@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#FAFAFA</color>
+    <color name="colorPrimaryDark">#E0E0E0</color>
+    <color name="colorAccent">#4CAF50</color>
+
+    <color name="textOrIcons">#ffffff</color>
+    <color name="primaryText">#212121</color>
+    <color name="secondaryText">#757575</color>
+    <color name="disabled">#BDBDBD</color>
+    <color name="colorDivider">#b3fafafa</color>
+
+    <color name="tomato">#F44336</color>
+    <color name="banana">#FFC107</color>
+    <color name="cucumber">#4CAF50</color>
+    <color name="blueBerry">#5C6BC0</color>
+    <color name="grape">#9C27B0</color>
+    <color name="blueSky">#2196F3</color>
+</resources>
