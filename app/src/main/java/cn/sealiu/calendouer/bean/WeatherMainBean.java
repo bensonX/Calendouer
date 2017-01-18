@@ -6,16 +6,17 @@ package cn.sealiu.calendouer.bean;
  */
 
 public class WeatherMainBean {
-    private int temp;
-    private int humidity;
-    private int temp_min;
-    private int temp_max;
 
-    public int getTemp() {
+    private float temp;
+    private int humidity;
+    private float temp_min;
+    private float temp_max;
+
+    public float getTemp() {
         return temp;
     }
 
-    public void setTemp(int temp) {
+    public void setTemp(float temp) {
         this.temp = temp;
     }
 
@@ -27,19 +28,19 @@ public class WeatherMainBean {
         this.humidity = humidity;
     }
 
-    public int getTemp_min() {
+    public float getTemp_min() {
         return temp_min;
     }
 
-    public void setTemp_min(int temp_min) {
+    public void setTemp_min(float temp_min) {
         this.temp_min = temp_min;
     }
 
-    public int getTemp_max() {
+    public float getTemp_max() {
         return temp_max;
     }
 
-    public void setTemp_max(int temp_max) {
+    public void setTemp_max(float temp_max) {
         this.temp_max = temp_max;
     }
 }

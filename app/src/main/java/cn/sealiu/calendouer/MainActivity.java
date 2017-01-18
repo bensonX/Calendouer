@@ -62,8 +62,6 @@ public class MainActivity extends AppCompatActivity {
 
     private final static int STAR = 5;
     private final static int COUNT = 20;
-    private static final long LOCATION_REFRESH_TIME = 5 * 60 * 1000;
-    private static final long LOCATION_REFRESH_DISTANCE = 10000;
     TextView monthTV;
     TextView weekTV;
     TextView lunarTV;
@@ -92,6 +90,8 @@ public class MainActivity extends AppCompatActivity {
             "廿一", "廿二", "廿三", "廿四", "廿五", "廿六", "廿七", "廿八", "廿九", "三十"
     };
     private Calendar calendar;
+
+    private LocationManager locationMgr;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -220,7 +220,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void initWeather() {
 
-        LocationManager locationMgr = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+        locationMgr = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
         if (ActivityCompat.checkSelfPermission(
                 this, permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             weatherTV.setText(getResources().getString(R.string.getWeatherInfo));
@@ -253,8 +253,8 @@ public class MainActivity extends AppCompatActivity {
         }
         locationMgr.requestLocationUpdates(
                 LocationManager.GPS_PROVIDER,
-                LOCATION_REFRESH_TIME,
-                LOCATION_REFRESH_DISTANCE,
+                0,
+                0,
                 new LocationListener() {
                     @Override
                     public void onLocationChanged(Location location) {
@@ -276,17 +276,22 @@ public class MainActivity extends AppCompatActivity {
 
                     }
                 });
+
         Location location = locationMgr.getLastKnownLocation(LocationManager.GPS_PROVIDER);
 
-        double lat = Math.round(location.getLatitude() * 100) / 100.0;
-        double lng = Math.round(location.getLongitude() * 100) / 100.0;
+        if (location == null) {
+            weatherTV.setText(getResources().getString(R.string.location_error));
+        } else {
+            double lat = Math.round(location.getLatitude() * 100) / 100.0;
+            double lng = Math.round(location.getLongitude() * 100) / 100.0;
 
-        Log.d("WEATHER", lat + "");
-        Log.d("WEATHER", lng + "");
+            Log.d("WEATHER", lat + "");
+            Log.d("WEATHER", lng + "");
 
-        new GetWeather().execute("http://api.openweathermap.org/data/2.5/weather?lat=" +
-                lat + "&lon=" + lng + "&lang=zh_cn&units=metric&appid=" +
-                getResources().getString(R.string.openWeather));
+            new GetWeather().execute("http://api.openweathermap.org/data/2.5/weather?lat=" +
+                    lat + "&lon=" + lng + "&lang=zh_cn&units=metric&appid=" +
+                    getResources().getString(R.string.openWeather));
+        }
 
     }
 
