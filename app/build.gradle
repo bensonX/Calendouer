@@ -3,7 +3,10 @@ apply plugin: 'com.android.application'
 android {
     signingConfigs {
         config {
-
+            keyAlias 'calendouer'
+            keyPassword 'sme0rmmly931119'
+            storeFile file('D:/Android/KeyStore/calendouer.jks')
+            storePassword 'sme0rmmly931119'
         }
     }
     compileSdkVersion 25
@@ -12,8 +15,8 @@ android {
         applicationId "cn.sealiu.calendouer"
         minSdkVersion 16
         targetSdkVersion 25
-        versionCode 2
-        versionName "1.1"
+        versionCode 3
+        versionName "1.2"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
     }

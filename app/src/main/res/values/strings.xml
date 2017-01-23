@@ -26,8 +26,9 @@
 
     <string name="pref_about_calendouer">关于豆瓣日历</string>
     <string name="pref_version">版本</string>
-    <string name="version" translatable="false">1.0</string>
+    <string name="version" translatable="false">1.2</string>
     <string name="about_content" translatable="false">"Calendouer(豆瓣日历)一词取自Calendar和Doubaner。豆瓣日历可以提供星期，农历和阳历日期，天气信息，最重要的是它和纸质的豆瓣日历一样为你每日推荐一部佳片。\n\n但是由于使用的是公开版的豆瓣API(豆瓣没有提供电影的上映日期，导演的出生日期和去世日期)，故还无法达到和纸质版一样的体验。抱歉！\n\nsealiu0217@gmail.com"</string>
     <string name="ok">好</string>
     <string name="location_error">无法获取您的位置</string>
+    <string name="initMovieRecommended">初始化电影推荐</string>
 </resources>
