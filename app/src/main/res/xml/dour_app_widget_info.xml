@@ -4,7 +4,7 @@
     android:initialLayout="@layout/dour_app_widget"
     android:minHeight="40dp"
     android:minWidth="250dp"
-    android:previewImage="@drawable/example_appwidget_preview"
+    android:previewImage="@drawable/calendouer_appwidget_preview_4x1"
     android:resizeMode="horizontal|vertical"
     android:updatePeriodMillis="900000"
     android:widgetCategory="home_screen">

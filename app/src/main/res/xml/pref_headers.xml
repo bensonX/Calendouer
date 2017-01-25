@@ -3,6 +3,11 @@
     <!-- These settings headers are only used on tablets. -->
 
     <header
+        android:id="@+id/general_setting"
+        android:icon="@drawable/ic_settings_24dp"
+        android:title="@string/pref_general_setting" />
+
+    <header
         android:id="@+id/about"
         android:icon="@drawable/ic_info_24dp"
         android:title="@string/pref_about_calendouer" />

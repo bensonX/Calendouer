@@ -9,6 +9,7 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.graphics.Typeface;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -43,8 +44,8 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 
 import cn.sealiu.calendouer.bean.MovieBaseBean;
@@ -55,6 +56,7 @@ import cn.sealiu.calendouer.until.BitmapUtils;
 import cn.sealiu.calendouer.until.LunarCalendar;
 import cn.sealiu.calendouer.until.MovieContract.MovieEntry;
 import cn.sealiu.calendouer.until.MovieDBHelper;
+import cn.sealiu.calendouer.until.SolarTermCalendar;
 
 import static android.Manifest.permission;
 
@@ -66,6 +68,7 @@ public class MainActivity extends AppCompatActivity {
     TextView weekTV;
     TextView lunarTV;
     TextView dateTV;
+    TextView solarTermTV;
     TextView monthYearTV;
     TextView weatherTV;
     ImageView movieImageIV;
@@ -80,16 +83,6 @@ public class MainActivity extends AppCompatActivity {
     SQLiteDatabase db;
     String[] movieIds = new String[COUNT];
     int index = 0;
-    private String[] weeks = {"星期日", "星期一", "星期二", "星期三", "星期四", "星期五", "星期六"};
-    private String[] months = {"一月", "二月", "三月", "四月", "五月", "六月", "七月", "八月",
-            "九月", "十月", "十一月", "十二月"};
-    private String[] lunar_months = {"一月", "二月", "三月", "四月", "五月", "六月", "七月", "八月",
-            "九月", "十月", "冬月", "腊月"};
-    private String[] days = {"初一", "初二", "初三", "初四", "初五", "初六", "初七", "初八", "初九",
-            "初十", "十一", "十二", "十三", "十四", "十五", "十六", "十七", "十八", "十九", "二十",
-            "廿一", "廿二", "廿三", "廿四", "廿五", "廿六", "廿七", "廿八", "廿九", "三十"
-    };
-    private Calendar calendar;
 
     private LocationManager locationMgr;
 
@@ -104,6 +97,7 @@ public class MainActivity extends AppCompatActivity {
         weekTV = (TextView) findViewById(R.id.week_day);
         lunarTV = (TextView) findViewById(R.id.lunar_date);
         dateTV = (TextView) findViewById(R.id.date);
+        solarTermTV = (TextView) findViewById(R.id.solar_term);
         monthYearTV = (TextView) findViewById(R.id.month_year);
 
         weatherTV = (TextView) findViewById(R.id.weather);
@@ -138,9 +132,6 @@ public class MainActivity extends AppCompatActivity {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             this.getWindow().setNavigationBarColor(ContextCompat.getColor(this, R.color.colorAccent));
         }
-
-        calendar = Calendar.getInstance();
-        calendar.setTime(new Date());
 
         initWeather();
         initCalendar();
@@ -180,46 +171,51 @@ public class MainActivity extends AppCompatActivity {
 
     private void initCalendar() {
 
-        int year = calendar.get(Calendar.YEAR);
-        int month = calendar.get(Calendar.MONTH) + 1;
-        int day = calendar.get(Calendar.DAY_OF_MONTH);
-        int week = calendar.get(Calendar.DAY_OF_WEEK) - 1;
+        Date now = new Date();
 
-        Log.d("SOLAR", "" + year + month + day + week);
+        List<String> solarCalendarStrs = LunarCalendar.getLunarCalendarStr(now);
 
+        monthTV.setText(solarCalendarStrs.get(6));
 
-        int[] lunar = LunarCalendar.solarToLunar(year, month, day);
-
-        Log.d("LUNAR", "" + lunar[0] + lunar[1] + lunar[2]);
-
-        monthTV.setText(months[month]);
-        weekTV.setText(weeks[week]);
+        weekTV.setText(solarCalendarStrs.get(4));
         lunarTV.setText(
                 String.format(
                         getResources().getString(R.string.lunar_date),
-                        lunar_months[lunar[1] - 1],
-                        days[lunar[2] - 1]
+                        solarCalendarStrs.get(1),
+                        solarCalendarStrs.get(2)
                 )
         );
-
-        dateTV.setText(Integer.toString(day));
 
         monthYearTV.setText(
                 String.format(
                         getResources().getString(R.string.month_year),
-                        year,
-                        month
+                        solarCalendarStrs.get(5),
+                        solarCalendarStrs.get(7)
                 )
         );
-        if (week == 0 || week == 6) {
+
+        dateTV.setText(solarCalendarStrs.get(8));
+        Typeface custom_font = Typeface.createFromAsset(getAssets(), "fonts/Lobster-Regular.ttf");
+        //dateTV.setTypeface(custom_font);
+
+        if (solarCalendarStrs.get(9).equals("1")) {
             dateTV.setTextColor(ContextCompat.getColor(this, R.color.colorAccent));
         } else {
             dateTV.setTextColor(ContextCompat.getColor(this, R.color.secondaryText));
         }
+
+        String str = SolarTermCalendar.getSolarTermStr(now);
+        if (str != null) {
+            Log.d("SolarTerm", str);
+            solarTermTV.setVisibility(View.VISIBLE);
+            solarTermTV.setText(str);
+        } else {
+            solarTermTV.setVisibility(View.GONE);
+        }
     }
 
     private void initWeather() {
-
+        // TODO: 2017/1/25 优化定位，使用网络定位，gps费电且会在状态栏弹出定位标志
         locationMgr = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
         if (ActivityCompat.checkSelfPermission(
                 this, permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {

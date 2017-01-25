@@ -6,8 +6,11 @@ package cn.sealiu.calendouer.until;
  */
 
 
+import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.List;
 
 /**
  * 工具类，实现公农历互转
@@ -22,13 +25,11 @@ public class LunarCalendar {
      * 支持转换的最大农历年份
      */
     private static final int MAX_YEAR = 2099;
-
     /**
      * 公历每月前的天数
      */
     private static final int DAYS_BEFORE_MONTH[] = {0, 31, 59, 90, 120, 151, 181,
             212, 243, 273, 304, 334, 365};
-
     /**
      * 用来表示1900年到2099年间农历年份的相关信息，共24位bit的16进制表示，其中：
      * 1. 前4位表示该年闰哪个月；
@@ -61,6 +62,15 @@ public class LunarCalendar {
             0x8A95BF, 0x0A9553, 0x0B4A47, 0x6B553B, 0x0AD54F, 0x055A45, 0x4A5D38, 0x0A5B4C, 0x052B42, 0x3A93B6,/*2071-2080*/
             0x069349, 0x7729BD, 0x06AA51, 0x0AD546, 0x54DABA, 0x04B64E, 0x0A5743, 0x452738, 0x0D264A, 0x8E933E,/*2081-2090*/
             0x0D5252, 0x0DAA47, 0x66B53B, 0x056D4F, 0x04AE45, 0x4A4EB9, 0x0A4D4C, 0x0D1541, 0x2D92B5          /*2091-2099*/
+    };
+    private static String[] weeks = {"星期日", "星期一", "星期二", "星期三", "星期四", "星期五", "星期六"};
+    private static String[] lunar_months = {"一月", "二月", "三月", "四月", "五月", "六月", "七月", "八月",
+            "九月", "十月", "冬月", "腊月"};
+    private static String[] solar_months = {"一月", "二月", "三月", "四月", "五月", "六月", "七月", "八月",
+            "九月", "十月", "十一月", "十二月"};
+    private static String[] days = {"初一", "初二", "初三", "初四", "初五", "初六", "初七", "初八", "初九",
+            "初十", "十一", "十二", "十三", "十四", "十五", "十六", "十七", "十八", "十九", "二十",
+            "廿一", "廿二", "廿三", "廿四", "廿五", "廿六", "廿七", "廿八", "廿九", "三十"
     };
 
     /**
@@ -296,8 +306,49 @@ public class LunarCalendar {
      * @return 传回农历 year年闰哪个月1-12, 没闰传回 0
      */
     private static int leapMonth(int year) {
-        return (int) ((LUNAR_INFO[year - MIN_YEAR] & 0xF00000)) >> 20;
+        return (LUNAR_INFO[year - MIN_YEAR] & 0xF00000) >> 20;
     }
 
+    /**
+     * Solar Date to Lunar Date
+     *
+     * @param date Solar Date
+     * @return List\<String\>  year0，month1，day2，leap3
+     * 0 year,
+     * 1 lunar_month,
+     * 2 day,
+     * 3 leap,
+     * 4 week,
+     * 5 solar_year,
+     * 6 solar_month_str, ex: 二月
+     * 7 solar_month_num, ex: 2
+     * 8 solar_day,
+     * 9 is_weekend
+     */
+    public static List<String> getLunarCalendarStr(Date date) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+
+        int year = calendar.get(Calendar.YEAR);
+        int month = calendar.get(Calendar.MONTH);
+        int day = calendar.get(Calendar.DAY_OF_MONTH);
+        int week = calendar.get(Calendar.DAY_OF_WEEK) - 1;
+        String isWeekend = week == 0 || week == 6 ? "1" : "0";
+
+        int[] lunar = LunarCalendar.solarToLunar(year, month + 1, day);
+
+        List<String> list = new ArrayList<>();
+        list.add(Integer.toString(lunar[0]));
+        list.add(lunar_months[lunar[1] - 1]);
+        list.add(days[lunar[2] - 1]);
+        list.add(Integer.toString(lunar[3]));
+        list.add(weeks[week]);
+        list.add(Integer.toString(year));
+        list.add(solar_months[month]);
+        list.add(Integer.toString(month + 1));
+        list.add(Integer.toString(day));
+        list.add(isWeekend);
+        return list;
+    }
 }
 

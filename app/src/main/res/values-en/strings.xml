@@ -11,7 +11,7 @@
     <string name="getTop250">Click To Get Douban Movie Top 250</string>
     <string name="getWeatherInfo">Click To Get Weather Info</string>
     <string name="grant">Grant</string>
-    <string name="month_year">%2$d/%1$d</string>
+    <string name="month_year">%2$s/%1$s</string>
     <string name="permission">Request Permission</string>
     <string name="rationale_location">Location information is only used for weather services.</string>
     <string name="setting">Setting</string>
