@@ -2,7 +2,7 @@
 <appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
     android:initialKeyguardLayout="@layout/dour_app_widget"
     android:initialLayout="@layout/dour_app_widget"
-    android:minHeight="40dp"
+    android:minHeight="110dp"
     android:minWidth="250dp"
     android:previewImage="@drawable/calendouer_appwidget_preview_4x1"
     android:resizeMode="horizontal|vertical"

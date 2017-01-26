@@ -9,7 +9,6 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.graphics.Typeface;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -30,6 +29,7 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -46,8 +46,10 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 import cn.sealiu.calendouer.bean.MovieBaseBean;
 import cn.sealiu.calendouer.bean.MovieBean;
@@ -72,7 +74,13 @@ public class MainActivity extends AppCompatActivity {
     TextView dateTV;
     TextView solarTermTV;
     TextView festivalTV;
+
+    RelativeLayout weatherHolder;
+    TextView getWeatherTV;
+    TextView cityNameTV;
     TextView weatherTV;
+    ImageView weatherIconIV;
+
     ImageView movieImageIV;
     TextView movieAverageTV;
     TextView movieTitleTV;
@@ -87,6 +95,25 @@ public class MainActivity extends AppCompatActivity {
     int index = 0;
 
     private LocationManager locationMgr;
+    private Map<String, Integer> iconMap;
+    private LocationListener listener = new LocationListener() {
+        @Override
+        public void onLocationChanged(Location location) {
+            getWeather(location);
+        }
+
+        @Override
+        public void onStatusChanged(String provider, int status, Bundle extras) {
+        }
+
+        @Override
+        public void onProviderEnabled(String provider) {
+        }
+
+        @Override
+        public void onProviderDisabled(String provider) {
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -102,7 +129,11 @@ public class MainActivity extends AppCompatActivity {
         solarTermTV = (TextView) findViewById(R.id.solar_term);
         festivalTV = (TextView) findViewById(R.id.festival);
 
+        weatherHolder = (RelativeLayout) findViewById(R.id.weatherHolder);
+        getWeatherTV = (TextView) findViewById(R.id.getWeatherInfo);
+        cityNameTV = (TextView) findViewById(R.id.city_name);
         weatherTV = (TextView) findViewById(R.id.weather);
+        weatherIconIV = (ImageView) findViewById(R.id.weather_icon);
 
         movieImageIV = (ImageView) findViewById(R.id.movie_image);
         movieAverageTV = (TextView) findViewById(R.id.rating__average);
@@ -117,6 +148,16 @@ public class MainActivity extends AppCompatActivity {
 
         dbHelper = new MovieDBHelper(this);
 
+        iconMap = new HashMap<>();
+        iconMap.put("01", R.drawable.weather01);
+        iconMap.put("02", R.drawable.weather02);
+        iconMap.put("03", R.drawable.weather03);
+        iconMap.put("04", R.drawable.weather04);
+        iconMap.put("09", R.drawable.weather09);
+        iconMap.put("10", R.drawable.weather10);
+        iconMap.put("11", R.drawable.weather11);
+        iconMap.put("13", R.drawable.weather13);
+        iconMap.put("50", R.drawable.weather50);
     }
 
     private boolean checkEmpty() {
@@ -190,17 +231,6 @@ public class MainActivity extends AppCompatActivity {
 
         dateTV.setText(solarCalendarStrs.get(8));
 
-        Typeface custom_font = Typeface.createFromAsset(getAssets(), "fonts/Lobster-Regular.ttf");
-        //dateTV.setTypeface(custom_font);
-
-        // TODO: 2017/1/26 长按设置字体
-        dateTV.setOnLongClickListener(new View.OnLongClickListener() {
-            @Override
-            public boolean onLongClick(View v) {
-                return false;
-            }
-        });
-
         // 设置节气
         String str = SolarTermCalendar.getSolarTermStr(now);
         if (str != null) {
@@ -246,11 +276,15 @@ public class MainActivity extends AppCompatActivity {
 
     private void initWeather() {
         // TODO: 2017/1/25 优化定位，使用网络定位，gps费电且会在状态栏弹出定位标志
+        getWeatherTV.setVisibility(View.GONE);
+        weatherHolder.setVisibility(View.GONE);
+
         locationMgr = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
         if (ActivityCompat.checkSelfPermission(
                 this, permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            weatherTV.setText(getResources().getString(R.string.getWeatherInfo));
-            weatherTV.setOnClickListener(new View.OnClickListener() {
+
+            getWeatherTV.setVisibility(View.VISIBLE);
+            getWeatherTV.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
 
@@ -265,7 +299,7 @@ public class MainActivity extends AppCompatActivity {
                                             new String[]{permission.ACCESS_FINE_LOCATION},
                                             100
                                     );
-                                    weatherTV.setOnClickListener(null);
+                                    getWeatherTV.setOnClickListener(null);
                                 }
                             })
                             .setNegativeButton(getString(R.string.deny), new DialogInterface.OnClickListener() {
@@ -277,48 +311,30 @@ public class MainActivity extends AppCompatActivity {
             });
             return;
         }
+
         locationMgr.requestLocationUpdates(
                 LocationManager.GPS_PROVIDER,
                 0,
                 0,
-                new LocationListener() {
-                    @Override
-                    public void onLocationChanged(Location location) {
-
-                    }
-
-                    @Override
-                    public void onStatusChanged(String provider, int status, Bundle extras) {
-
-                    }
-
-                    @Override
-                    public void onProviderEnabled(String provider) {
-
-                    }
-
-                    @Override
-                    public void onProviderDisabled(String provider) {
-
-                    }
-                });
+                listener);
 
         Location location = locationMgr.getLastKnownLocation(LocationManager.GPS_PROVIDER);
 
         if (location == null) {
-            weatherTV.setText(getResources().getString(R.string.location_error));
+            getWeatherTV.setText(getResources().getString(R.string.location_error));
         } else {
-            double lat = Math.round(location.getLatitude() * 100) / 100.0;
-            double lng = Math.round(location.getLongitude() * 100) / 100.0;
-
-            Log.d("WEATHER", lat + "");
-            Log.d("WEATHER", lng + "");
-
-            new GetWeather().execute("http://api.openweathermap.org/data/2.5/weather?lat=" +
-                    lat + "&lon=" + lng + "&lang=zh_cn&units=metric&appid=" +
-                    getResources().getString(R.string.openWeather));
+            locationMgr.removeUpdates(listener);
+            getWeather(location);
         }
+    }
 
+    private void getWeather(Location location) {
+        double lat = Math.round(location.getLatitude() * 100) / 100.0;
+        double lng = Math.round(location.getLongitude() * 100) / 100.0;
+
+        new GetWeather().execute("http://api.openweathermap.org/data/2.5/weather?lat=" +
+                lat + "&lon=" + lng + "&lang=zh_cn&units=metric&appid=" +
+                getResources().getString(R.string.openWeather));
     }
 
     private void initMovieDB() {
@@ -503,6 +519,11 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
+    protected void onStop() {
+        super.onStop();
+    }
+
+    @Override
     protected void onDestroy() {
         db.close();
         dbHelper.close();
@@ -560,6 +581,7 @@ public class MainActivity extends AppCompatActivity {
                         getResources().getString(R.string.api_error),
                         Toast.LENGTH_LONG
                 ).show();
+                hideProgressDialog();
             }
         }
     }
@@ -623,6 +645,7 @@ public class MainActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(String s) {
             super.onPostExecute(s);
+            weatherHolder.setVisibility(View.VISIBLE);
             final WeatherBean weatherBean = new Gson().fromJson(s, WeatherBean.class);
             String weathers = "";
             int length = weatherBean.getWeather().length;
@@ -630,11 +653,21 @@ public class MainActivity extends AppCompatActivity {
                 weathers += weatherBean.getWeather()[i].getDescription() + " ";
             }
 
+            String weatherIcon = weatherBean.getWeather()[0].getIcon().substring(0, 2);
+
+            cityNameTV.setText(weatherBean.getName());
+            weatherIconIV.setImageDrawable(
+                    ContextCompat.getDrawable(
+                            MainActivity.this,
+                            iconMap.get(weatherIcon)
+                    )
+            );
+
             String weather = String.format(
                     getResources().getString(R.string.weather),
-                    weatherBean.getName(),
                     weathers,
-                    weatherBean.getMain().getTemp());
+                    weatherBean.getMain().getTemp()
+            );
 
             weatherTV.setText(weather);
         }

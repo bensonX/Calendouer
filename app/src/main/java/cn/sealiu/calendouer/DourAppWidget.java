@@ -15,8 +15,8 @@ import android.widget.RemoteViews;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 
 import cn.sealiu.calendouer.until.LunarCalendar;
@@ -27,34 +27,19 @@ public class DourAppWidget extends AppWidgetProvider {
 
     void updateAppWidget(Context context, AppWidgetManager appWidgetManager,
                          int appWidgetId) {
-        String[] weeks = {"星期日", "星期一", "星期二", "星期三", "星期四", "星期五", "星期六"};
-        String[] lunar_months = {"一月", "二月", "三月", "四月", "五月", "六月", "七月", "八月",
-                "九月", "十月", "冬月", "腊月"};
-        String[] days = {"初一", "初二", "初三", "初四", "初五", "初六", "初七", "初八", "初九",
-                "初十", "十一", "十二", "十三", "十四", "十五", "十六", "十七", "十八", "十九", "二十",
-                "廿一", "廿二", "廿三", "廿四", "廿五", "廿六", "廿七", "廿八", "廿九", "三十"
-        };
 
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(new Date());
+        List<String> list = LunarCalendar.getLunarCalendarStr(new Date());
 
-        int year = calendar.get(Calendar.YEAR);
-        int month = calendar.get(Calendar.MONTH) + 1;
-        int day = calendar.get(Calendar.DAY_OF_MONTH);
-        int week = calendar.get(Calendar.DAY_OF_WEEK) - 1;
-
-        int[] lunar = LunarCalendar.solarToLunar(year, month, day);
-
-        //CharSequence widgetText = context.getString(R.string.appwidget_text);
-        // Construct the RemoteViews object
         RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.dour_app_widget);
-        views.setTextViewText(R.id.month_year, year + "年 " + month + "月 " + day + "日");
-        views.setTextViewText(R.id.week_day, weeks[week]);
+        views.setTextViewText(
+                R.id.month_year,
+                list.get(5) + "年 " + list.get(7) + "月 " + list.get(8) + "日");
+        views.setTextViewText(R.id.week_day, list.get(4));
 
         CharSequence lunarText = String.format(
                 context.getString(R.string.lunar_date),
-                lunar_months[lunar[1] - 1],
-                days[lunar[2] - 1]
+                list.get(1),
+                list.get(2)
         );
 
         views.setTextViewText(R.id.lunar_date, lunarText);
@@ -137,7 +122,6 @@ public class DourAppWidget extends AppWidgetProvider {
             PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, openAppIntent, 0);
             views.setOnClickPendingIntent(R.id.init_movie_btn, pendingIntent);
         }
-
 
         // Instruct the widget manager to update the widget
         appWidgetManager.updateAppWidget(appWidgetId, views);
