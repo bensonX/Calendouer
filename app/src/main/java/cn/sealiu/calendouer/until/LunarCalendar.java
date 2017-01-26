@@ -64,7 +64,7 @@ public class LunarCalendar {
             0x0D5252, 0x0DAA47, 0x66B53B, 0x056D4F, 0x04AE45, 0x4A4EB9, 0x0A4D4C, 0x0D1541, 0x2D92B5          /*2091-2099*/
     };
     private static String[] weeks = {"星期日", "星期一", "星期二", "星期三", "星期四", "星期五", "星期六"};
-    private static String[] lunar_months = {"一月", "二月", "三月", "四月", "五月", "六月", "七月", "八月",
+    private static String[] lunar_months = {"正月", "二月", "三月", "四月", "五月", "六月", "七月", "八月",
             "九月", "十月", "冬月", "腊月"};
     private static String[] solar_months = {"一月", "二月", "三月", "四月", "五月", "六月", "七月", "八月",
             "九月", "十月", "十一月", "十二月"};

@@ -7,7 +7,6 @@
     <string name="lunar_date" translatable="false">农历%1$s%2$s</string>
 
     <string name="weather">%1$s %2$s %3$.0f \u2103</string>
-    <string name="month_year">%1$s/%2$s</string>
     <string name="rationale_location">位置信息仅用于天气预报</string>
     <string name="getWeatherInfo">点击获取天气信息</string>
     <string name="permission">权限请求</string>

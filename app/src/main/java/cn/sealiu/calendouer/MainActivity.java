@@ -44,6 +44,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -53,6 +54,7 @@ import cn.sealiu.calendouer.bean.MovieBean;
 import cn.sealiu.calendouer.bean.Top250Bean;
 import cn.sealiu.calendouer.bean.WeatherBean;
 import cn.sealiu.calendouer.until.BitmapUtils;
+import cn.sealiu.calendouer.until.FestivalCalendar;
 import cn.sealiu.calendouer.until.LunarCalendar;
 import cn.sealiu.calendouer.until.MovieContract.MovieEntry;
 import cn.sealiu.calendouer.until.MovieDBHelper;
@@ -69,7 +71,7 @@ public class MainActivity extends AppCompatActivity {
     TextView lunarTV;
     TextView dateTV;
     TextView solarTermTV;
-    TextView monthYearTV;
+    TextView festivalTV;
     TextView weatherTV;
     ImageView movieImageIV;
     TextView movieAverageTV;
@@ -98,7 +100,7 @@ public class MainActivity extends AppCompatActivity {
         lunarTV = (TextView) findViewById(R.id.lunar_date);
         dateTV = (TextView) findViewById(R.id.date);
         solarTermTV = (TextView) findViewById(R.id.solar_term);
-        monthYearTV = (TextView) findViewById(R.id.month_year);
+        festivalTV = (TextView) findViewById(R.id.festival);
 
         weatherTV = (TextView) findViewById(R.id.weather);
 
@@ -186,24 +188,20 @@ public class MainActivity extends AppCompatActivity {
                 )
         );
 
-        monthYearTV.setText(
-                String.format(
-                        getResources().getString(R.string.month_year),
-                        solarCalendarStrs.get(5),
-                        solarCalendarStrs.get(7)
-                )
-        );
-
         dateTV.setText(solarCalendarStrs.get(8));
+
         Typeface custom_font = Typeface.createFromAsset(getAssets(), "fonts/Lobster-Regular.ttf");
         //dateTV.setTypeface(custom_font);
 
-        if (solarCalendarStrs.get(9).equals("1")) {
-            dateTV.setTextColor(ContextCompat.getColor(this, R.color.colorAccent));
-        } else {
-            dateTV.setTextColor(ContextCompat.getColor(this, R.color.secondaryText));
-        }
+        // TODO: 2017/1/26 长按设置字体
+        dateTV.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                return false;
+            }
+        });
 
+        // 设置节气
         String str = SolarTermCalendar.getSolarTermStr(now);
         if (str != null) {
             Log.d("SolarTerm", str);
@@ -211,6 +209,38 @@ public class MainActivity extends AppCompatActivity {
             solarTermTV.setText(str);
         } else {
             solarTermTV.setVisibility(View.GONE);
+        }
+
+        // 设置节日
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(now);
+        // 节日
+        String solarFestStr = FestivalCalendar.getSolarFest(calendar);
+        String lunarFestStr = FestivalCalendar.getLunarFest(calendar);
+        calendar.setTime(now);
+        String weekFestStr = FestivalCalendar.getWeekFest(calendar);
+
+        String festStr = "";
+        if (solarFestStr != null) {
+            festStr += solarFestStr;
+        }
+        if (lunarFestStr != null) {
+            festStr += " " + lunarFestStr;
+        }
+        if (weekFestStr != null) {
+            festStr += " " + weekFestStr;
+        }
+        if (!festStr.equals("")) {
+            festivalTV.setVisibility(View.VISIBLE);
+            festivalTV.setText(festStr);
+            dateTV.setTextColor(ContextCompat.getColor(this, R.color.colorAccent));
+        } else {
+            festivalTV.setVisibility(View.GONE);
+        }
+
+        // 周末
+        if (solarCalendarStrs.get(9).equals("1")) {
+            dateTV.setTextColor(ContextCompat.getColor(this, R.color.colorAccent));
         }
     }
 
