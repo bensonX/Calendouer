@@ -13,7 +13,6 @@ import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
 import java.util.List;
 
@@ -84,7 +83,14 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
         }
 
         if (header.id == R.id.version) {
-            Toast.makeText(this, getResources().getString(R.string.version), Toast.LENGTH_SHORT).show();
+            new AlertDialog.Builder(this)
+                    .setTitle(getString(R.string.what_new))
+                    .setMessage(getString(R.string.update_content))
+                    .setNegativeButton(getString(R.string.close), new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                        }
+                    }).show();
         }
     }
 }

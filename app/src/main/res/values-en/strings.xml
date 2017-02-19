@@ -21,4 +21,8 @@
     <string name="location_error">unknow location</string>
     <string name="initMovieRecommended">Initialize Movie Recommended</string>
     <string name="unknown_weahter">unknow weather</string>
+    <string name="weather_preview">Weather forecast 3 days</string>
+    <string name="close">Close</string>
+    <string name="last_update">last update: %1$s</string>
+    <string name="what_new">WHAT\'S NEW</string>
 </resources>

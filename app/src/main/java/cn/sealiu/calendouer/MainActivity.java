@@ -68,7 +68,7 @@ import cn.sealiu.calendouer.until.WeatherIcon;
 
 import static android.Manifest.permission;
 
-public class MainActivity extends AppCompatActivity implements AMapLocationListener {
+public class MainActivity extends AppCompatActivity implements AMapLocationListener, View.OnClickListener {
 
     private final static int STAR = 5;
     private final static int COUNT = 20;
@@ -103,6 +103,8 @@ public class MainActivity extends AppCompatActivity implements AMapLocationListe
     AMapLocationClient mLocationClient;
     AMapLocationClientOption mLocationOption;
 
+    String weatherJson;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -122,6 +124,7 @@ public class MainActivity extends AppCompatActivity implements AMapLocationListe
         cityNameTV = (TextView) findViewById(R.id.city_name);
         weatherTV = (TextView) findViewById(R.id.weather);
         weatherIconIV = (ImageView) findViewById(R.id.weather_icon);
+        weatherIconIV.setOnClickListener(this);
 
         movieImageIV = (ImageView) findViewById(R.id.movie_image);
         movieAverageTV = (TextView) findViewById(R.id.rating__average);
@@ -587,6 +590,20 @@ public class MainActivity extends AppCompatActivity implements AMapLocationListe
                 permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED;
     }
 
+    @Override
+    public void onClick(View v) {
+        if (v.getId() == R.id.weather_icon) {
+            if (weatherJson != null) {
+                WeatherFragment weatherFragment = new WeatherFragment();
+                Bundle bundle = new Bundle();
+                bundle.putString("weather", weatherJson);
+
+                weatherFragment.setArguments(bundle);
+                weatherFragment.show(getSupportFragmentManager(), "Weather_Preview");
+            }
+        }
+    }
+
     private class GetTop250 extends AsyncTask<String, String, String> {
 
         @Override
@@ -703,6 +720,7 @@ public class MainActivity extends AppCompatActivity implements AMapLocationListe
         protected void onPostExecute(String s) {
             super.onPostExecute(s);
             if (s != null && !s.equals("")) {
+                weatherJson = s;
                 XzBean xzBean = new Gson().fromJson(s, XzBean.class);
                 XzResultsBean resultsBean = xzBean.getResults()[0];
                 XzLocationBean locationBean = resultsBean.getLocation();

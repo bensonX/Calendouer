@@ -7,13 +7,13 @@
     <string name="lunar_date" translatable="false">农历%1$s%2$s</string>
 
     <string name="weather" translatable="false">%1$s\n%2$s\u2103 | %3$s\u2103</string>
+    <string name="weather_high_low" translatable="false">%1$s\u2103 | %2$s\u2103</string>
     <string name="rationale_location">位置信息仅用于天气预报</string>
     <string name="getWeatherInfo">点击获取天气信息</string>
     <string name="permission">权限请求</string>
     <string name="grant">同意授权</string>
     <string name="deny">拒绝</string>
 
-    <string name="openWeather" translatable="false">dcf34cdacd7abb5690c299bc56de7809</string>
     <string name="getTop250">点击获取豆瓣电影Top250</string>
 
     <string name="downloading">正在下载电影数据....</string>
@@ -21,14 +21,19 @@
     <string name="createDB">正在创建本地数据库....</string>
     <string name="arrangeData">正在整理数据....</string>
     <string name="api_error">豆瓣数据请求失败</string>
-    <string name="movie_recommended">电影推荐(豆瓣Top250)</string>
+    <string name="movie_recommended">电影推荐(豆瓣)</string>
 
     <string name="pref_about_calendouer">关于豆瓣日历</string>
     <string name="pref_version">版本</string>
-    <string name="version" translatable="false">1.3</string>
-    <string name="about_content" translatable="false">"Calendouer(豆瓣日历)一词取自Calendar和Doubaner。豆瓣日历可以提供星期，农历和阳历日期，天气信息，最重要的是它和纸质的豆瓣日历一样为你每日推荐一部佳片。\n\n但是由于使用的是公开版的豆瓣API(豆瓣没有提供电影的上映日期，导演的出生日期和去世日期)，故还无法达到和纸质版一样的体验。抱歉！\n\nsealiu0217@gmail.com"</string>
+    <string name="version" translatable="false">1.4</string>
+    <string name="about_content" translatable="false">"Calendouer(豆瓣日历)一词取自Calendar和Doubaner。豆瓣日历可以提供星期，农历和阳历日期，天气信息，最重要的是它和纸质的豆瓣日历一样为你每日推荐一部佳片。\n\n但是由于使用的是公开版的豆瓣API(豆瓣没有提供电影的上映日期，导演的出生日期和去世日期)，故还无法达到和纸质版一样的体验。抱歉！\n\n反馈: sealiu0217@gmail.com"</string>
     <string name="ok">好</string>
     <string name="location_error">未知位置</string>
     <string name="initMovieRecommended">初始化电影推荐</string>
     <string name="unknown_weahter">未知天气</string>
+    <string name="last_update">最近更新: %1$s</string>
+    <string name="close">关闭</string>
+    <string name="weather_preview">3日天气预报</string>
+    <string name="what_new">更新内容</string>
+    <string name="update_content" translatable="false">✱更换天气预报信息提供商\n✱点击天气图标查看3日天气预报\n✱优化定位</string>
 </resources>
