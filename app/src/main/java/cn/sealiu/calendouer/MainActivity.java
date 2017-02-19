@@ -9,13 +9,11 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.location.Location;
-import android.location.LocationListener;
-import android.location.LocationManager;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
@@ -33,6 +31,10 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.amap.api.location.AMapLocation;
+import com.amap.api.location.AMapLocationClient;
+import com.amap.api.location.AMapLocationClientOption;
+import com.amap.api.location.AMapLocationListener;
 import com.google.gson.Gson;
 
 import java.io.BufferedReader;
@@ -46,28 +48,31 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 
 import cn.sealiu.calendouer.bean.MovieBaseBean;
 import cn.sealiu.calendouer.bean.MovieBean;
 import cn.sealiu.calendouer.bean.Top250Bean;
-import cn.sealiu.calendouer.bean.WeatherBean;
+import cn.sealiu.calendouer.bean.XzBean;
+import cn.sealiu.calendouer.bean.XzLocationBean;
+import cn.sealiu.calendouer.bean.XzResultsBean;
+import cn.sealiu.calendouer.bean.XzWeatherBean;
 import cn.sealiu.calendouer.until.BitmapUtils;
 import cn.sealiu.calendouer.until.FestivalCalendar;
 import cn.sealiu.calendouer.until.LunarCalendar;
 import cn.sealiu.calendouer.until.MovieContract.MovieEntry;
 import cn.sealiu.calendouer.until.MovieDBHelper;
 import cn.sealiu.calendouer.until.SolarTermCalendar;
+import cn.sealiu.calendouer.until.WeatherIcon;
 
 import static android.Manifest.permission;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements AMapLocationListener {
 
     private final static int STAR = 5;
     private final static int COUNT = 20;
+    private final static int LOCATION_PERM = 100;
     TextView monthTV;
     TextView weekTV;
     TextView lunarTV;
@@ -94,26 +99,9 @@ public class MainActivity extends AppCompatActivity {
     String[] movieIds = new String[COUNT];
     int index = 0;
 
-    private LocationManager locationMgr;
-    private Map<String, Integer> iconMap;
-    private LocationListener listener = new LocationListener() {
-        @Override
-        public void onLocationChanged(Location location) {
-            getWeather(location);
-        }
-
-        @Override
-        public void onStatusChanged(String provider, int status, Bundle extras) {
-        }
-
-        @Override
-        public void onProviderEnabled(String provider) {
-        }
-
-        @Override
-        public void onProviderDisabled(String provider) {
-        }
-    };
+    WeatherIcon icons;
+    AMapLocationClient mLocationClient;
+    AMapLocationClientOption mLocationOption;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -148,16 +136,14 @@ public class MainActivity extends AppCompatActivity {
 
         dbHelper = new MovieDBHelper(this);
 
-        iconMap = new HashMap<>();
-        iconMap.put("01", R.drawable.weather01);
-        iconMap.put("02", R.drawable.weather02);
-        iconMap.put("03", R.drawable.weather03);
-        iconMap.put("04", R.drawable.weather04);
-        iconMap.put("09", R.drawable.weather09);
-        iconMap.put("10", R.drawable.weather10);
-        iconMap.put("11", R.drawable.weather11);
-        iconMap.put("13", R.drawable.weather13);
-        iconMap.put("50", R.drawable.weather50);
+        icons = new WeatherIcon();
+        mLocationClient = new AMapLocationClient(getApplicationContext());
+        mLocationClient.setLocationListener(this);
+
+        mLocationOption = new AMapLocationClientOption();
+        mLocationOption.setLocationMode(AMapLocationClientOption.AMapLocationMode.Hight_Accuracy);
+
+        mLocationClient.setLocationOption(mLocationOption);
     }
 
     private boolean checkEmpty() {
@@ -275,15 +261,12 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void initWeather() {
-        // TODO: 2017/1/25 优化定位，使用网络定位，gps费电且会在状态栏弹出定位标志
-        getWeatherTV.setVisibility(View.GONE);
-        weatherHolder.setVisibility(View.GONE);
 
-        locationMgr = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
-        if (ActivityCompat.checkSelfPermission(
-                this, permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+        if (!checkPermission()) {
 
             getWeatherTV.setVisibility(View.VISIBLE);
+            weatherHolder.setVisibility(View.GONE);
+
             getWeatherTV.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -296,10 +279,16 @@ public class MainActivity extends AppCompatActivity {
                                 public void onClick(DialogInterface dialog, int which) {
                                     ActivityCompat.requestPermissions(
                                             MainActivity.this,
-                                            new String[]{permission.ACCESS_FINE_LOCATION},
-                                            100
+                                            new String[]{
+                                                    permission.ACCESS_FINE_LOCATION,
+                                                    permission.ACCESS_COARSE_LOCATION,
+                                                    permission.ACCESS_NETWORK_STATE,
+                                                    permission.ACCESS_WIFI_STATE,
+                                                    permission.CHANGE_WIFI_STATE,
+                                                    permission.INTERNET
+                                            },
+                                            LOCATION_PERM
                                     );
-                                    getWeatherTV.setOnClickListener(null);
                                 }
                             })
                             .setNegativeButton(getString(R.string.deny), new DialogInterface.OnClickListener() {
@@ -309,32 +298,59 @@ public class MainActivity extends AppCompatActivity {
                             }).show();
                 }
             });
-            return;
-        }
-
-        locationMgr.requestLocationUpdates(
-                LocationManager.GPS_PROVIDER,
-                0,
-                0,
-                listener);
-
-        Location location = locationMgr.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-
-        if (location == null) {
-            getWeatherTV.setText(getResources().getString(R.string.location_error));
         } else {
-            locationMgr.removeUpdates(listener);
-            getWeather(location);
+            Log.d("PERM", "已有授权");
+            getWeather();
         }
     }
 
-    private void getWeather(Location location) {
-        double lat = Math.round(location.getLatitude() * 100) / 100.0;
-        double lng = Math.round(location.getLongitude() * 100) / 100.0;
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == LOCATION_PERM) {
+            if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                getWeatherTV.setText("Loading");
+                getWeatherTV.setOnClickListener(null);
 
-        new GetWeather().execute("http://api.openweathermap.org/data/2.5/weather?lat=" +
-                lat + "&lon=" + lng + "&lang=zh_cn&units=metric&appid=" +
-                getResources().getString(R.string.openWeather));
+                Log.d("PERM", "授权成功，开始定位");
+                mLocationClient.startLocation();
+            } else {
+                getWeatherTV.setText("Need Location Permission");
+            }
+        }
+    }
+
+    private void getWeather() {
+        SharedPreferences locationPref = getApplication()
+                .getSharedPreferences("location", MODE_PRIVATE);
+
+        String latitude = locationPref.getString("Latitude", "");
+        String longitude = locationPref.getString("Longitude", "");
+
+        Log.d("XZ", latitude + "/" + longitude);
+
+        getWeather(latitude, longitude);
+    }
+
+    private void getWeather(String lat, String lng) {
+        Log.d("PERM", "获取天气");
+
+        getWeatherTV.setVisibility(View.GONE);
+        weatherHolder.setVisibility(View.VISIBLE);
+        if (!lat.equals("") && !lng.equals("")) {
+            Log.d("PERM", "经纬度不为空");
+            String apiStr = "https://api.thinkpage.cn/v3/weather/daily.json?key=txyws41isbyqnma5&" +
+                    "location=" + lat + ":" + lng + "&language=zh-Hans&unit=c";
+            new GetWeather().execute(apiStr);
+        } else {
+            Log.d("PERM", "经纬度为空");
+            cityNameTV.setText(getResources().getString(R.string.location_error));
+            weatherTV.setText(getResources().getString(R.string.unknown_weahter));
+            weatherIconIV.setImageDrawable(ContextCompat.getDrawable(
+                    MainActivity.this,
+                    icons.map.get("99")
+            ));
+        }
     }
 
     private void initMovieDB() {
@@ -521,6 +537,9 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onStop() {
         super.onStop();
+        if (mLocationClient != null) {
+            mLocationClient.onDestroy();
+        }
     }
 
     @Override
@@ -528,6 +547,44 @@ public class MainActivity extends AppCompatActivity {
         db.close();
         dbHelper.close();
         super.onDestroy();
+    }
+
+    @Override
+    public void onLocationChanged(AMapLocation aMapLocation) {
+        if (aMapLocation != null) {
+            if (aMapLocation.getErrorCode() == 0) {
+                String lat = aMapLocation.getLatitude() + "";
+                String lng = aMapLocation.getLongitude() + "";
+
+                Log.d("AMap", lat + "/" + lng);
+
+                SharedPreferences locationPref = getApplication()
+                        .getSharedPreferences("location", MODE_PRIVATE);
+                SharedPreferences.Editor prefsEditor = locationPref.edit();
+                prefsEditor.putString("Latitude", lat);
+                prefsEditor.putString("Longitude", lng);
+                prefsEditor.apply();
+
+                Log.d("PERM", "定位成功，准备获取天气");
+                getWeather(lat, lng);
+
+                mLocationOption.setInterval(2400000);
+                mLocationClient.setLocationOption(mLocationOption);
+
+            } else {
+                // 定位失败时，可通过ErrCode（错误码）信息来确定失败的原因
+                // errInfo是错误信息，详见错误码表。
+                Log.e("AmapError", "location Error, ErrCode:"
+                        + aMapLocation.getErrorCode() + ", errInfo:"
+                        + aMapLocation.getErrorInfo());
+            }
+        }
+    }
+
+    private boolean checkPermission() {
+        return ActivityCompat.checkSelfPermission(this, permission.ACCESS_COARSE_LOCATION)
+                == PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this,
+                permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED;
     }
 
     private class GetTop250 extends AsyncTask<String, String, String> {
@@ -645,31 +702,42 @@ public class MainActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(String s) {
             super.onPostExecute(s);
-            weatherHolder.setVisibility(View.VISIBLE);
-            final WeatherBean weatherBean = new Gson().fromJson(s, WeatherBean.class);
-            String weathers = "";
-            int length = weatherBean.getWeather().length;
-            for (int i = 0; i < length; i++) {
-                weathers += weatherBean.getWeather()[i].getDescription() + " ";
+            if (s != null && !s.equals("")) {
+                XzBean xzBean = new Gson().fromJson(s, XzBean.class);
+                XzResultsBean resultsBean = xzBean.getResults()[0];
+                XzLocationBean locationBean = resultsBean.getLocation();
+                XzWeatherBean[] weatherBeans = resultsBean.getDaily();
+                String lastUpdate = resultsBean.getLast_update();
+
+                Log.d("XZ", "location: " + locationBean.getPath());
+                Log.d("XZ", "weather: " + weatherBeans[0].toString());
+                Log.d("XZ", "last_update: " + lastUpdate);
+
+                cityNameTV.setText(locationBean.getName());
+                XzWeatherBean nowWeather = weatherBeans[0];
+
+                String weathersText;
+                if (nowWeather.getText_night().equals(nowWeather.getText_day())) {
+                    weathersText = nowWeather.getText_day();
+                } else {
+                    weathersText = nowWeather.getText_day() + ", " + nowWeather.getText_night();
+                }
+                String weather = String.format(
+                        getResources().getString(R.string.weather),
+                        weathersText,
+                        nowWeather.getHigh(),
+                        nowWeather.getLow()
+                );
+
+                weatherTV.setText(weather);
+
+                weatherIconIV.setImageDrawable(
+                        ContextCompat.getDrawable(
+                                MainActivity.this,
+                                icons.map.get(nowWeather.getCode_day())
+                        )
+                );
             }
-
-            String weatherIcon = weatherBean.getWeather()[0].getIcon().substring(0, 2);
-
-            cityNameTV.setText(weatherBean.getName());
-            weatherIconIV.setImageDrawable(
-                    ContextCompat.getDrawable(
-                            MainActivity.this,
-                            iconMap.get(weatherIcon)
-                    )
-            );
-
-            String weather = String.format(
-                    getResources().getString(R.string.weather),
-                    weathers,
-                    weatherBean.getMain().getTemp()
-            );
-
-            weatherTV.setText(weather);
         }
     }
 }
