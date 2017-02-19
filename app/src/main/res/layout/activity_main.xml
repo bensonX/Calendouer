@@ -158,7 +158,8 @@
             </RelativeLayout>
 
             <TextView
-                android:layout_width="match_parent"
+                android:id="@+id/douban_movie_title"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="@dimen/activity_vertical_margin"
                 android:text="@string/movie_recommended"

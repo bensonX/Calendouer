@@ -25,4 +25,12 @@
     <string name="close">Close</string>
     <string name="last_update">last update: %1$s</string>
     <string name="what_new">WHAT\'S NEW</string>
+    <string name="case_date_title">Calender</string>
+    <string name="case_date_text">Very useful information with Lunar Date, Solar Date, Solar Term, Holiday</string>
+    <string name="case_douban_movie_title">Movie Recommandation</string>
+    <string name="case_douban_movie_text">Douban Movie TOP250, A Calendar, A Movie</string>
+    <string name="case_weather_title">Weahter Forecast</string>
+    <string name="case_weather_text">Needs device location information, Click Weather Icon to check weather forecast in 3 days</string>
+    <string name="got_it">Got It</string>
+    <string name="welcome">Welcome Tips: Add widget to desktop for easy getting movie recommandation</string>
 </resources>

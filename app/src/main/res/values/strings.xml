@@ -36,4 +36,18 @@
     <string name="weather_preview">3日天气预报</string>
     <string name="what_new">更新内容</string>
     <string name="update_content" translatable="false">✱更换天气预报信息提供商\n✱点击天气图标查看3日天气预报\n✱优化定位</string>
+    <string name="got_it">知道了</string>
+
+    <!--Show Case-->
+    <string name="case_date_title">日历</string>
+    <string name="case_date_text">提供阳历，阴历，节气，节日等丰富信息</string>
+
+    <string name="case_weather_title">天气服务</string>
+    <string name="case_weather_text">需要授权定位权限获取天气服务, 点击天气图标查看近3日的天气预报</string>
+
+    <string name="case_douban_movie_title">电影推荐</string>
+    <string name="case_douban_movie_text">豆瓣电影TOP250, 一页日历，一部电影</string>
+
+    <string name="welcome">欢迎使用 向桌面添加小部件，轻松获得电影推荐</string>
 </resources>
+

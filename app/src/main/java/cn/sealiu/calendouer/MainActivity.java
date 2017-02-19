@@ -16,6 +16,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.view.ViewCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.AppCompatButton;
@@ -23,7 +24,11 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.animation.Interpolator;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
@@ -35,6 +40,10 @@ import com.amap.api.location.AMapLocation;
 import com.amap.api.location.AMapLocationClient;
 import com.amap.api.location.AMapLocationClientOption;
 import com.amap.api.location.AMapLocationListener;
+import com.github.amlcurran.showcaseview.ShowcaseView;
+import com.github.amlcurran.showcaseview.SimpleShowcaseEventListener;
+import com.github.amlcurran.showcaseview.targets.Target;
+import com.github.amlcurran.showcaseview.targets.ViewTarget;
 import com.google.gson.Gson;
 
 import java.io.BufferedReader;
@@ -79,13 +88,12 @@ public class MainActivity extends AppCompatActivity implements AMapLocationListe
     TextView dateTV;
     TextView solarTermTV;
     TextView festivalTV;
-
     RelativeLayout weatherHolder;
     TextView getWeatherTV;
     TextView cityNameTV;
     TextView weatherTV;
     ImageView weatherIconIV;
-
+    TextView doubanTitleTV;
     ImageView movieImageIV;
     TextView movieAverageTV;
     TextView movieTitleTV;
@@ -98,12 +106,12 @@ public class MainActivity extends AppCompatActivity implements AMapLocationListe
     SQLiteDatabase db;
     String[] movieIds = new String[COUNT];
     int index = 0;
-
     WeatherIcon icons;
     AMapLocationClient mLocationClient;
     AMapLocationClientOption mLocationOption;
-
     String weatherJson;
+    private ShowcaseView showcaseView;
+    private int counter = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -126,6 +134,7 @@ public class MainActivity extends AppCompatActivity implements AMapLocationListe
         weatherIconIV = (ImageView) findViewById(R.id.weather_icon);
         weatherIconIV.setOnClickListener(this);
 
+        doubanTitleTV = (TextView) findViewById(R.id.douban_movie_title);
         movieImageIV = (ImageView) findViewById(R.id.movie_image);
         movieAverageTV = (TextView) findViewById(R.id.rating__average);
         movieTitleTV = (TextView) findViewById(R.id.movie_title);
@@ -198,6 +207,14 @@ public class MainActivity extends AppCompatActivity implements AMapLocationListe
             }
 
             setMovieInfo();
+        }
+
+        SharedPreferences sp = this.getSharedPreferences("show_case", Context.MODE_PRIVATE);
+
+        if (sp.getBoolean("first_run", true)) {
+            sp.edit().putBoolean("first_run", false).apply();
+            counter = 0;
+            firstLaunch();
         }
     }
 
@@ -604,6 +621,60 @@ public class MainActivity extends AppCompatActivity implements AMapLocationListe
         }
     }
 
+    private void firstLaunch() {
+
+        RelativeLayout.LayoutParams lps = new RelativeLayout.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+        );
+
+        lps.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
+        lps.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
+        int margin = ((Number) (getResources().getDisplayMetrics().density * 12)).intValue();
+        lps.setMargins(margin, margin, margin, margin);
+
+        Button customButton = (Button) getLayoutInflater().inflate(R.layout.view_custom_button, null);
+        MultiEventListener multiEventListener = new MultiEventListener(new ShakeButtonListener(customButton));
+
+        showcaseView = new ShowcaseView.Builder(this)
+                .withMaterialShowcase()
+                .setTarget(new ViewTarget(findViewById(R.id.date)))
+                .setContentTitle(getString(R.string.case_date_title))
+                .setContentText(getString(R.string.case_date_text))
+                .setStyle(R.style.CustomShowcaseTheme)
+                .setShowcaseEventListener(multiEventListener)
+                .replaceEndButton(customButton)
+                .setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        switch (counter) {
+                            case 0:
+                                showcaseView.setShowcase(new ViewTarget(getWeatherTV), true);
+                                showcaseView.setContentTitle(getString(R.string.case_weather_title));
+                                showcaseView.setContentText(getString(R.string.case_weather_text));
+                                break;
+                            case 1:
+                                showcaseView.setShowcase(new ViewTarget(doubanTitleTV), true);
+                                showcaseView.setContentTitle(getString(R.string.case_douban_movie_title));
+                                showcaseView.setContentText(getString(R.string.case_douban_movie_text));
+                                break;
+                            case 2:
+                                showcaseView.setTarget(Target.NONE);
+                                showcaseView.setContentTitle(getString(R.string.app_name));
+                                showcaseView.setContentText(getString(R.string.welcome));
+                                showcaseView.setButtonText(getString(R.string.close));
+                                break;
+                            case 3:
+                                showcaseView.hide();
+                                break;
+                        }
+                        counter++;
+                    }
+                })
+                .build();
+        showcaseView.setButtonPosition(lps);
+    }
+
     private class GetTop250 extends AsyncTask<String, String, String> {
 
         @Override
@@ -756,6 +827,38 @@ public class MainActivity extends AppCompatActivity implements AMapLocationListe
                         )
                 );
             }
+        }
+    }
+
+    private class ShakeButtonListener extends SimpleShowcaseEventListener {
+        private final Button button;
+
+        ShakeButtonListener(Button button) {
+            this.button = button;
+        }
+
+        @Override
+        public void onShowcaseViewTouchBlocked(MotionEvent motionEvent) {
+            int translation = getResources().getDimensionPixelOffset(R.dimen.touch_button_wobble);
+            ViewCompat.animate(button)
+                    .translationXBy(translation)
+                    .setInterpolator(new WobblyInterpolator(2));
+        }
+    }
+
+    private class WobblyInterpolator implements Interpolator {
+
+        private final double CONVERT_TO_RADS = 2 * Math.PI;
+        private final int cycles;
+
+        WobblyInterpolator(int cycles) {
+            this.cycles = cycles;
+        }
+
+        @Override
+        public float getInterpolation(float proportion) {
+            double sin = Math.sin(cycles * proportion * CONVERT_TO_RADS);
+            return (float) sin;
         }
     }
 }
