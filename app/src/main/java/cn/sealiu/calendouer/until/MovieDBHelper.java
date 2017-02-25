@@ -5,6 +5,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
 import static cn.sealiu.calendouer.until.MovieContract.MovieEntry;
+import static cn.sealiu.calendouer.until.PersonalContract.PersonalEntry;
 
 /**
  * Created by liuyang
@@ -12,10 +13,10 @@ import static cn.sealiu.calendouer.until.MovieContract.MovieEntry;
  */
 
 public class MovieDBHelper extends SQLiteOpenHelper {
-    private static final int DB_VERSION = 1;
+    private static final int DB_VERSION = 2;
     private static final String DB_NAME = "MOVIE.db";
 
-    private static final String SQL_CREATE_ENTRIES =
+    private static final String MOVIE_CREATE_ENTRIES =
             "CREATE TABLE IF NOT EXISTS " + MovieEntry.TABLE_NAME + "(" +
                     MovieEntry.COLUMN_NAME_ID + " TEXT PRIMARY KEY, " +
                     MovieEntry.COLUMN_NAME_TITLE + " TEXT, " +
@@ -26,8 +27,20 @@ public class MovieDBHelper extends SQLiteOpenHelper {
                     MovieEntry.COLUMN_NAME_ALT + " TEXT, " +
                     MovieEntry.COLUMN_NAME_YEAR + " TEXT," +
                     MovieEntry.COLUMN_NAME_SUMMARY + " TEXT)";
-    private static final String SQL_DELETE_ENTRIES =
+    private static final String MOVIE_DELETE_ENTRIES =
             "DROP TABLE IF EXISTS " + MovieEntry.TABLE_NAME;
+
+    private static final String PERSONAL_CREATE_ENTRIES =
+            "CREATE TABLE IF NOT EXISTS " + MovieEntry.TABLE_NAME + "(" +
+                    PersonalEntry.COLUMN_NAME_ID + "TEXT PRIMARY KEY, " +
+                    PersonalEntry.COLUMN_NAME_KEY + " TEXT, " +
+                    PersonalEntry.COLUMN_NAME_VALUE + " TEXT, " +
+                    PersonalEntry.COLUMN_NAME_LEVEL + " TEXT, " +
+                    PersonalEntry.COLUMN_NAME_DATETIME + " TEXT, " +
+                    PersonalEntry.COLUMN_NAME_ALT + " TEXT)";
+
+    private static final String PERSONAL_DELETE_ENTRIES =
+            "DROP TABLE IF EXISTS " + PersonalEntry.TABLE_NAME;
 
     public MovieDBHelper(Context context) {
         super(context, DB_NAME, null, DB_VERSION);
@@ -35,12 +48,15 @@ public class MovieDBHelper extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        db.execSQL(SQL_CREATE_ENTRIES);
+        db.execSQL(MOVIE_CREATE_ENTRIES);
+        db.execSQL(PERSONAL_CREATE_ENTRIES);
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        db.execSQL(SQL_DELETE_ENTRIES);
+        if (oldVersion < DB_VERSION) {
+            db.execSQL(PERSONAL_CREATE_ENTRIES);
+        }
         onCreate(db);
     }
 

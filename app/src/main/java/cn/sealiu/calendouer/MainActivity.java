@@ -341,19 +341,13 @@ public class MainActivity extends AppCompatActivity implements AMapLocationListe
     }
 
     private void getWeather() {
+        Log.d("PERM", "获取天气");
+
         SharedPreferences locationPref = getApplication()
                 .getSharedPreferences("location", MODE_PRIVATE);
 
-        String latitude = locationPref.getString("Latitude", "");
-        String longitude = locationPref.getString("Longitude", "");
-
-        Log.d("XZ", latitude + "/" + longitude);
-
-        getWeather(latitude, longitude);
-    }
-
-    private void getWeather(String lat, String lng) {
-        Log.d("PERM", "获取天气");
+        String lat = locationPref.getString("Latitude", "");
+        String lng = locationPref.getString("Longitude", "");
 
         getWeatherTV.setVisibility(View.GONE);
         weatherHolder.setVisibility(View.VISIBLE);
@@ -586,7 +580,7 @@ public class MainActivity extends AppCompatActivity implements AMapLocationListe
                 prefsEditor.apply();
 
                 Log.d("PERM", "定位成功，准备获取天气");
-                getWeather(lat, lng);
+                getWeather();
 
                 mLocationOption.setInterval(2400000);
                 mLocationClient.setLocationOption(mLocationOption);
