@@ -13,6 +13,7 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -20,6 +21,7 @@ import android.support.v4.view.ViewCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.AppCompatButton;
+import android.support.v7.widget.CardView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
@@ -111,9 +113,10 @@ public class MainActivity extends AppCompatActivity implements
     WeatherIcon icons;
     AMapLocationClient mLocationClient;
     AMapLocationClientOption mLocationOption;
-    String weatherJson;
     SharedPreferences sharedPref;
     DateFormat df;
+    CardView movieCard;
+    SharedPreferences settingPref;
     private ShowcaseView showcaseView;
     private int counter = 0;
 
@@ -137,7 +140,7 @@ public class MainActivity extends AppCompatActivity implements
         weatherTV = (TextView) findViewById(R.id.weather);
         weatherIconIV = (ImageView) findViewById(R.id.weather_icon);
         weatherIconIV.setOnClickListener(this);
-
+        movieCard = (CardView) findViewById(R.id.movie_card);
         doubanTitleTV = (TextView) findViewById(R.id.douban_movie_title);
         movieImageIV = (ImageView) findViewById(R.id.movie_image);
         movieAverageTV = (TextView) findViewById(R.id.rating__average);
@@ -163,6 +166,7 @@ public class MainActivity extends AppCompatActivity implements
         mLocationClient.setLocationOption(mLocationOption);
 
         sharedPref = this.getPreferences(Context.MODE_PRIVATE);
+        settingPref = PreferenceManager.getDefaultSharedPreferences(this);
         df = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
     }
 
@@ -176,42 +180,55 @@ public class MainActivity extends AppCompatActivity implements
 
     @Override
     protected void onResume() {
+        Log.d("RUN", "onResume");
         super.onResume();
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             this.getWindow().setNavigationBarColor(ContextCompat.getColor(this, R.color.colorPrimary));
         }
 
-        initWeather();
         initCalendar();
 
-        if (checkEmpty()) {
-            loadingPB.setVisibility(View.GONE);
-            getTop250Btn.setVisibility(View.VISIBLE);
-            movieRecommendedHolder.setVisibility(View.GONE);
-            getTop250Btn.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    getTop250Btn.setVisibility(View.GONE);
-                    initMovieDB();
-                }
-            });
+        if (settingPref.getBoolean("weather_show", true)) {
+            weatherHolder.setVisibility(View.VISIBLE);
+            initWeather();
         } else {
-            Log.d("DB", "is not empty");
-            String datePref = sharedPref.getString("DATE", "null");
-            String idPref = sharedPref.getString("ID", "null");
+            weatherHolder.setVisibility(View.GONE);
+            // TODO: 2017/2/27 weather card hide and show notification
+        }
 
-            if (!datePref.equals(df.format(new Date()))) {
+        if (settingPref.getBoolean("movie_recommended_show", true)) {
+            movieCard.setVisibility(View.VISIBLE);
+            if (checkEmpty()) {
+                loadingPB.setVisibility(View.GONE);
+                getTop250Btn.setVisibility(View.VISIBLE);
+                movieRecommendedHolder.setVisibility(View.GONE);
+                getTop250Btn.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        getTop250Btn.setVisibility(View.GONE);
+                        initMovieDB();
+                    }
+                });
+            } else {
+                Log.d("DB", "is not empty");
+                String datePref = sharedPref.getString("DATE", "null");
+                String idPref = sharedPref.getString("ID", "null");
 
-                db = dbHelper.getWritableDatabase();
-                db.delete(
-                        MovieEntry.TABLE_NAME,
-                        MovieEntry.COLUMN_NAME_ID + "=?",
-                        new String[]{idPref}
-                );
+                if (!datePref.equals(df.format(new Date()))) {
+
+                    db = dbHelper.getWritableDatabase();
+                    db.delete(
+                            MovieEntry.TABLE_NAME,
+                            MovieEntry.COLUMN_NAME_ID + "=?",
+                            new String[]{idPref}
+                    );
+                }
+                setMovieInfo();
             }
-
-            setMovieInfo();
+        } else {
+            // TODO: 2017/2/27 movie card hide
+            movieCard.setVisibility(View.GONE);
         }
 
         if (sharedPref.getBoolean("first_run", true)) {
@@ -272,15 +289,9 @@ public class MainActivity extends AppCompatActivity implements
         if (!festStr.equals("")) {
             festivalTV.setVisibility(View.VISIBLE);
             festivalTV.setText(festStr);
-            //dateTV.setTextColor(ContextCompat.getColor(this, R.color.colorAccent));
         } else {
             festivalTV.setVisibility(View.GONE);
         }
-
-        // 周末
-        //if (solarCalendarStrs.get(9).equals("1")) {
-        //dateTV.setTextColor(ContextCompat.getColor(this, R.color.colorAccent));
-        //}
     }
 
     private void initWeather() {
@@ -323,7 +334,11 @@ public class MainActivity extends AppCompatActivity implements
             });
         } else {
             Log.d("PERM", "已有授权");
-            getWeather();
+            if (sharedPref.getString("weather_json", "").equals("")) {
+                getWeather();
+            } else {
+                setWeather();
+            }
         }
     }
 
@@ -556,7 +571,9 @@ public class MainActivity extends AppCompatActivity implements
 
     @Override
     protected void onDestroy() {
-        db.close();
+        if (db != null) {
+            db.close();
+        }
         dbHelper.close();
         super.onDestroy();
     }
@@ -578,9 +595,11 @@ public class MainActivity extends AppCompatActivity implements
                 prefsEditor.apply();
 
                 Log.d("PERM", "定位成功，准备获取天气");
+
+                // 这时重新取天气预报，不从shardPref中读取
                 getWeather();
 
-                mLocationOption.setInterval(2400000);
+                mLocationOption.setInterval(30000);//5分钟刷新定位
                 mLocationClient.setLocationOption(mLocationOption);
 
             } else {
@@ -602,7 +621,9 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     public void onClick(View v) {
         if (v.getId() == R.id.weather_icon) {
-            if (weatherJson != null) {
+
+            String weatherJson = sharedPref.getString("weather_json", "");
+            if (!weatherJson.equals("")) {
                 WeatherFragment weatherFragment = new WeatherFragment();
                 Bundle bundle = new Bundle();
                 bundle.putString("weather", weatherJson);
@@ -677,6 +698,44 @@ public class MainActivity extends AppCompatActivity implements
         }
     }
     */
+
+    private void setWeather() {
+        String s = sharedPref.getString("weather_json", "");
+        XzBean xzBean = new Gson().fromJson(s, XzBean.class);
+        XzResultsBean resultsBean = xzBean.getResults()[0];
+        XzLocationBean locationBean = resultsBean.getLocation();
+        XzWeatherBean[] weatherBeans = resultsBean.getDaily();
+        String lastUpdate = resultsBean.getLast_update();
+
+        Log.d("XZ", "location: " + locationBean.getPath());
+        Log.d("XZ", "weather: " + weatherBeans[0].toString());
+        Log.d("XZ", "last_update: " + lastUpdate);
+
+        cityNameTV.setText(locationBean.getName());
+        XzWeatherBean nowWeather = weatherBeans[0];
+
+        String weathersText;
+        if (nowWeather.getText_night().equals(nowWeather.getText_day())) {
+            weathersText = nowWeather.getText_day();
+        } else {
+            weathersText = nowWeather.getText_day() + ", " + nowWeather.getText_night();
+        }
+        String weather = String.format(
+                getResources().getString(R.string.weather),
+                weathersText,
+                nowWeather.getHigh(),
+                nowWeather.getLow()
+        );
+
+        weatherTV.setText(weather);
+
+        weatherIconIV.setImageDrawable(
+                ContextCompat.getDrawable(
+                        MainActivity.this,
+                        icons.map.get(nowWeather.getCode_day())
+                )
+        );
+    }
 
     private class GetTop250 extends AsyncTask<String, String, String> {
 
@@ -785,41 +844,11 @@ public class MainActivity extends AppCompatActivity implements
         protected void onPostExecute(String s) {
             super.onPostExecute(s);
             if (s != null && !s.equals("")) {
-                weatherJson = s;
-                XzBean xzBean = new Gson().fromJson(s, XzBean.class);
-                XzResultsBean resultsBean = xzBean.getResults()[0];
-                XzLocationBean locationBean = resultsBean.getLocation();
-                XzWeatherBean[] weatherBeans = resultsBean.getDaily();
-                String lastUpdate = resultsBean.getLast_update();
+                sharedPref.edit().putString("weather_json", s).apply();
 
-                Log.d("XZ", "location: " + locationBean.getPath());
-                Log.d("XZ", "weather: " + weatherBeans[0].toString());
-                Log.d("XZ", "last_update: " + lastUpdate);
-
-                cityNameTV.setText(locationBean.getName());
-                XzWeatherBean nowWeather = weatherBeans[0];
-
-                String weathersText;
-                if (nowWeather.getText_night().equals(nowWeather.getText_day())) {
-                    weathersText = nowWeather.getText_day();
-                } else {
-                    weathersText = nowWeather.getText_day() + ", " + nowWeather.getText_night();
-                }
-                String weather = String.format(
-                        getResources().getString(R.string.weather),
-                        weathersText,
-                        nowWeather.getHigh(),
-                        nowWeather.getLow()
-                );
-
-                weatherTV.setText(weather);
-
-                weatherIconIV.setImageDrawable(
-                        ContextCompat.getDrawable(
-                                MainActivity.this,
-                                icons.map.get(nowWeather.getCode_day())
-                        )
-                );
+                setWeather();
+            } else {
+                // TODO: 2017/2/27 处理请求天气信息错误的情况
             }
         }
     }

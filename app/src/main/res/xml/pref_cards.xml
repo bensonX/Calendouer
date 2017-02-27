@@ -2,8 +2,13 @@
 
     <SwitchPreference
         android:defaultValue="true"
-        android:key="notification_show"
-        android:title="@string/pref_title_cards" />
+        android:key="weather_show"
+        android:title="@string/pref_title_weather" />
+
+    <SwitchPreference
+        android:defaultValue="true"
+        android:key="things_show"
+        android:title="@string/pref_title_things" />
 
     <SwitchPreference
         android:defaultValue="true"
