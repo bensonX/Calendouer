@@ -11,8 +11,7 @@
         android:id="@+id/app_bar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:theme="@style/AppTheme.AppBarOverlay"
-        app:elevation="0dp">
+        android:theme="@style/AppTheme.AppBarOverlay">
 
         <android.support.v7.widget.Toolbar
             android:id="@+id/toolbar"
@@ -22,16 +21,14 @@
 
     </android.support.design.widget.AppBarLayout>
 
-    <android.support.v4.widget.NestedScrollView
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="48dp"
-        android:layout_marginStart="48dp"
+        android:layout_height="match_parent"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/activity_vertical_margin"
             android:orientation="vertical"
             android:paddingBottom="56dp">
@@ -40,12 +37,16 @@
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
                 android:layout_marginBottom="8dp"
+                android:layout_marginEnd="48dp"
+                android:layout_marginStart="48dp"
                 android:background="@android:color/darker_gray" />
 
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
+                android:layout_marginEnd="48dp"
+                android:layout_marginStart="48dp"
                 android:orientation="horizontal">
 
                 <TextView
@@ -70,16 +71,19 @@
                     android:text="@string/lunar_date" />
             </LinearLayout>
 
-
             <View
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
+                android:layout_marginEnd="48dp"
+                android:layout_marginStart="48dp"
                 android:layout_marginTop="8dp"
                 android:background="@android:color/darker_gray" />
 
             <RelativeLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content">
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="48dp"
+                android:layout_marginStart="48dp">
 
                 <TextView
                     android:id="@+id/date"
@@ -102,11 +106,12 @@
                     android:visibility="gone" />
             </RelativeLayout>
 
-
             <TextView
                 android:id="@+id/festival"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginEnd="48dp"
+                android:layout_marginStart="48dp"
                 android:textAlignment="center"
                 android:visibility="gone" />
 
@@ -114,6 +119,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
                 android:layout_marginBottom="@dimen/activity_horizontal_margin"
+                android:layout_marginEnd="48dp"
+                android:layout_marginStart="48dp"
                 android:layout_marginTop="@dimen/activity_horizontal_margin"
                 android:background="@android:color/darker_gray" />
 
@@ -126,36 +133,70 @@
                 android:text="@string/getWeatherInfo"
                 android:visibility="gone" />
 
-            <RelativeLayout
+
+            <LinearLayout
                 android:id="@+id/weatherHolder"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:layout_marginBottom="@dimen/activity_vertical_margin">
+                android:layout_marginBottom="@dimen/activity_vertical_margin"
+                android:background="@android:color/white"
+                android:orientation="vertical"
+                android:paddingBottom="16dp"
+                android:paddingLeft="32dp"
+                android:paddingRight="32dp"
+                android:paddingTop="16dp">
 
                 <TextView
                     android:id="@+id/city_name"
                     android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:layout_centerVertical="true"
-                    android:layout_toLeftOf="@+id/weather_icon" />
-
-                <ImageView
-                    android:id="@+id/weather_icon"
-                    android:layout_width="36dp"
-                    android:layout_height="36dp"
-                    android:layout_centerHorizontal="true"
-                    android:layout_marginLeft="@dimen/activity_horizontal_margin"
-                    android:layout_marginRight="@dimen/activity_horizontal_margin"
-                    android:scaleType="centerCrop" />
-
-                <TextView
-                    android:id="@+id/weather"
-                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_centerVertical="true"
-                    android:layout_toRightOf="@+id/weather_icon" />
-            </RelativeLayout>
+                    android:text="chengdu"
+                    android:textSize="24sp" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <ImageView
+                            android:id="@+id/weather_icon"
+                            android:layout_width="56dp"
+                            android:layout_height="56dp"
+                            android:layout_marginBottom="8dp"
+                            android:layout_marginTop="@dimen/activity_vertical_margin"
+                            android:scaleType="centerCrop"
+                            app:srcCompat="@drawable/weather01" />
+
+                        <TextView
+                            android:id="@+id/weather_info"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="CLEAR" />
+
+                        <TextView
+                            android:id="@+id/wind"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="10kph 无持续风向"
+                            android:textSize="12sp" />
+                    </LinearLayout>
+
+                    <TextView
+                        android:id="@+id/weather_high"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="2"
+                        android:gravity="center"
+                        android:text="13\u00B0/4\u00B0"
+                        android:textSize="60sp" />
+                </LinearLayout>
+            </LinearLayout>
 
             <TextView
                 android:id="@+id/douban_movie_title"
@@ -251,5 +292,5 @@
 
         </LinearLayout>
 
-    </android.support.v4.widget.NestedScrollView>
+    </ScrollView>
 </android.support.design.widget.CoordinatorLayout>

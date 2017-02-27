@@ -1,0 +1,18 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <SwitchPreference
+        android:defaultValue="true"
+        android:key="notification_show"
+        android:title="@string/pref_title_cards" />
+
+    <SwitchPreference
+        android:defaultValue="true"
+        android:key="movie_recommended_show"
+        android:title="@string/pref_title_movie" />
+
+    <SwitchPreference
+        android:defaultValue="true"
+        android:key="movie_similar_show"
+        android:title="@string/pref_title_similar_movie" />
+
+</PreferenceScreen>

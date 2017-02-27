@@ -49,5 +49,9 @@
     <string name="case_douban_movie_text">豆瓣电影TOP250, 一页日历，一部电影</string>
 
     <string name="welcome">欢迎使用 向桌面添加小部件，轻松获得电影推荐</string>
+    <string name="pref_card_settings">卡片设置</string>
+    <string name="pref_title_cards">提醒</string>
+    <string name="pref_title_movie">推荐电影</string>
+    <string name="pref_title_similar_movie">相似电影</string>
 </resources>
 

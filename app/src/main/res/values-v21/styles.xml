@@ -8,4 +8,8 @@
         <item name="colorAccent">@color/colorAccent</item>
         <item name="android:navigationBarColor">@color/colorAccent</item>
     </style>
+
+    <style name="CollapsedAppbar" parent="@android:style/TextAppearance.Material.Widget.Toolbar.Title">
+        <item name="android:textColor">@color/textOrIcons</item>
+    </style>
 </resources>

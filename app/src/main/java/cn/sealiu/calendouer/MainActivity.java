@@ -77,11 +77,14 @@ import cn.sealiu.calendouer.until.WeatherIcon;
 
 import static android.Manifest.permission;
 
-public class MainActivity extends AppCompatActivity implements AMapLocationListener, View.OnClickListener {
+public class MainActivity extends AppCompatActivity implements
+        AMapLocationListener,
+        View.OnClickListener {
 
     private final static int STAR = 5;
-    private final static int COUNT = 20;
+    private final static int MAX_COUNT = 100;
     private final static int LOCATION_PERM = 100;
+    Toolbar toolbar;
     TextView monthTV;
     TextView weekTV;
     TextView lunarTV;
@@ -89,6 +92,7 @@ public class MainActivity extends AppCompatActivity implements AMapLocationListe
     TextView solarTermTV;
     TextView festivalTV;
     RelativeLayout weatherHolder;
+    LinearLayout movieRecommendedHolder;
     TextView getWeatherTV;
     TextView cityNameTV;
     TextView weatherTV;
@@ -104,20 +108,20 @@ public class MainActivity extends AppCompatActivity implements AMapLocationListe
     ProgressDialog mProgressDialog;
     MovieDBHelper dbHelper;
     SQLiteDatabase db;
-    String[] movieIds = new String[COUNT];
-    int index = 0;
     WeatherIcon icons;
     AMapLocationClient mLocationClient;
     AMapLocationClientOption mLocationOption;
     String weatherJson;
+    SharedPreferences sharedPref;
+    DateFormat df;
     private ShowcaseView showcaseView;
     private int counter = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setContentView(R.layout.activity_preview);
+        toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
         monthTV = (TextView) findViewById(R.id.month);
@@ -143,6 +147,7 @@ public class MainActivity extends AppCompatActivity implements AMapLocationListe
 
         loadingPB = (ProgressBar) findViewById(R.id.loading);
         getTop250Btn = (AppCompatButton) findViewById(R.id.getTop250_btn);
+        movieRecommendedHolder = (LinearLayout) findViewById(R.id.movie_recommended_holder);
 
         loadingPB.setVisibility(View.VISIBLE);
 
@@ -156,6 +161,9 @@ public class MainActivity extends AppCompatActivity implements AMapLocationListe
         mLocationOption.setLocationMode(AMapLocationClientOption.AMapLocationMode.Hight_Accuracy);
 
         mLocationClient.setLocationOption(mLocationOption);
+
+        sharedPref = this.getPreferences(Context.MODE_PRIVATE);
+        df = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
     }
 
     private boolean checkEmpty() {
@@ -171,7 +179,7 @@ public class MainActivity extends AppCompatActivity implements AMapLocationListe
         super.onResume();
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            this.getWindow().setNavigationBarColor(ContextCompat.getColor(this, R.color.colorAccent));
+            this.getWindow().setNavigationBarColor(ContextCompat.getColor(this, R.color.colorPrimary));
         }
 
         initWeather();
@@ -180,21 +188,18 @@ public class MainActivity extends AppCompatActivity implements AMapLocationListe
         if (checkEmpty()) {
             loadingPB.setVisibility(View.GONE);
             getTop250Btn.setVisibility(View.VISIBLE);
+            movieRecommendedHolder.setVisibility(View.GONE);
             getTop250Btn.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
+                    getTop250Btn.setVisibility(View.GONE);
                     initMovieDB();
                 }
             });
         } else {
             Log.d("DB", "is not empty");
-
-            SharedPreferences sharedPref = this.getPreferences(Context.MODE_PRIVATE);
-
             String datePref = sharedPref.getString("DATE", "null");
             String idPref = sharedPref.getString("ID", "null");
-
-            DateFormat df = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
 
             if (!datePref.equals(df.format(new Date()))) {
 
@@ -209,10 +214,8 @@ public class MainActivity extends AppCompatActivity implements AMapLocationListe
             setMovieInfo();
         }
 
-        SharedPreferences sp = this.getSharedPreferences("show_case", Context.MODE_PRIVATE);
-
-        if (sp.getBoolean("first_run", true)) {
-            sp.edit().putBoolean("first_run", false).apply();
+        if (sharedPref.getBoolean("first_run", true)) {
+            sharedPref.edit().putBoolean("first_run", false).apply();
             counter = 0;
             firstLaunch();
         }
@@ -269,15 +272,15 @@ public class MainActivity extends AppCompatActivity implements AMapLocationListe
         if (!festStr.equals("")) {
             festivalTV.setVisibility(View.VISIBLE);
             festivalTV.setText(festStr);
-            dateTV.setTextColor(ContextCompat.getColor(this, R.color.colorAccent));
+            //dateTV.setTextColor(ContextCompat.getColor(this, R.color.colorAccent));
         } else {
             festivalTV.setVisibility(View.GONE);
         }
 
         // 周末
-        if (solarCalendarStrs.get(9).equals("1")) {
-            dateTV.setTextColor(ContextCompat.getColor(this, R.color.colorAccent));
-        }
+        //if (solarCalendarStrs.get(9).equals("1")) {
+        //dateTV.setTextColor(ContextCompat.getColor(this, R.color.colorAccent));
+        //}
     }
 
     private void initWeather() {
@@ -369,17 +372,8 @@ public class MainActivity extends AppCompatActivity implements AMapLocationListe
 
     private void initMovieDB() {
         showProgressDialog(getResources().getString(R.string.downloading));
-        SharedPreferences sharedPref = this.getPreferences(Context.MODE_PRIVATE);
         int start = sharedPref.getInt("START", 0);
-        new GetTop250().execute("https://api.douban.com/v2/movie/top250?start=" + start + "&count=" + COUNT);
-    }
-
-    private void arrangeMovieDB() {
-        mProgressDialog.setMessage(getResources().getString(R.string.arrangeData));
-
-        if (movieIds.length != 0) {
-            new GetMovieInfo().execute("https://api.douban.com/v2/movie/subject/" + movieIds[index]);
-        }
+        new GetTop250().execute("https://api.douban.com/v2/movie/top250?start=" + start + "&count=" + MAX_COUNT);
     }
 
     @Override
@@ -471,11 +465,18 @@ public class MainActivity extends AppCompatActivity implements AMapLocationListe
         if (cursor.moveToFirst()) {
             id = cursor.getString(cursor.getColumnIndex(MovieEntry.COLUMN_NAME_ID));
             String title = cursor.getString(cursor.getColumnIndex(MovieEntry.COLUMN_NAME_TITLE));
-            float average = cursor.getFloat(cursor.getColumnIndex(MovieEntry.COLUMN_NAME_AVERAGE));
-            String stars = cursor.getString(cursor.getColumnIndex(MovieEntry.COLUMN_NAME_STARS));
             String images = cursor.getString(cursor.getColumnIndex(MovieEntry.COLUMN_NAME_IMAGES));
             final String alt = cursor.getString(cursor.getColumnIndex(MovieEntry.COLUMN_NAME_ALT));
+            String stars = cursor.getString(cursor.getColumnIndex(MovieEntry.COLUMN_NAME_STARS));
+            float average = cursor.getFloat(cursor.getColumnIndex(MovieEntry.COLUMN_NAME_AVERAGE));
+
+            //通过top250无法获取
             String summary = cursor.getString(cursor.getColumnIndex(MovieEntry.COLUMN_NAME_SUMMARY));
+            //需要借助getMovieInfo（仅一次）
+            if (summary.equals("") && id != null) {
+                new GetMovieInfo().execute("https://api.douban.com/v2/movie/subject/" + id);
+                return;
+            }
 
             if (loadingPB.getVisibility() == View.VISIBLE) {
                 loadingPB.setVisibility(View.GONE);
@@ -523,9 +524,6 @@ public class MainActivity extends AppCompatActivity implements AMapLocationListe
         }
 
         cursor.close();
-
-        SharedPreferences sharedPref = this.getPreferences(Context.MODE_PRIVATE);
-        DateFormat df = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
 
         sharedPref.edit().putString("DATE", df.format(new Date())).apply();
         sharedPref.edit().putString("ID", id).apply();
@@ -669,6 +667,17 @@ public class MainActivity extends AppCompatActivity implements AMapLocationListe
         showcaseView.setButtonPosition(lps);
     }
 
+    /*
+    @Override
+    public void onOffsetChanged(AppBarLayout appBarLayout, int verticalOffset) {
+        if (collapsingToolbar.getHeight() + verticalOffset < 2 * ViewCompat.getMinimumHeight(collapsingToolbar)) {
+            toolbar.animate().alpha(1).setDuration(600);
+        } else {
+            toolbar.animate().alpha(0).setDuration(600);
+        }
+    }
+    */
+
     private class GetTop250 extends AsyncTask<String, String, String> {
 
         @Override
@@ -683,7 +692,6 @@ public class MainActivity extends AppCompatActivity implements AMapLocationListe
 
             Top250Bean top250Bean = new Gson().fromJson(s, Top250Bean.class);
             if (top250Bean != null) {
-                int index = 0;
                 MovieBaseBean[] movieBaseBeans = top250Bean.getSubjects();
 
                 db = dbHelper.getWritableDatabase();
@@ -691,37 +699,38 @@ public class MainActivity extends AppCompatActivity implements AMapLocationListe
                 mProgressDialog.setMessage(getResources().getString(R.string.createDB));
 
                 for (MovieBaseBean mbb : movieBaseBeans) {
-
-                    movieIds[index++] = mbb.getId();
-
                     ContentValues values = new ContentValues();
 
                     values.put(MovieEntry.COLUMN_NAME_ID, mbb.getId());
                     values.put(MovieEntry.COLUMN_NAME_TITLE, mbb.getTitle());
                     values.put(MovieEntry.COLUMN_NAME_ORIGINAL_TITLE, mbb.getOriginal_title());
                     values.put(MovieEntry.COLUMN_NAME_IMAGES, mbb.getImages().getLarge());
-                    values.put(MovieEntry.COLUMN_NAME_AVERAGE, 0.0);
-                    values.put(MovieEntry.COLUMN_NAME_STARS, "0");
                     values.put(MovieEntry.COLUMN_NAME_ALT, mbb.getAlt());
                     values.put(MovieEntry.COLUMN_NAME_YEAR, mbb.getYear());
+                    values.put(MovieEntry.COLUMN_NAME_STARS, mbb.getRating().getStarts());
+                    values.put(MovieEntry.COLUMN_NAME_AVERAGE, mbb.getRating().getAverage());
+                    // 无法通过top250获得：
                     values.put(MovieEntry.COLUMN_NAME_SUMMARY, "");
 
                     db.insert(MovieEntry.TABLE_NAME, null, values);
                 }
 
-                SharedPreferences sharedPref = MainActivity.this.getPreferences(Context.MODE_PRIVATE);
-                int start = sharedPref.getInt("START", 0) + COUNT;
+                int start = sharedPref.getInt("START", 0) + top250Bean.getCount();
                 sharedPref.edit().putInt("START", start).apply();
-
-                arrangeMovieDB();
+                movieRecommendedHolder.setVisibility(View.VISIBLE);
+                setMovieInfo();
             } else {
+                getTop250Btn.setVisibility(View.VISIBLE);
                 Toast.makeText(
                         MainActivity.this,
                         getResources().getString(R.string.api_error),
                         Toast.LENGTH_LONG
                 ).show();
-                hideProgressDialog();
+
+                // TODO: 2017/2/26 修改top250显示信息，或者重试
             }
+
+            hideProgressDialog();
         }
     }
 
@@ -742,8 +751,6 @@ public class MainActivity extends AppCompatActivity implements AMapLocationListe
                 db = dbHelper.getWritableDatabase();
 
                 ContentValues values = new ContentValues();
-                values.put(MovieEntry.COLUMN_NAME_AVERAGE, movieBean.getRating().getAverage());
-                values.put(MovieEntry.COLUMN_NAME_STARS, movieBean.getRating().getStarts());
                 values.put(MovieEntry.COLUMN_NAME_SUMMARY, movieBean.getSummary());
 
                 String selection = MovieEntry.COLUMN_NAME_ID + "=?";
@@ -763,14 +770,7 @@ public class MainActivity extends AppCompatActivity implements AMapLocationListe
                 ).show();
             }
 
-
-            if (++index < COUNT) {
-                new GetMovieInfo().execute("https://api.douban.com/v2/movie/subject/" + movieIds[index]);
-            } else {
-                hideProgressDialog();
-                getTop250Btn.setVisibility(View.GONE);
-                setMovieInfo();
-            }
+            setMovieInfo();
         }
     }
 
