@@ -9,15 +9,17 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.location.LocationManager;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
+import android.support.design.widget.CoordinatorLayout;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
-import android.support.v4.view.ViewCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.AppCompatButton;
@@ -26,11 +28,7 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewGroup;
-import android.view.animation.Interpolator;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
@@ -42,10 +40,6 @@ import com.amap.api.location.AMapLocation;
 import com.amap.api.location.AMapLocationClient;
 import com.amap.api.location.AMapLocationClientOption;
 import com.amap.api.location.AMapLocationListener;
-import com.github.amlcurran.showcaseview.ShowcaseView;
-import com.github.amlcurran.showcaseview.SimpleShowcaseEventListener;
-import com.github.amlcurran.showcaseview.targets.Target;
-import com.github.amlcurran.showcaseview.targets.ViewTarget;
 import com.google.gson.Gson;
 
 import java.io.BufferedReader;
@@ -117,15 +111,18 @@ public class MainActivity extends AppCompatActivity implements
     DateFormat df;
     CardView movieCard;
     SharedPreferences settingPref;
-    private ShowcaseView showcaseView;
-    private int counter = 0;
+    LocationManager locationMgr;
+
+    CoordinatorLayout coordinatorLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_preview);
+        setContentView(R.layout.activity_main);
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        coordinatorLayout = (CoordinatorLayout) findViewById(R.id.activity_main);
 
         monthTV = (TextView) findViewById(R.id.month);
         weekTV = (TextView) findViewById(R.id.week_day);
@@ -157,17 +154,12 @@ public class MainActivity extends AppCompatActivity implements
         dbHelper = new MovieDBHelper(this);
 
         icons = new WeatherIcon();
-        mLocationClient = new AMapLocationClient(getApplicationContext());
-        mLocationClient.setLocationListener(this);
-
-        mLocationOption = new AMapLocationClientOption();
-        mLocationOption.setLocationMode(AMapLocationClientOption.AMapLocationMode.Hight_Accuracy);
-
-        mLocationClient.setLocationOption(mLocationOption);
 
         sharedPref = this.getPreferences(Context.MODE_PRIVATE);
         settingPref = PreferenceManager.getDefaultSharedPreferences(this);
         df = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+
+        locationMgr = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
     }
 
     private boolean checkEmpty() {
@@ -186,6 +178,14 @@ public class MainActivity extends AppCompatActivity implements
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             this.getWindow().setNavigationBarColor(ContextCompat.getColor(this, R.color.colorPrimary));
         }
+
+        mLocationClient = new AMapLocationClient(getApplicationContext());
+        mLocationClient.setLocationListener(this);
+
+        mLocationOption = new AMapLocationClientOption();
+        mLocationOption.setLocationMode(AMapLocationClientOption.AMapLocationMode.Hight_Accuracy);
+
+        mLocationClient.setLocationOption(mLocationOption);
 
         initCalendar();
 
@@ -229,12 +229,6 @@ public class MainActivity extends AppCompatActivity implements
         } else {
             // TODO: 2017/2/27 movie card hide
             movieCard.setVisibility(View.GONE);
-        }
-
-        if (sharedPref.getBoolean("first_run", true)) {
-            sharedPref.edit().putBoolean("first_run", false).apply();
-            counter = 0;
-            firstLaunch();
         }
     }
 
@@ -292,6 +286,11 @@ public class MainActivity extends AppCompatActivity implements
         } else {
             festivalTV.setVisibility(View.GONE);
         }
+
+        // 周末
+//        if (solarCalendarStrs.get(9).equals("1")) {
+//            dateTV.setTextColor(ContextCompat.getColor(this, R.color.orange));
+//        }
     }
 
     private void initWeather() {
@@ -351,6 +350,7 @@ public class MainActivity extends AppCompatActivity implements
                 getWeatherTV.setOnClickListener(null);
 
                 Log.d("PERM", "授权成功，开始定位");
+
                 mLocationClient.startLocation();
             } else {
                 getWeatherTV.setText("Need Location Permission");
@@ -358,17 +358,47 @@ public class MainActivity extends AppCompatActivity implements
         }
     }
 
+    @Override
+    public void onLocationChanged(AMapLocation aMapLocation) {
+        if (aMapLocation != null) {
+            if (aMapLocation.getErrorCode() == 0) {
+                String lat = aMapLocation.getLatitude() + "";
+                String lng = aMapLocation.getLongitude() + "";
+
+                Log.d("AMap", lat + "/" + lng);
+
+                sharedPref.edit().putString("Latitude", lat).apply();
+                sharedPref.edit().putString("Longitude", lng).apply();
+
+                Log.d("PERM", "定位成功，准备获取天气");
+
+            } else {
+                // 定位失败时，可通过ErrCode（错误码）信息来确定失败的原因
+                // errInfo是错误信息，详见错误码表。
+                Log.e("AMap", "location Error, ErrCode:"
+                        + aMapLocation.getErrorCode() + ", errInfo:"
+                        + aMapLocation.getErrorInfo());
+
+                Snackbar.make(coordinatorLayout, aMapLocation.getErrorInfo(), Snackbar.LENGTH_LONG)
+                        .setAction("重试", new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                mLocationClient.startLocation();
+                            }
+                        });
+            }
+        }
+    }
+
     private void getWeather() {
         Log.d("PERM", "获取天气");
 
-        SharedPreferences locationPref = getApplication()
-                .getSharedPreferences("location", MODE_PRIVATE);
-
-        String lat = locationPref.getString("Latitude", "");
-        String lng = locationPref.getString("Longitude", "");
-
         getWeatherTV.setVisibility(View.GONE);
         weatherHolder.setVisibility(View.VISIBLE);
+
+        String lat = sharedPref.getString("Latitude", "");
+        String lng = sharedPref.getString("Longitude", "");
+
         if (!lat.equals("") && !lng.equals("")) {
             Log.d("PERM", "经纬度不为空");
             String apiStr = "https://api.thinkpage.cn/v3/weather/daily.json?key=txyws41isbyqnma5&" +
@@ -376,12 +406,7 @@ public class MainActivity extends AppCompatActivity implements
             new GetWeather().execute(apiStr);
         } else {
             Log.d("PERM", "经纬度为空");
-            cityNameTV.setText(getResources().getString(R.string.location_error));
-            weatherTV.setText(getResources().getString(R.string.unknown_weahter));
-            weatherIconIV.setImageDrawable(ContextCompat.getDrawable(
-                    MainActivity.this,
-                    icons.map.get("99")
-            ));
+            mLocationClient.startLocation();
         }
     }
 
@@ -578,40 +603,6 @@ public class MainActivity extends AppCompatActivity implements
         super.onDestroy();
     }
 
-    @Override
-    public void onLocationChanged(AMapLocation aMapLocation) {
-        if (aMapLocation != null) {
-            if (aMapLocation.getErrorCode() == 0) {
-                String lat = aMapLocation.getLatitude() + "";
-                String lng = aMapLocation.getLongitude() + "";
-
-                Log.d("AMap", lat + "/" + lng);
-
-                SharedPreferences locationPref = getApplication()
-                        .getSharedPreferences("location", MODE_PRIVATE);
-                SharedPreferences.Editor prefsEditor = locationPref.edit();
-                prefsEditor.putString("Latitude", lat);
-                prefsEditor.putString("Longitude", lng);
-                prefsEditor.apply();
-
-                Log.d("PERM", "定位成功，准备获取天气");
-
-                // 这时重新取天气预报，不从shardPref中读取
-                getWeather();
-
-                mLocationOption.setInterval(30000);//5分钟刷新定位
-                mLocationClient.setLocationOption(mLocationOption);
-
-            } else {
-                // 定位失败时，可通过ErrCode（错误码）信息来确定失败的原因
-                // errInfo是错误信息，详见错误码表。
-                Log.e("AmapError", "location Error, ErrCode:"
-                        + aMapLocation.getErrorCode() + ", errInfo:"
-                        + aMapLocation.getErrorInfo());
-            }
-        }
-    }
-
     private boolean checkPermission() {
         return ActivityCompat.checkSelfPermission(this, permission.ACCESS_COARSE_LOCATION)
                 == PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this,
@@ -620,84 +611,25 @@ public class MainActivity extends AppCompatActivity implements
 
     @Override
     public void onClick(View v) {
-        if (v.getId() == R.id.weather_icon) {
 
-            String weatherJson = sharedPref.getString("weather_json", "");
-            if (!weatherJson.equals("")) {
-                WeatherFragment weatherFragment = new WeatherFragment();
-                Bundle bundle = new Bundle();
-                bundle.putString("weather", weatherJson);
+        switch (v.getId()) {
+            case R.id.weather_icon:
+                String weatherJson = sharedPref.getString("weather_json", "");
+                if (!weatherJson.equals("")) {
+                    WeatherFragment weatherFragment = new WeatherFragment();
+                    Bundle bundle = new Bundle();
+                    bundle.putString("weather", weatherJson);
 
-                weatherFragment.setArguments(bundle);
-                weatherFragment.show(getSupportFragmentManager(), "Weather_Preview");
-            }
+                    weatherFragment.setArguments(bundle);
+                    weatherFragment.show(getSupportFragmentManager(), "Weather_Preview");
+                } else {
+                    mLocationClient.startLocation();
+                }
+                break;
+            case R.id.city_name:
+                mLocationClient.startLocation();
         }
     }
-
-    private void firstLaunch() {
-
-        RelativeLayout.LayoutParams lps = new RelativeLayout.LayoutParams(
-                ViewGroup.LayoutParams.WRAP_CONTENT,
-                ViewGroup.LayoutParams.WRAP_CONTENT
-        );
-
-        lps.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
-        lps.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
-        int margin = ((Number) (getResources().getDisplayMetrics().density * 12)).intValue();
-        lps.setMargins(margin, margin, margin, margin);
-
-        Button customButton = (Button) getLayoutInflater().inflate(R.layout.view_custom_button, null);
-        MultiEventListener multiEventListener = new MultiEventListener(new ShakeButtonListener(customButton));
-
-        showcaseView = new ShowcaseView.Builder(this)
-                .withMaterialShowcase()
-                .setTarget(new ViewTarget(findViewById(R.id.date)))
-                .setContentTitle(getString(R.string.case_date_title))
-                .setContentText(getString(R.string.case_date_text))
-                .setStyle(R.style.CustomShowcaseTheme)
-                .setShowcaseEventListener(multiEventListener)
-                .replaceEndButton(customButton)
-                .setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        switch (counter) {
-                            case 0:
-                                showcaseView.setShowcase(new ViewTarget(getWeatherTV), true);
-                                showcaseView.setContentTitle(getString(R.string.case_weather_title));
-                                showcaseView.setContentText(getString(R.string.case_weather_text));
-                                break;
-                            case 1:
-                                showcaseView.setShowcase(new ViewTarget(doubanTitleTV), true);
-                                showcaseView.setContentTitle(getString(R.string.case_douban_movie_title));
-                                showcaseView.setContentText(getString(R.string.case_douban_movie_text));
-                                break;
-                            case 2:
-                                showcaseView.setTarget(Target.NONE);
-                                showcaseView.setContentTitle(getString(R.string.app_name));
-                                showcaseView.setContentText(getString(R.string.welcome));
-                                showcaseView.setButtonText(getString(R.string.close));
-                                break;
-                            case 3:
-                                showcaseView.hide();
-                                break;
-                        }
-                        counter++;
-                    }
-                })
-                .build();
-        showcaseView.setButtonPosition(lps);
-    }
-
-    /*
-    @Override
-    public void onOffsetChanged(AppBarLayout appBarLayout, int verticalOffset) {
-        if (collapsingToolbar.getHeight() + verticalOffset < 2 * ViewCompat.getMinimumHeight(collapsingToolbar)) {
-            toolbar.animate().alpha(1).setDuration(600);
-        } else {
-            toolbar.animate().alpha(0).setDuration(600);
-        }
-    }
-    */
 
     private void setWeather() {
         String s = sharedPref.getString("weather_json", "");
@@ -729,12 +661,7 @@ public class MainActivity extends AppCompatActivity implements
 
         weatherTV.setText(weather);
 
-        weatherIconIV.setImageDrawable(
-                ContextCompat.getDrawable(
-                        MainActivity.this,
-                        icons.map.get(nowWeather.getCode_day())
-                )
-        );
+        weatherIconIV.setImageResource(icons.map.get(nowWeather.getCode_day()));
     }
 
     private class GetTop250 extends AsyncTask<String, String, String> {
@@ -845,43 +772,79 @@ public class MainActivity extends AppCompatActivity implements
             super.onPostExecute(s);
             if (s != null && !s.equals("")) {
                 sharedPref.edit().putString("weather_json", s).apply();
-
                 setWeather();
             } else {
-                // TODO: 2017/2/27 处理请求天气信息错误的情况
+
+                cityNameTV.setText(getResources().getString(R.string.location_error));
+                weatherTV.setText(getResources().getString(R.string.unknown_weahter));
+                weatherIconIV.setImageDrawable(ContextCompat.getDrawable(
+                        MainActivity.this,
+                        icons.map.get("99")
+                ));
+
+                Snackbar.make(coordinatorLayout, "请求天气失败", Snackbar.LENGTH_LONG)
+                        .setAction("重试", new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                getWeather();
+                            }
+                        });
             }
         }
     }
 
-    private class ShakeButtonListener extends SimpleShowcaseEventListener {
-        private final Button button;
 
-        ShakeButtonListener(Button button) {
-            this.button = button;
-        }
-
-        @Override
-        public void onShowcaseViewTouchBlocked(MotionEvent motionEvent) {
-            int translation = getResources().getDimensionPixelOffset(R.dimen.touch_button_wobble);
-            ViewCompat.animate(button)
-                    .translationXBy(translation)
-                    .setInterpolator(new WobblyInterpolator(2));
-        }
+    /*
+    private void activeWeekendFest(){
+        dateHolder.setBackgroundColor(ContextCompat.getColor(this, R.color.textOrIcons));
+        monthTV.setTextColor(ContextCompat.getColor(this, R.color.colorPrimary));
+        weekTV.setTextColor(ContextCompat.getColor(this, R.color.colorPrimary));
+        lunarTV.setTextColor(ContextCompat.getColor(this, R.color.colorPrimary));
     }
 
-    private class WobblyInterpolator implements Interpolator {
 
-        private final double CONVERT_TO_RADS = 2 * Math.PI;
-        private final int cycles;
-
-        WobblyInterpolator(int cycles) {
-            this.cycles = cycles;
-        }
-
-        @Override
-        public float getInterpolation(float proportion) {
-            double sin = Math.sin(cycles * proportion * CONVERT_TO_RADS);
-            return (float) sin;
-        }
+    private boolean isLatLngSaved() {
+        String lat = sharedPref.getString("Latitude", "");
+        String lng = sharedPref.getString("Longitude", "");
+        return !lat.equals("") && !lng.equals("");
     }
+
+    private boolean isLocationProviderEnabled() {
+        boolean gps_enabled = false, network_enabled = false;
+        try {
+            gps_enabled = locationMgr.isProviderEnabled(LocationManager.GPS_PROVIDER);
+        } catch (Exception ex) {
+            Log.e("location_gps", ex.toString());
+        }
+
+        try {
+            network_enabled = locationMgr.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
+        } catch (Exception ex) {
+            Log.e("location_network", ex.toString());
+        }
+
+        return gps_enabled || network_enabled;
+    }
+
+    private void openLocationSettingDialog() {
+        new AlertDialog.Builder(MainActivity.this)
+                .setTitle(getString(R.string.open_location))
+                .setMessage(getString(R.string.rationale_location))
+                .setPositiveButton(getString(R.string.open_location_setting), new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        Intent myIntent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+                        startActivity(myIntent);
+                        Log.d("PERM", "back from location setting");
+                    }
+                })
+                .setNegativeButton(getString(R.string.deny), new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+
+                        cityNameTV.setOnClickListener(MainActivity.this);
+                    }
+                }).show();
+    }
+    */
 }

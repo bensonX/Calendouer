@@ -1,5 +1,4 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -45,8 +44,7 @@
             android:id="@+id/weather_icon_0"
             android:layout_width="0dp"
             android:layout_height="60dp"
-            android:layout_weight="1"
-            app:srcCompat="@drawable/weather01" />
+            android:layout_weight="1" />
 
         <LinearLayout
             android:layout_width="0dp"
@@ -93,8 +91,7 @@
             <ImageView
                 android:id="@+id/weather_icon_1"
                 android:layout_width="match_parent"
-                android:layout_height="48dp"
-                app:srcCompat="@drawable/weather03" />
+                android:layout_height="48dp" />
 
             <TextView
                 android:id="@+id/weather_high_low_1"
@@ -120,8 +117,7 @@
             <ImageView
                 android:id="@+id/weather_icon_2"
                 android:layout_width="match_parent"
-                android:layout_height="48dp"
-                app:srcCompat="@drawable/weather09" />
+                android:layout_height="48dp" />
 
             <TextView
                 android:id="@+id/weather_high_low_2"
