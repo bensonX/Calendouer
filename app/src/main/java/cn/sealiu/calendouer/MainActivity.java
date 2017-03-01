@@ -485,7 +485,7 @@ public class MainActivity extends AppCompatActivity implements
             String id = cursor.getString(cursor.getColumnIndex(MovieEntry.COLUMN_NAME_ID));
             sharedPref.edit().putString("DATE", df.format(new Date())).apply();
             sharedPref.edit().putString("ID", id).apply();
-            new GetMovieInfo().execute("https://api.douban.com/v2/movie/subject/" + id);
+            setMovieInfoRepeat(id);
         }
         cursor.close();
     }
@@ -526,6 +526,10 @@ public class MainActivity extends AppCompatActivity implements
             String stars = cursor.getString(cursor.getColumnIndex(MovieEntry.COLUMN_NAME_STARS));
             float average = cursor.getFloat(cursor.getColumnIndex(MovieEntry.COLUMN_NAME_AVERAGE));
             String summary = cursor.getString(cursor.getColumnIndex(MovieEntry.COLUMN_NAME_SUMMARY));
+
+            if (summary.equals("")) {
+                new GetMovieInfo().execute("https://api.douban.com/v2/movie/subject/" + id);
+            }
 
             setMovieInfo(title, images, alt, stars, average, summary);
         }
@@ -776,7 +780,7 @@ public class MainActivity extends AppCompatActivity implements
         protected void onPostExecute(String s) {
             super.onPostExecute(s);
 
-            MovieBean movieBean = new Gson().fromJson(s, MovieBean.class);
+            final MovieBean movieBean = new Gson().fromJson(s, MovieBean.class);
 
             if (movieBean != null) {
                 db = dbHelper.getWritableDatabase();
@@ -807,7 +811,10 @@ public class MainActivity extends AppCompatActivity implements
                         .setAction("重试", new View.OnClickListener() {
                             @Override
                             public void onClick(View v) {
-                                setMovieInfoRandom();
+                                String id = sharedPref.getString("ID", "");
+                                if (!id.equals("")) {
+                                    setMovieInfoRepeat(id);
+                                }
                             }
                         }).show();
             }
