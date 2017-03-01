@@ -18,6 +18,7 @@
         <meta-data
             android:name="com.amap.api.v2.apikey"
             android:value="ac0da37db6ef5f31028399107930eca2" />
+
         <activity
             android:name=".MainActivity"
             android:label="@string/app_name">
@@ -41,8 +42,8 @@
                 android:name="android.appwidget.provider"
                 android:resource="@xml/dour_app_widget_info" />
         </receiver>
-
         <service android:name="com.amap.api.location.APSService" />
+        <receiver android:name=".UpdateWeatherReceiver" />
     </application>
 
 </manifest>

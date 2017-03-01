@@ -56,5 +56,22 @@
     <string name="pref_title_weather">天气预报</string>
     <string name="open_location">开启定位服务</string>
     <string name="open_location_setting">定位设置</string>
+    <string name="weather_update_frequency">天气更新频率</string>
+    <string name="update_frequency">更新频率</string>
+    <string name="update_frequency_default">2</string>
+
+    <array name="update_frequency_entries">
+        <item>每2小时</item>
+        <item>每4小时</item>
+        <item>每6小时</item>
+        <item>每8小时</item>
+    </array>
+
+    <array name="update_frequency_values">
+        <item>"2"</item>
+        <item>"4"</item>
+        <item>"6"</item>
+        <item>"8"</item>
+    </array>
 </resources>
 

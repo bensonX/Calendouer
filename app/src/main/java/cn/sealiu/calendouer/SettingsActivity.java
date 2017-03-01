@@ -149,6 +149,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
             addPreferencesFromResource(R.xml.pref_cards);
             setHasOptionsMenu(true);
 
+            bindPreferenceSummaryToValue(findPreference("update_frequency"));
 //            bindPreferenceSummaryToValue(findPreference("weather_show"));
 //            bindPreferenceSummaryToValue(findPreference("notification_show"));
 //            bindPreferenceSummaryToValue(findPreference("movie_recommended_show"));

@@ -5,6 +5,16 @@
         android:key="weather_show"
         android:title="@string/pref_title_weather" />
 
+    <ListPreference
+        android:defaultValue="@string/update_frequency_default"
+        android:dependency="weather_show"
+        android:dialogTitle="@string/update_frequency"
+        android:entries="@array/update_frequency_entries"
+        android:entryValues="@array/update_frequency_values"
+        android:key="update_frequency"
+        android:title="@string/weather_update_frequency" />
+
+
     <SwitchPreference
         android:defaultValue="true"
         android:key="things_show"

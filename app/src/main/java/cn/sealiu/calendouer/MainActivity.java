@@ -1,5 +1,7 @@
 package cn.sealiu.calendouer;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.app.ProgressDialog;
 import android.content.ContentValues;
 import android.content.Context;
@@ -34,7 +36,6 @@ import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.amap.api.location.AMapLocation;
 import com.amap.api.location.AMapLocationClient;
@@ -80,6 +81,8 @@ public class MainActivity extends AppCompatActivity implements
     private final static int STAR = 5;
     private final static int MAX_COUNT = 100;
     private final static int LOCATION_PERM = 100;
+
+    private final static int WEATHER_REQUEST_CODE = 114;
     Toolbar toolbar;
     TextView monthTV;
     TextView weekTV;
@@ -155,7 +158,7 @@ public class MainActivity extends AppCompatActivity implements
 
         icons = new WeatherIcon();
 
-        sharedPref = this.getPreferences(Context.MODE_PRIVATE);
+        sharedPref = this.getSharedPreferences("calendouer", Context.MODE_PRIVATE);
         settingPref = PreferenceManager.getDefaultSharedPreferences(this);
         df = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
 
@@ -341,6 +344,12 @@ public class MainActivity extends AppCompatActivity implements
         }
     }
 
+    private void initMovieDB() {
+        showProgressDialog(getResources().getString(R.string.downloading));
+        int start = sharedPref.getInt("START", 0);
+        new GetTop250().execute("https://api.douban.com/v2/movie/top250?start=" + start + "&count=" + MAX_COUNT);
+    }
+
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
@@ -390,6 +399,20 @@ public class MainActivity extends AppCompatActivity implements
         }
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_main, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == R.id.action_setting) {
+            startActivity(new Intent(this, SettingsActivity.class));
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
     private void getWeather() {
         Log.d("PERM", "获取天气");
 
@@ -408,26 +431,6 @@ public class MainActivity extends AppCompatActivity implements
             Log.d("PERM", "经纬度为空");
             mLocationClient.startLocation();
         }
-    }
-
-    private void initMovieDB() {
-        showProgressDialog(getResources().getString(R.string.downloading));
-        int start = sharedPref.getInt("START", 0);
-        new GetTop250().execute("https://api.douban.com/v2/movie/top250?start=" + start + "&count=" + MAX_COUNT);
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_main, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getItemId() == R.id.action_setting) {
-            startActivity(new Intent(this, SettingsActivity.class));
-        }
-        return super.onOptionsItemSelected(item);
     }
 
     private String doInBackground(String params) {
@@ -662,6 +665,32 @@ public class MainActivity extends AppCompatActivity implements
         weatherTV.setText(weather);
 
         weatherIconIV.setImageResource(icons.map.get(nowWeather.getCode_day()));
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(new Date());
+
+        calendar.add(
+                Calendar.HOUR_OF_DAY,
+                Integer.parseInt(settingPref.getString("update_frequency", "2"))
+        );
+        setTrigger(WEATHER_REQUEST_CODE, calendar.getTimeInMillis());
+    }
+
+    private void setTrigger(int requestCode, long triggerAtMillis) {
+        AlarmManager alarmMgr = (AlarmManager) getSystemService(ALARM_SERVICE);
+        Intent intent = new Intent(this, UpdateWeatherReceiver.class);
+
+        PendingIntent alarmIntent = PendingIntent.getBroadcast(
+                this,
+                requestCode,
+                intent,
+                PendingIntent.FLAG_UPDATE_CURRENT
+        );
+
+        alarmMgr.set(
+                AlarmManager.RTC,
+                triggerAtMillis,
+                alarmIntent
+        );
     }
 
     private class GetTop250 extends AsyncTask<String, String, String> {
@@ -707,16 +736,17 @@ public class MainActivity extends AppCompatActivity implements
                 setMovieInfo();
             } else {
                 getTop250Btn.setVisibility(View.VISIBLE);
-                Toast.makeText(
-                        MainActivity.this,
-                        getResources().getString(R.string.api_error),
-                        Toast.LENGTH_LONG
-                ).show();
+                hideProgressDialog();
 
-                // TODO: 2017/2/26 修改top250显示信息，或者重试
+                Snackbar.make(coordinatorLayout, "豆瓣服务器开小差了", Snackbar.LENGTH_LONG)
+                        .setAction("重试", new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                initMovieDB();
+                            }
+                        }).show();
             }
 
-            hideProgressDialog();
         }
     }
 
@@ -749,14 +779,15 @@ public class MainActivity extends AppCompatActivity implements
                         selectionArgs
                 );
             } else {
-                Toast.makeText(
-                        MainActivity.this,
-                        getResources().getString(R.string.api_error),
-                        Toast.LENGTH_LONG
-                ).show();
-            }
 
-            setMovieInfo();
+                Snackbar.make(coordinatorLayout, "豆瓣服务器开小差了", Snackbar.LENGTH_LONG)
+                        .setAction("重试", new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                setMovieInfo();
+                            }
+                        }).show();
+            }
         }
     }
 
@@ -792,59 +823,4 @@ public class MainActivity extends AppCompatActivity implements
             }
         }
     }
-
-
-    /*
-    private void activeWeekendFest(){
-        dateHolder.setBackgroundColor(ContextCompat.getColor(this, R.color.textOrIcons));
-        monthTV.setTextColor(ContextCompat.getColor(this, R.color.colorPrimary));
-        weekTV.setTextColor(ContextCompat.getColor(this, R.color.colorPrimary));
-        lunarTV.setTextColor(ContextCompat.getColor(this, R.color.colorPrimary));
-    }
-
-
-    private boolean isLatLngSaved() {
-        String lat = sharedPref.getString("Latitude", "");
-        String lng = sharedPref.getString("Longitude", "");
-        return !lat.equals("") && !lng.equals("");
-    }
-
-    private boolean isLocationProviderEnabled() {
-        boolean gps_enabled = false, network_enabled = false;
-        try {
-            gps_enabled = locationMgr.isProviderEnabled(LocationManager.GPS_PROVIDER);
-        } catch (Exception ex) {
-            Log.e("location_gps", ex.toString());
-        }
-
-        try {
-            network_enabled = locationMgr.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
-        } catch (Exception ex) {
-            Log.e("location_network", ex.toString());
-        }
-
-        return gps_enabled || network_enabled;
-    }
-
-    private void openLocationSettingDialog() {
-        new AlertDialog.Builder(MainActivity.this)
-                .setTitle(getString(R.string.open_location))
-                .setMessage(getString(R.string.rationale_location))
-                .setPositiveButton(getString(R.string.open_location_setting), new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        Intent myIntent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-                        startActivity(myIntent);
-                        Log.d("PERM", "back from location setting");
-                    }
-                })
-                .setNegativeButton(getString(R.string.deny), new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-
-                        cityNameTV.setOnClickListener(MainActivity.this);
-                    }
-                }).show();
-    }
-    */
 }
