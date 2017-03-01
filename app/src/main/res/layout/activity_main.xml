@@ -118,6 +118,7 @@
                         android:layout_height="match_parent"
                         android:layout_centerVertical="true"
                         android:layout_toLeftOf="@+id/weather_icon"
+                        android:gravity="end"
                         android:textColor="@color/textOrIcons" />
 
                     <ImageView

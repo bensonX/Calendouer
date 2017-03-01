@@ -2,8 +2,10 @@ package cn.sealiu.calendouer;
 
 
 import android.annotation.TargetApi;
+import android.content.ActivityNotFoundException;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.ListPreference;
@@ -117,11 +119,32 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
             new AlertDialog.Builder(this)
                     .setTitle(getString(R.string.pref_about_calendouer))
                     .setMessage(getString(R.string.about_content))
-                    .setNegativeButton(getString(R.string.ok), new DialogInterface.OnClickListener() {
+                    .setPositiveButton(getString(R.string.douban_group), new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
+                            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://www.douban.com/group/calendouer/"));
+                            startActivity(intent);
                         }
+                    }).setNegativeButton(getString(R.string.close), new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                }
                     }).show();
+        }
+
+        if (header.id == R.id.rating) {
+            Uri uri = Uri.parse("market://details?id=" + getApplication().getPackageName());
+            Intent goToMarket = new Intent(Intent.ACTION_VIEW, uri);
+            try {
+                startActivity(goToMarket);
+            } catch (ActivityNotFoundException e) {
+                startActivity(new Intent(Intent.ACTION_VIEW,
+                        Uri.parse(
+                                "http://play.google.com/store/apps/details?id=" +
+                                        getApplication().getPackageName()
+                        )
+                ));
+            }
         }
 
         if (header.id == R.id.version) {

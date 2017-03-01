@@ -6,7 +6,7 @@ package cn.sealiu.calendouer.bean;
  */
 public class RatingBean {
     private int max;
-    private double average;
+    private float average;
     private String stars;
     private int min;
 
@@ -18,11 +18,11 @@ public class RatingBean {
         this.max = max;
     }
 
-    public double getAverage() {
+    public float getAverage() {
         return average;
     }
 
-    public void setAverage(double average) {
+    public void setAverage(float average) {
         this.average = average;
     }
 

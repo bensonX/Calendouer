@@ -27,7 +27,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.AppCompatButton;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -76,7 +75,8 @@ import static android.Manifest.permission;
 
 public class MainActivity extends AppCompatActivity implements
         AMapLocationListener,
-        View.OnClickListener {
+        View.OnClickListener,
+        SharedPreferences.OnSharedPreferenceChangeListener {
 
     private final static int STAR = 5;
     private final static int MAX_COUNT = 100;
@@ -110,9 +110,9 @@ public class MainActivity extends AppCompatActivity implements
     WeatherIcon icons;
     AMapLocationClient mLocationClient;
     AMapLocationClientOption mLocationOption;
-    SharedPreferences sharedPref;
     DateFormat df;
     CardView movieCard;
+    SharedPreferences sharedPref;
     SharedPreferences settingPref;
     LocationManager locationMgr;
 
@@ -160,8 +160,10 @@ public class MainActivity extends AppCompatActivity implements
 
         sharedPref = this.getSharedPreferences("calendouer", Context.MODE_PRIVATE);
         settingPref = PreferenceManager.getDefaultSharedPreferences(this);
-        df = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
 
+        sharedPref.registerOnSharedPreferenceChangeListener(this);
+
+        df = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
         locationMgr = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
     }
 
@@ -175,7 +177,6 @@ public class MainActivity extends AppCompatActivity implements
 
     @Override
     protected void onResume() {
-        Log.d("RUN", "onResume");
         super.onResume();
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
@@ -209,25 +210,30 @@ public class MainActivity extends AppCompatActivity implements
                 getTop250Btn.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        getTop250Btn.setVisibility(View.GONE);
                         initMovieDB();
                     }
                 });
             } else {
-                Log.d("DB", "is not empty");
                 String datePref = sharedPref.getString("DATE", "null");
                 String idPref = sharedPref.getString("ID", "null");
 
-                if (!datePref.equals(df.format(new Date()))) {
-
-                    db = dbHelper.getWritableDatabase();
-                    db.delete(
-                            MovieEntry.TABLE_NAME,
-                            MovieEntry.COLUMN_NAME_ID + "=?",
-                            new String[]{idPref}
-                    );
+                if (datePref.equals("") || idPref.equals("")) {
+                    setMovieInfoRandom();
+                } else {
+                    if (!datePref.equals(df.format(new Date()))) {
+                        //new day
+                        db = dbHelper.getWritableDatabase();
+                        if (db.delete(
+                                MovieEntry.TABLE_NAME,
+                                MovieEntry.COLUMN_NAME_ID + "=?",
+                                new String[]{idPref}) == 1) {
+                            setMovieInfoRandom();
+                        }
+                    } else {
+                        //same day
+                        setMovieInfoRepeat(idPref);
+                    }
                 }
-                setMovieInfo();
             }
         } else {
             // TODO: 2017/2/27 movie card hide
@@ -254,20 +260,18 @@ public class MainActivity extends AppCompatActivity implements
 
         dateTV.setText(solarCalendarStrs.get(8));
 
-        // 设置节气
+        // set solar term
         String str = SolarTermCalendar.getSolarTermStr(now);
         if (str != null) {
-            Log.d("SolarTerm", str);
             solarTermTV.setVisibility(View.VISIBLE);
             solarTermTV.setText(str);
         } else {
             solarTermTV.setVisibility(View.GONE);
         }
 
-        // 设置节日
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(now);
-        // 节日
+        // fest
         String solarFestStr = FestivalCalendar.getSolarFest(calendar);
         String lunarFestStr = FestivalCalendar.getLunarFest(calendar);
         calendar.setTime(now);
@@ -289,11 +293,6 @@ public class MainActivity extends AppCompatActivity implements
         } else {
             festivalTV.setVisibility(View.GONE);
         }
-
-        // 周末
-//        if (solarCalendarStrs.get(9).equals("1")) {
-//            dateTV.setTextColor(ContextCompat.getColor(this, R.color.orange));
-//        }
     }
 
     private void initWeather() {
@@ -335,7 +334,7 @@ public class MainActivity extends AppCompatActivity implements
                 }
             });
         } else {
-            Log.d("PERM", "已有授权");
+            getWeatherTV.setVisibility(View.GONE);
             if (sharedPref.getString("weather_json", "").equals("")) {
                 getWeather();
             } else {
@@ -355,15 +354,20 @@ public class MainActivity extends AppCompatActivity implements
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == LOCATION_PERM) {
             if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                getWeatherTV.setText("Loading");
                 getWeatherTV.setOnClickListener(null);
-
-                Log.d("PERM", "授权成功，开始定位");
 
                 mLocationClient.startLocation();
             } else {
-                getWeatherTV.setText("Need Location Permission");
+                getWeatherTV.setText(getString(R.string.need_location_premission));
             }
+        }
+    }
+
+    @Override
+    public void onSharedPreferenceChanged(SharedPreferences sharedPref, String key) {
+        if (key.equals("Latitude") || key.equals("Longitude") &&
+                sharedPref.getString("weather_json", "").equals("")) {
+            getWeather();
         }
     }
 
@@ -374,20 +378,10 @@ public class MainActivity extends AppCompatActivity implements
                 String lat = aMapLocation.getLatitude() + "";
                 String lng = aMapLocation.getLongitude() + "";
 
-                Log.d("AMap", lat + "/" + lng);
-
                 sharedPref.edit().putString("Latitude", lat).apply();
                 sharedPref.edit().putString("Longitude", lng).apply();
 
-                Log.d("PERM", "定位成功，准备获取天气");
-
             } else {
-                // 定位失败时，可通过ErrCode（错误码）信息来确定失败的原因
-                // errInfo是错误信息，详见错误码表。
-                Log.e("AMap", "location Error, ErrCode:"
-                        + aMapLocation.getErrorCode() + ", errInfo:"
-                        + aMapLocation.getErrorInfo());
-
                 Snackbar.make(coordinatorLayout, aMapLocation.getErrorInfo(), Snackbar.LENGTH_LONG)
                         .setAction("重试", new View.OnClickListener() {
                             @Override
@@ -414,21 +408,16 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     private void getWeather() {
-        Log.d("PERM", "获取天气");
-
-        getWeatherTV.setVisibility(View.GONE);
         weatherHolder.setVisibility(View.VISIBLE);
 
         String lat = sharedPref.getString("Latitude", "");
         String lng = sharedPref.getString("Longitude", "");
 
         if (!lat.equals("") && !lng.equals("")) {
-            Log.d("PERM", "经纬度不为空");
             String apiStr = "https://api.thinkpage.cn/v3/weather/daily.json?key=txyws41isbyqnma5&" +
                     "location=" + lat + ":" + lng + "&language=zh-Hans&unit=c";
             new GetWeather().execute(apiStr);
         } else {
-            Log.d("PERM", "经纬度为空");
             mLocationClient.startLocation();
         }
     }
@@ -452,7 +441,6 @@ public class MainActivity extends AppCompatActivity implements
 
             while ((line = reader.readLine()) != null) {
                 buffer.append(line + "\n");
-                Log.d("Response: ", "> " + line);   //here u ll get whole response...... :-)
             }
 
             return buffer.toString();
@@ -477,8 +465,35 @@ public class MainActivity extends AppCompatActivity implements
         return null;
     }
 
-    private void setMovieInfo() {
+    /**
+     * execute only once per day, select a new movie randomly
+     */
+    private void setMovieInfoRandom() {
+        db = dbHelper.getReadableDatabase();
+        String sql = "SELECT * FROM " +
+                MovieEntry.TABLE_NAME +
+                " WHERE " + MovieEntry.COLUMN_NAME_ID +
+                " IN (SELECT " + MovieEntry.COLUMN_NAME_ID + " FROM " +
+                MovieEntry.TABLE_NAME +
+                " ORDER BY RANDOM() LIMIT 1)";
+        Cursor cursor = db.rawQuery(
+                sql,
+                null
+        );
 
+        if (cursor.moveToFirst()) {
+            String id = cursor.getString(cursor.getColumnIndex(MovieEntry.COLUMN_NAME_ID));
+            sharedPref.edit().putString("DATE", df.format(new Date())).apply();
+            sharedPref.edit().putString("ID", id).apply();
+            new GetMovieInfo().execute("https://api.douban.com/v2/movie/subject/" + id);
+        }
+        cursor.close();
+    }
+
+    /**
+     * show the same movie in the same day
+     */
+    private void setMovieInfoRepeat(String id) {
         loadingPB.setVisibility(View.VISIBLE);
 
         db = dbHelper.getReadableDatabase();
@@ -494,82 +509,74 @@ public class MainActivity extends AppCompatActivity implements
         };
 
         Cursor cursor = db.query(
-                MovieEntry.TABLE_NAME,
-                projection,
-                null,
-                null,
-                null,
-                null,
-                null,
-                "1"
+                MovieEntry.TABLE_NAME, //table
+                projection, //columns
+                MovieEntry.COLUMN_NAME_ID + " = ?", //selection
+                new String[]{id}, //selectionArgs
+                null, //groupBy
+                null, //having
+                null, //orderBy
+                "1" //limit
         );
 
-        String id = "null";
         if (cursor.moveToFirst()) {
-            id = cursor.getString(cursor.getColumnIndex(MovieEntry.COLUMN_NAME_ID));
             String title = cursor.getString(cursor.getColumnIndex(MovieEntry.COLUMN_NAME_TITLE));
             String images = cursor.getString(cursor.getColumnIndex(MovieEntry.COLUMN_NAME_IMAGES));
             final String alt = cursor.getString(cursor.getColumnIndex(MovieEntry.COLUMN_NAME_ALT));
             String stars = cursor.getString(cursor.getColumnIndex(MovieEntry.COLUMN_NAME_STARS));
             float average = cursor.getFloat(cursor.getColumnIndex(MovieEntry.COLUMN_NAME_AVERAGE));
-
-            //通过top250无法获取
             String summary = cursor.getString(cursor.getColumnIndex(MovieEntry.COLUMN_NAME_SUMMARY));
-            //需要借助getMovieInfo（仅一次）
-            if (summary.equals("") && id != null) {
-                new GetMovieInfo().execute("https://api.douban.com/v2/movie/subject/" + id);
-                return;
-            }
 
-            if (loadingPB.getVisibility() == View.VISIBLE) {
-                loadingPB.setVisibility(View.GONE);
-            }
+            setMovieInfo(title, images, alt, stars, average, summary);
+        }
+        cursor.close();
+    }
 
-            movieTitleTV.setText(title);
-            movieAverageTV.setText(Float.toString(average));
-            double stars_num = Double.parseDouble(stars) / 10;
+    private void setMovieInfo(String title, String images, final String alt, String stars, float average, String summary) {
 
-            int full_star_num = (int) Math.floor(stars_num);
-            int half_star_num = (int) (Math.floor((stars_num - full_star_num) * 2));
-            int blank_star_num = STAR - full_star_num - half_star_num;
-
-            starsHolderLL.removeAllViews();
-
-            while (full_star_num-- > 0) {
-                ImageView star = new ImageView(MainActivity.this);
-                star.setImageDrawable(ContextCompat.getDrawable(MainActivity.this, R.drawable.ic_star_16dp));
-                starsHolderLL.addView(star);
-            }
-            while (half_star_num-- > 0) {
-                ImageView star = new ImageView(MainActivity.this);
-                star.setImageDrawable(ContextCompat.getDrawable(MainActivity.this, R.drawable.ic_star_half_16dp));
-                starsHolderLL.addView(star);
-            }
-
-            while (blank_star_num-- > 0) {
-                ImageView star = new ImageView(MainActivity.this);
-                star.setImageDrawable(ContextCompat.getDrawable(MainActivity.this, R.drawable.ic_star_blank_16dp));
-                starsHolderLL.addView(star);
-            }
-
-            movieSummaryTV.setText(summary);
-
-            BitmapUtils bitmapUtils = new BitmapUtils();
-            bitmapUtils.disPlay(movieImageIV, images);
-
-            movieImageIV.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(alt));
-                    startActivity(intent);
-                }
-            });
+        if (loadingPB.getVisibility() == View.VISIBLE) {
+            loadingPB.setVisibility(View.GONE);
         }
 
-        cursor.close();
+        movieTitleTV.setText(title);
+        movieAverageTV.setText(Float.toString(average));
+        double stars_num = Double.parseDouble(stars) / 10;
 
-        sharedPref.edit().putString("DATE", df.format(new Date())).apply();
-        sharedPref.edit().putString("ID", id).apply();
+        int full_star_num = (int) Math.floor(stars_num);
+        int half_star_num = (int) (Math.floor((stars_num - full_star_num) * 2));
+        int blank_star_num = STAR - full_star_num - half_star_num;
+
+        starsHolderLL.removeAllViews();
+
+        while (full_star_num-- > 0) {
+            ImageView star = new ImageView(MainActivity.this);
+            star.setImageDrawable(ContextCompat.getDrawable(MainActivity.this, R.drawable.ic_star_16dp));
+            starsHolderLL.addView(star);
+        }
+        while (half_star_num-- > 0) {
+            ImageView star = new ImageView(MainActivity.this);
+            star.setImageDrawable(ContextCompat.getDrawable(MainActivity.this, R.drawable.ic_star_half_16dp));
+            starsHolderLL.addView(star);
+        }
+
+        while (blank_star_num-- > 0) {
+            ImageView star = new ImageView(MainActivity.this);
+            star.setImageDrawable(ContextCompat.getDrawable(MainActivity.this, R.drawable.ic_star_blank_16dp));
+            starsHolderLL.addView(star);
+        }
+
+        movieSummaryTV.setText(summary);
+
+        BitmapUtils bitmapUtils = new BitmapUtils();
+        bitmapUtils.disPlay(movieImageIV, images);
+
+        movieImageIV.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(alt));
+                startActivity(intent);
+            }
+        });
     }
 
     private void showProgressDialog(String content) {
@@ -640,13 +647,14 @@ public class MainActivity extends AppCompatActivity implements
         XzResultsBean resultsBean = xzBean.getResults()[0];
         XzLocationBean locationBean = resultsBean.getLocation();
         XzWeatherBean[] weatherBeans = resultsBean.getDaily();
-        String lastUpdate = resultsBean.getLast_update();
 
-        Log.d("XZ", "location: " + locationBean.getPath());
-        Log.d("XZ", "weather: " + weatherBeans[0].toString());
-        Log.d("XZ", "last_update: " + lastUpdate);
-
-        cityNameTV.setText(locationBean.getName());
+        cityNameTV.setText(
+                locationBean.getName() + "\n" +
+                        String.format(
+                                getResources().getString(R.string.last_update),
+                                resultsBean.getLast_update().substring(11, 16)
+                        )
+        );
         XzWeatherBean nowWeather = weatherBeans[0];
 
         String weathersText;
@@ -664,7 +672,12 @@ public class MainActivity extends AppCompatActivity implements
 
         weatherTV.setText(weather);
 
-        weatherIconIV.setImageResource(icons.map.get(nowWeather.getCode_day()));
+        if (Calendar.getInstance().get(Calendar.HOUR_OF_DAY) < 18) { //day
+            weatherIconIV.setImageResource(icons.map.get(nowWeather.getCode_day()));
+        } else {//night
+            weatherIconIV.setImageResource(icons.map.get(nowWeather.getCode_night()));
+        }
+
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(new Date());
 
@@ -724,7 +737,6 @@ public class MainActivity extends AppCompatActivity implements
                     values.put(MovieEntry.COLUMN_NAME_YEAR, mbb.getYear());
                     values.put(MovieEntry.COLUMN_NAME_STARS, mbb.getRating().getStarts());
                     values.put(MovieEntry.COLUMN_NAME_AVERAGE, mbb.getRating().getAverage());
-                    // 无法通过top250获得：
                     values.put(MovieEntry.COLUMN_NAME_SUMMARY, "");
 
                     db.insert(MovieEntry.TABLE_NAME, null, values);
@@ -733,10 +745,13 @@ public class MainActivity extends AppCompatActivity implements
                 int start = sharedPref.getInt("START", 0) + top250Bean.getCount();
                 sharedPref.edit().putInt("START", start).apply();
                 movieRecommendedHolder.setVisibility(View.VISIBLE);
-                setMovieInfo();
-            } else {
-                getTop250Btn.setVisibility(View.VISIBLE);
+
                 hideProgressDialog();
+                getTop250Btn.setVisibility(View.GONE);
+                setMovieInfoRandom();
+            } else {
+                hideProgressDialog();
+                getTop250Btn.setVisibility(View.VISIBLE);
 
                 Snackbar.make(coordinatorLayout, "豆瓣服务器开小差了", Snackbar.LENGTH_LONG)
                         .setAction("重试", new View.OnClickListener() {
@@ -772,19 +787,27 @@ public class MainActivity extends AppCompatActivity implements
                 String selection = MovieEntry.COLUMN_NAME_ID + "=?";
                 String[] selectionArgs = {movieBean.getId()};
 
-                db.update(
+                if (db.update(
                         MovieEntry.TABLE_NAME,
                         values,
                         selection,
-                        selectionArgs
-                );
+                        selectionArgs) == 1) {
+                    setMovieInfo(
+                            movieBean.getTitle(),
+                            movieBean.getImages().getLarge(),
+                            movieBean.getAlt(),
+                            movieBean.getRating().getStarts(),
+                            movieBean.getRating().getAverage(),
+                            movieBean.getSummary()
+                    );
+                }
             } else {
 
                 Snackbar.make(coordinatorLayout, "豆瓣服务器开小差了", Snackbar.LENGTH_LONG)
                         .setAction("重试", new View.OnClickListener() {
                             @Override
                             public void onClick(View v) {
-                                setMovieInfo();
+                                setMovieInfoRandom();
                             }
                         }).show();
             }

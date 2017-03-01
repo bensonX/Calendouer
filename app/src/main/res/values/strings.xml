@@ -2,10 +2,7 @@
     <string name="app_name">豆瓣日历</string>
     <string name="about">关于</string>
     <string name="setting">设置</string>
-
-
     <string name="lunar_date" translatable="false">农历%1$s%2$s</string>
-
     <string name="weather" translatable="false">%1$s\n%2$s\u2103 | %3$s\u2103</string>
     <string name="weather_high_low" translatable="false">%1$s\u2103 | %2$s\u2103</string>
     <string name="rationale_location">位置信息仅用于天气预报</string>
@@ -14,51 +11,39 @@
     <string name="grant">同意授权</string>
     <string name="deny">拒绝</string>
 
-    <string name="getTop250">点击获取豆瓣电影Top250</string>
+    <string name="getTop250">初始化电影推荐</string>
 
     <string name="downloading">正在下载电影数据....</string>
     <string name="downloaded">下载完成</string>
     <string name="createDB">正在创建本地数据库....</string>
     <string name="arrangeData">正在整理数据....</string>
     <string name="api_error">豆瓣数据请求失败</string>
-    <string name="movie_recommended">电影推荐(豆瓣)</string>
+    <string name="movie_recommended">每日电影</string>
 
     <string name="pref_about_calendouer">关于豆瓣日历</string>
     <string name="pref_version">版本</string>
-    <string name="version" translatable="false">1.4</string>
-    <string name="about_content" translatable="false">"Calendouer(豆瓣日历)一词取自Calendar和Doubaner。豆瓣日历可以提供星期，农历和阳历日期，天气信息，最重要的是它和纸质的豆瓣日历一样为你每日推荐一部佳片。\n\n但是由于使用的是公开版的豆瓣API(豆瓣没有提供电影的上映日期，导演的出生日期和去世日期)，故还无法达到和纸质版一样的体验。抱歉！\n\n反馈: sealiu0217@gmail.com"</string>
-    <string name="ok">好</string>
+    <string name="version" translatable="false">1.5</string>
+    <string name="about_content" translatable="false">"Calendouer(豆瓣日历)一词取自Calendar和Doubaner。豆瓣日历可以提供星期，农历和阳历日期，天气信息，最重要的是它和纸质的豆瓣日历一样为你每日推荐一部佳片。\n\n反馈: sealiu0217@gmail.com"</string>
     <string name="location_error">无法定位</string>
     <string name="initMovieRecommended">初始化电影推荐</string>
     <string name="unknown_weahter">未知天气</string>
-    <string name="last_update">最近更新: %1$s</string>
+    <string name="last_update">更新: %1$s</string>
+    <string name="weather_info">%1$s转%2$s</string>
     <string name="close">关闭</string>
     <string name="weather_preview">3日天气预报</string>
     <string name="what_new">更新内容</string>
-    <string name="update_content" translatable="false">✱更换天气预报信息提供商\n✱点击天气图标查看3日天气预报\n✱优化定位</string>
-    <string name="got_it">知道了</string>
+    <string name="update_content" translatable="false">✱修改应用布局\n✱天气预报自动刷新与缓存\n✱修改电影推荐模式\n</string>
 
-    <!--Show Case-->
-    <string name="case_date_title">日历</string>
-    <string name="case_date_text">提供阳历，阴历，节气，节日等丰富信息</string>
-
-    <string name="case_weather_title">天气服务</string>
-    <string name="case_weather_text">需要授权定位权限获取天气服务, 点击天气图标查看近3日的天气预报</string>
-
-    <string name="case_douban_movie_title">电影推荐</string>
-    <string name="case_douban_movie_text">豆瓣电影TOP250, 一页日历，一部电影</string>
-
-    <string name="welcome">欢迎使用 向桌面添加小部件，轻松获得电影推荐</string>
     <string name="pref_card_settings">卡片设置</string>
     <string name="pref_title_things">事情</string>
-    <string name="pref_title_movie">推荐电影</string>
-    <string name="pref_title_similar_movie">相似电影</string>
+    <string name="pref_title_movie">每日电影</string>
     <string name="pref_title_weather">天气预报</string>
     <string name="open_location">开启定位服务</string>
     <string name="open_location_setting">定位设置</string>
     <string name="weather_update_frequency">天气更新频率</string>
     <string name="update_frequency">更新频率</string>
-    <string name="update_frequency_default">2</string>
+    <string name="update_frequency_default" translatable="false">2</string>
+    <string name="need_location_premission">需要定位权限</string>
 
     <array name="update_frequency_entries">
         <item>每2小时</item>
@@ -73,5 +58,9 @@
         <item>"6"</item>
         <item>"8"</item>
     </array>
+    <string name="pref_title_similar_movie">猜你喜欢</string>
+    <string name="douban_group">去豆瓣小组畅聊</string>
+    <string name="pref_rate">去评分</string>
+    <string name="google_play">Google Play</string>
 </resources>
 

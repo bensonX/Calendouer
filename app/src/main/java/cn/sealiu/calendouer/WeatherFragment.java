@@ -15,6 +15,7 @@ import android.widget.TextView;
 import com.google.gson.Gson;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 import cn.sealiu.calendouer.bean.XzBean;
@@ -39,6 +40,7 @@ public class WeatherFragment extends DialogFragment {
         TextView city = (TextView) view.findViewById(R.id.city_name);
         TextView last_update = (TextView) view.findViewById(R.id.last_update);
         TextView wind = (TextView) view.findViewById(R.id.wind);
+        TextView weather_info = (TextView) view.findViewById(R.id.weather_info);
 
         TextView weather_high_low_0 = (TextView) view.findViewById(R.id.weather_high_low_0);
         TextView weather_high_low_1 = (TextView) view.findViewById(R.id.weather_high_low_1);
@@ -83,7 +85,38 @@ public class WeatherFragment extends DialogFragment {
                             weatherBeans[0].getWind_direction()
             );
 
-            for (int i = 0; i < 3; i++) {
+            weather_info.setText(getTextDayNight(
+                    weatherBeans[0].getText_day(),
+                    weatherBeans[0].getText_night()
+            ));
+
+            if (Calendar.getInstance().get(Calendar.HOUR_OF_DAY) < 18) { //day
+                weather_icon_0.setImageDrawable(
+                        ContextCompat.getDrawable(
+                                getActivity(),
+                                icons.map.get(weatherBeans[0].getCode_day())
+                        )
+                );
+            } else {//night
+                weather_icon_0.setImageDrawable(
+                        ContextCompat.getDrawable(
+                                getActivity(),
+                                icons.map.get(weatherBeans[0].getCode_night())
+                        )
+                );
+            }
+
+            weather_high_low_0.setText(
+                    String.format(
+                            getResources().getString(R.string.weather_high_low),
+                            weatherBeans[0].getHigh(),
+                            weatherBeans[0].getLow()
+                    )
+            );
+
+            date_0.setText(weatherBeans[0].getDate());
+
+            for (int i = 1; i < 3; i++) {
                 weather_icon.get(i).setImageDrawable(
                         ContextCompat.getDrawable(
                                 getActivity(),
@@ -92,7 +125,10 @@ public class WeatherFragment extends DialogFragment {
                 );
 
                 weather_high_low.get(i).setText(
-                        String.format(
+                        getTextDayNight(
+                                weatherBeans[i].getText_day(),
+                                weatherBeans[i].getText_night()
+                        ) + String.format(
                                 getResources().getString(R.string.weather_high_low),
                                 weatherBeans[i].getHigh(),
                                 weatherBeans[i].getLow()
@@ -117,4 +153,15 @@ public class WeatherFragment extends DialogFragment {
         return builder.create();
     }
 
+    private String getTextDayNight(String text_day, String text_night) {
+
+        if (text_day.equals(text_night)) {
+            return text_day;
+        } else {
+            return String.format(getString(R.string.weather_info),
+                    text_day,
+                    text_night
+            );
+        }
+    }
 }

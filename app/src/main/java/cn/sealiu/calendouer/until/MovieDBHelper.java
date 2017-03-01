@@ -55,6 +55,8 @@ public class MovieDBHelper extends SQLiteOpenHelper {
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         if (oldVersion < DB_VERSION) {
+            db.execSQL(MOVIE_DELETE_ENTRIES);
+            db.execSQL(MOVIE_CREATE_ENTRIES);
             db.execSQL(PERSONAL_CREATE_ENTRIES);
         }
         onCreate(db);
