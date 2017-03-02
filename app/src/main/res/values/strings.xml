@@ -61,6 +61,6 @@
     <string name="pref_title_similar_movie">猜你喜欢</string>
     <string name="douban_group">去豆瓣小组畅聊</string>
     <string name="pref_rate">去评分</string>
-    <string name="google_play">Google Play</string>
+    <string name="google_play" translatable="false">Google Play</string>
 </resources>
 

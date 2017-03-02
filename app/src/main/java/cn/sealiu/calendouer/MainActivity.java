@@ -40,6 +40,7 @@ import com.amap.api.location.AMapLocation;
 import com.amap.api.location.AMapLocationClient;
 import com.amap.api.location.AMapLocationClientOption;
 import com.amap.api.location.AMapLocationListener;
+import com.bumptech.glide.Glide;
 import com.google.gson.Gson;
 
 import java.io.BufferedReader;
@@ -63,7 +64,6 @@ import cn.sealiu.calendouer.bean.XzBean;
 import cn.sealiu.calendouer.bean.XzLocationBean;
 import cn.sealiu.calendouer.bean.XzResultsBean;
 import cn.sealiu.calendouer.bean.XzWeatherBean;
-import cn.sealiu.calendouer.until.BitmapUtils;
 import cn.sealiu.calendouer.until.FestivalCalendar;
 import cn.sealiu.calendouer.until.LunarCalendar;
 import cn.sealiu.calendouer.until.MovieContract.MovieEntry;
@@ -92,7 +92,7 @@ public class MainActivity extends AppCompatActivity implements
     TextView festivalTV;
     RelativeLayout weatherHolder;
     LinearLayout movieRecommendedHolder;
-    TextView getWeatherTV;
+    AppCompatButton getWeatherTV;
     TextView cityNameTV;
     TextView weatherTV;
     ImageView weatherIconIV;
@@ -111,6 +111,7 @@ public class MainActivity extends AppCompatActivity implements
     AMapLocationClient mLocationClient;
     AMapLocationClientOption mLocationOption;
     DateFormat df;
+    CardView initWeatherCard;
     CardView movieCard;
     SharedPreferences sharedPref;
     SharedPreferences settingPref;
@@ -133,9 +134,9 @@ public class MainActivity extends AppCompatActivity implements
         dateTV = (TextView) findViewById(R.id.date);
         solarTermTV = (TextView) findViewById(R.id.solar_term);
         festivalTV = (TextView) findViewById(R.id.festival);
-
         weatherHolder = (RelativeLayout) findViewById(R.id.weatherHolder);
-        getWeatherTV = (TextView) findViewById(R.id.getWeatherInfo);
+        getWeatherTV = (AppCompatButton) findViewById(R.id.getWeatherInfo);
+        initWeatherCard = (CardView) findViewById(R.id.init_weather_card);
         cityNameTV = (TextView) findViewById(R.id.city_name);
         weatherTV = (TextView) findViewById(R.id.weather);
         weatherIconIV = (ImageView) findViewById(R.id.weather_icon);
@@ -299,7 +300,7 @@ public class MainActivity extends AppCompatActivity implements
 
         if (!checkPermission()) {
 
-            getWeatherTV.setVisibility(View.VISIBLE);
+            initWeatherCard.setVisibility(View.VISIBLE);
             weatherHolder.setVisibility(View.GONE);
 
             getWeatherTV.setOnClickListener(new View.OnClickListener() {
@@ -334,7 +335,7 @@ public class MainActivity extends AppCompatActivity implements
                 }
             });
         } else {
-            getWeatherTV.setVisibility(View.GONE);
+            initWeatherCard.setVisibility(View.GONE);
             if (sharedPref.getString("weather_json", "").equals("")) {
                 getWeather();
             } else {
@@ -571,8 +572,7 @@ public class MainActivity extends AppCompatActivity implements
 
         movieSummaryTV.setText(summary);
 
-        BitmapUtils bitmapUtils = new BitmapUtils();
-        bitmapUtils.disPlay(movieImageIV, images);
+        Glide.with(this).load(images).into(movieImageIV);
 
         movieImageIV.setOnClickListener(new View.OnClickListener() {
             @Override

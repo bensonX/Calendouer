@@ -36,4 +36,6 @@
     <string name="pref_title_similar_movie">You May Like</string>
     <string name="weather_update_frequency">Weather Update Frequency</string>
     <string name="weather_info">%1$s %2$s</string>
+    <string name="pref_rate">Rating</string>
+    <string name="douban_group">Douban Group</string>
 </resources>
