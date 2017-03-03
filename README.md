@@ -10,7 +10,7 @@ Calendouer-豆瓣日历(农历, 天气, 电影推荐)
 - 图书推荐*
 - 桌面小部件
 
-\* 开发中
+\* 开发中  
 \** 功能增强中
 
 ##IOS
@@ -24,7 +24,7 @@ Calendouer-豆瓣日历(农历, 天气, 电影推荐)
 \** 字体不做要求
 
 ##注意
-- 请替换下面的 `com.amap.api.v2.apikey`
+- 请替换 `AndroidManifest.xml` 中高德地图的apikey `com.amap.api.v2.apikey`
 
 ```
 <application
