@@ -32,7 +32,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -102,7 +101,6 @@ public class MainActivity extends AppCompatActivity implements
     TextView movieTitleTV;
     TextView movieSummaryTV;
     LinearLayout starsHolderLL;
-    ProgressBar loadingPB;
     AppCompatButton getTop250Btn;
     ProgressDialog mProgressDialog;
     MovieDBHelper dbHelper;
@@ -149,11 +147,8 @@ public class MainActivity extends AppCompatActivity implements
         movieSummaryTV = (TextView) findViewById(R.id.movie_summary);
         starsHolderLL = (LinearLayout) findViewById(R.id.rating__stars_holder);
 
-        loadingPB = (ProgressBar) findViewById(R.id.loading);
         getTop250Btn = (AppCompatButton) findViewById(R.id.getTop250_btn);
         movieRecommendedHolder = (LinearLayout) findViewById(R.id.movie_recommended_holder);
-
-        loadingPB.setVisibility(View.VISIBLE);
 
         dbHelper = new MovieDBHelper(this);
 
@@ -203,9 +198,9 @@ public class MainActivity extends AppCompatActivity implements
         }
 
         if (settingPref.getBoolean("movie_recommended_show", true)) {
+            doubanTitleTV.setVisibility(View.VISIBLE);
             movieCard.setVisibility(View.VISIBLE);
             if (checkEmpty()) {
-                loadingPB.setVisibility(View.GONE);
                 getTop250Btn.setVisibility(View.VISIBLE);
                 movieRecommendedHolder.setVisibility(View.GONE);
                 getTop250Btn.setOnClickListener(new View.OnClickListener() {
@@ -239,6 +234,7 @@ public class MainActivity extends AppCompatActivity implements
         } else {
             // TODO: 2017/2/27 movie card hide
             movieCard.setVisibility(View.GONE);
+            doubanTitleTV.setVisibility(View.GONE);
         }
     }
 
@@ -495,7 +491,6 @@ public class MainActivity extends AppCompatActivity implements
      * show the same movie in the same day
      */
     private void setMovieInfoRepeat(String id) {
-        loadingPB.setVisibility(View.VISIBLE);
 
         db = dbHelper.getReadableDatabase();
 
@@ -538,10 +533,6 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     private void setMovieInfo(String title, String images, final String alt, String stars, float average, String summary) {
-
-        if (loadingPB.getVisibility() == View.VISIBLE) {
-            loadingPB.setVisibility(View.GONE);
-        }
 
         movieTitleTV.setText(title);
         movieAverageTV.setText(Float.toString(average));
