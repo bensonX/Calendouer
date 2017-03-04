@@ -10,6 +10,7 @@
     <string name="permission">权限请求</string>
     <string name="grant">同意授权</string>
     <string name="deny">拒绝</string>
+    <string name="ok">确定</string>
 
     <string name="getTop250">初始化电影推荐</string>
 
@@ -68,5 +69,16 @@
     <string name="download_movie_data">下载电影数据</string>
     <string name="download_tips">这需要耗费些许流量,继续下载吗</string>
     <string name="cancel">取消</string>
+
+    <string name="directors">导演：%1$s</string>
+    <string name="casts">主演：%1$s</string>
+    <string name="ratings_count">共 %1$s 人评分</string>
+    <string name="transition.movie.cover" translatable="false">TRANSITION MOVIE COVER</string>
+
+    <string name="default_date_picker">%1$s年%2$s月%3$s日%4$s</string>
+    <string name="default_time_picker">%1$s:%2$s</string>
+    <string name="action_save">保存</string>
+    <string name="add_things_do">我要看…</string>
+    <string name="add_things_do_content">我要看%1$s</string>
 </resources>
 

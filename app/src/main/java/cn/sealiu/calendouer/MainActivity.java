@@ -12,7 +12,6 @@ import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.location.LocationManager;
-import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
@@ -27,6 +26,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.AppCompatButton;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -34,6 +34,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.amap.api.location.AMapLocation;
 import com.amap.api.location.AMapLocationClient;
@@ -76,7 +77,8 @@ import static android.Manifest.permission;
 public class MainActivity extends AppCompatActivity implements
         AMapLocationListener,
         View.OnClickListener,
-        SharedPreferences.OnSharedPreferenceChangeListener {
+        SharedPreferences.OnSharedPreferenceChangeListener,
+        MovieFragment.MovieListener {
 
     private final static int STAR = 5;
     private final static int MAX_COUNT = 100;
@@ -132,7 +134,7 @@ public class MainActivity extends AppCompatActivity implements
         setSupportActionBar(toolbar);
 
         coordinatorLayout = (CoordinatorLayout) findViewById(R.id.activity_main);
-
+        findViewById(R.id.fab).setOnClickListener(this);
         monthTV = (TextView) findViewById(R.id.month);
         weekTV = (TextView) findViewById(R.id.week_day);
         lunarTV = (TextView) findViewById(R.id.lunar_date);
@@ -377,7 +379,7 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     private void initThings() {
-
+        // TODO: 2017/3/4 tings
     }
 
     private void initMovieDB() {
@@ -564,7 +566,8 @@ public class MainActivity extends AppCompatActivity implements
             String summary = cursor.getString(cursor.getColumnIndex(MovieEntry.COLUMN_NAME_SUMMARY));
 
             if (summary.equals("")) {
-                new GetMovieInfo().execute("https://api.douban.com/v2/movie/subject/" + id);
+                Log.d("douban", "get_movie_info: " + id);
+                new GetMovieInfo().execute("http://api.douban.com/v2/movie/subject/" + id);
             }
 
             setMovieInfo(title, images, alt, stars, average, summary);
@@ -602,16 +605,11 @@ public class MainActivity extends AppCompatActivity implements
         }
 
         movieSummaryTV.setText(summary);
+        movieSummaryTV.setOnClickListener(this);
 
         Glide.with(this).load(images).into(movieImageIV);
 
-        movieImageIV.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(alt));
-                startActivity(intent);
-            }
-        });
+        movieImageIV.setOnClickListener(this);
     }
 
     private void showProgressDialog(String content) {
@@ -673,6 +671,14 @@ public class MainActivity extends AppCompatActivity implements
                 break;
             case R.id.city_name:
                 mLocationClient.startLocation();
+                break;
+            case R.id.movie_image:
+            case R.id.movie_summary:
+                openMovieFragment();
+                break;
+            case R.id.fab:
+                startActivity(new Intent(this, AddThingsActivity.class));
+                break;
         }
     }
 
@@ -739,6 +745,29 @@ public class MainActivity extends AppCompatActivity implements
                 triggerAtMillis,
                 alarmIntent
         );
+    }
+
+    @Override
+    public void onAddThings() {
+        Intent intent = new Intent(this, AddThingsActivity.class);
+
+        intent.putExtra("movie_title", movieTitleTV.getText());
+        startActivity(intent);
+    }
+
+    private void openMovieFragment() {
+        String movieJson = sharedPref.getString("movie_json", "");
+
+        if (movieJson.equals("")) {
+            Toast.makeText(this, "error", Toast.LENGTH_LONG).show();
+        } else {
+            MovieFragment movieFragment = new MovieFragment();
+            Bundle bundle = new Bundle();
+            bundle.putString("movie", movieJson);
+
+            movieFragment.setArguments(bundle);
+            movieFragment.show(getSupportFragmentManager(), movieFragment.getTag());
+        }
     }
 
     private class GetTop250 extends AsyncTask<String, String, String> {
@@ -813,9 +842,10 @@ public class MainActivity extends AppCompatActivity implements
         protected void onPostExecute(String s) {
             super.onPostExecute(s);
 
-            final MovieBean movieBean = new Gson().fromJson(s, MovieBean.class);
-
-            if (movieBean != null) {
+            if (s != null && !s.equals("")) {
+                Log.d("douban", "getMovieInfo: " + s);
+                sharedPref.edit().putString("movie_json", s).apply();
+                final MovieBean movieBean = new Gson().fromJson(s, MovieBean.class);
                 db = dbHelper.getWritableDatabase();
 
                 ContentValues values = new ContentValues();
@@ -839,7 +869,7 @@ public class MainActivity extends AppCompatActivity implements
                     );
                 }
             } else {
-
+                Log.d("douban", "getMovieInfo: null");
                 Snackbar.make(coordinatorLayout, "豆瓣服务器开小差了", Snackbar.LENGTH_LONG)
                         .setAction("重试", new View.OnClickListener() {
                             @Override

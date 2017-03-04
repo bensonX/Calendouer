@@ -51,4 +51,13 @@
         <item>every 6 hours</item>
         <item>every 8 hours</item>
     </array>
+    <string name="action_save">Save</string>
+    <string name="casts">casts: %1$s</string>
+    <string name="default_date_picker">%4$s, %3$s/%2$s, %1$s</string>
+    <string name="default_time_picker">%1$s:%2$s</string>
+    <string name="directors">directors: %1$s</string>
+    <string name="ratings_count">rating count: %1$s</string>
+    <string name="add_things_do">I want to do...</string>
+    <string name="ok">OK</string>
+    <string name="add_things_do_content">Watch %1$s</string>
 </resources>
