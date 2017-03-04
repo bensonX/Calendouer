@@ -38,4 +38,17 @@
     <string name="weather_info">%1$s %2$s</string>
     <string name="pref_rate">Rating</string>
     <string name="douban_group">Douban Group</string>
+    <string name="all_things_have_done">all things have been done</string>
+    <string name="things">Things</string>
+    <string name="weather_title">Weather</string>
+    <string name="cancel">Cancel</string>
+    <string name="download_movie_data">Download Movie Mate-Data</string>
+    <string name="download_tips">This may cost your little data. Are you sure?</string>
+
+    <array name="update_frequency_entries">
+        <item>every 2 hours</item>
+        <item>every 4 hours</item>
+        <item>every 6 hours</item>
+        <item>every 8 hours</item>
+    </array>
 </resources>

@@ -13,13 +13,13 @@
 
     <header
         android:id="@+id/rating"
-        android:icon="@drawable/ic_favorite_24dp"
+        android:icon="@drawable/ic_shop_24dp"
         android:summary="@string/google_play"
         android:title="@string/pref_rate" />
 
     <header
         android:id="@+id/version"
-        android:icon="@drawable/ic_star_24dp"
+        android:icon="@drawable/ic_version_24dp"
         android:summary="@string/version"
         android:title="@string/pref_version" />
 </preference-headers>

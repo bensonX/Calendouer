@@ -25,7 +25,7 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.AppCompatButton;
-import android.support.v7.widget.CardView;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -63,11 +63,12 @@ import cn.sealiu.calendouer.bean.XzBean;
 import cn.sealiu.calendouer.bean.XzLocationBean;
 import cn.sealiu.calendouer.bean.XzResultsBean;
 import cn.sealiu.calendouer.bean.XzWeatherBean;
+import cn.sealiu.calendouer.until.DBHelper;
 import cn.sealiu.calendouer.until.FestivalCalendar;
 import cn.sealiu.calendouer.until.LunarCalendar;
 import cn.sealiu.calendouer.until.MovieContract.MovieEntry;
-import cn.sealiu.calendouer.until.MovieDBHelper;
 import cn.sealiu.calendouer.until.SolarTermCalendar;
+import cn.sealiu.calendouer.until.ThingsContract.ThingsEntry;
 import cn.sealiu.calendouer.until.WeatherIcon;
 
 import static android.Manifest.permission;
@@ -95,7 +96,7 @@ public class MainActivity extends AppCompatActivity implements
     TextView cityNameTV;
     TextView weatherTV;
     ImageView weatherIconIV;
-    TextView doubanTitleTV;
+    ImageView movieCardCover;
     ImageView movieImageIV;
     TextView movieAverageTV;
     TextView movieTitleTV;
@@ -103,14 +104,20 @@ public class MainActivity extends AppCompatActivity implements
     LinearLayout starsHolderLL;
     AppCompatButton getTop250Btn;
     ProgressDialog mProgressDialog;
-    MovieDBHelper dbHelper;
+    DBHelper dbHelper;
     SQLiteDatabase db;
     WeatherIcon icons;
     AMapLocationClient mLocationClient;
     AMapLocationClientOption mLocationOption;
     DateFormat df;
-    CardView initWeatherCard;
-    CardView movieCard;
+
+    LinearLayout weatherCard;
+    LinearLayout thingsCard;
+    LinearLayout movieCard;
+
+    RecyclerView thingsRecyclerView;
+    TextView thingsEmpty;
+
     SharedPreferences sharedPref;
     SharedPreferences settingPref;
     LocationManager locationMgr;
@@ -134,13 +141,19 @@ public class MainActivity extends AppCompatActivity implements
         festivalTV = (TextView) findViewById(R.id.festival);
         weatherHolder = (RelativeLayout) findViewById(R.id.weatherHolder);
         getWeatherTV = (AppCompatButton) findViewById(R.id.getWeatherInfo);
-        initWeatherCard = (CardView) findViewById(R.id.init_weather_card);
+
+        weatherCard = (LinearLayout) findViewById(R.id.weather_card);
         cityNameTV = (TextView) findViewById(R.id.city_name);
         weatherTV = (TextView) findViewById(R.id.weather);
         weatherIconIV = (ImageView) findViewById(R.id.weather_icon);
         weatherIconIV.setOnClickListener(this);
-        movieCard = (CardView) findViewById(R.id.movie_card);
-        doubanTitleTV = (TextView) findViewById(R.id.douban_movie_title);
+
+        thingsCard = (LinearLayout) findViewById(R.id.things_card);
+        thingsEmpty = (TextView) findViewById(R.id.things_empty);
+        thingsRecyclerView = (RecyclerView) findViewById(R.id.things_recycler_view);
+
+        movieCardCover = (ImageView) findViewById(R.id.movie_card_cover);
+        movieCard = (LinearLayout) findViewById(R.id.movie_card);
         movieImageIV = (ImageView) findViewById(R.id.movie_image);
         movieAverageTV = (TextView) findViewById(R.id.rating__average);
         movieTitleTV = (TextView) findViewById(R.id.movie_title);
@@ -150,7 +163,7 @@ public class MainActivity extends AppCompatActivity implements
         getTop250Btn = (AppCompatButton) findViewById(R.id.getTop250_btn);
         movieRecommendedHolder = (LinearLayout) findViewById(R.id.movie_recommended_holder);
 
-        dbHelper = new MovieDBHelper(this);
+        dbHelper = new DBHelper(this);
 
         icons = new WeatherIcon();
 
@@ -161,14 +174,6 @@ public class MainActivity extends AppCompatActivity implements
 
         df = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
         locationMgr = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
-    }
-
-    private boolean checkEmpty() {
-        db = dbHelper.getReadableDatabase();
-        Cursor cursor = db.rawQuery("SELECT * FROM " + MovieEntry.TABLE_NAME, null);
-        boolean isEmpty = !cursor.moveToFirst();
-        cursor.close();
-        return isEmpty;
     }
 
     @Override
@@ -194,19 +199,43 @@ public class MainActivity extends AppCompatActivity implements
             initWeather();
         } else {
             weatherHolder.setVisibility(View.GONE);
-            // TODO: 2017/2/27 weather card hide and show notification
+        }
+
+        if (settingPref.getBoolean("things_show", true)) {
+            thingsCard.setVisibility(View.VISIBLE);
+            if (checkEmpty(ThingsEntry.TABLE_NAME)) {
+                thingsEmpty.setVisibility(View.VISIBLE);
+            } else {
+                // TODO: 2017/3/4 set adapter to recycler view
+            }
+            initThings();
+        } else {
+            thingsCard.setVisibility(View.GONE);
         }
 
         if (settingPref.getBoolean("movie_recommended_show", true)) {
-            doubanTitleTV.setVisibility(View.VISIBLE);
             movieCard.setVisibility(View.VISIBLE);
-            if (checkEmpty()) {
+            if (checkEmpty(MovieEntry.TABLE_NAME)) {
                 getTop250Btn.setVisibility(View.VISIBLE);
+                movieCardCover.setVisibility(View.VISIBLE);
                 movieRecommendedHolder.setVisibility(View.GONE);
                 getTop250Btn.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        initMovieDB();
+                        new AlertDialog.Builder(MainActivity.this)
+                                .setTitle(getString(R.string.download_movie_data))
+                                .setMessage(getString(R.string.download_tips))
+                                .setPositiveButton(getString(R.string.ok), new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        initMovieDB();
+                                    }
+                                })
+                                .setNegativeButton(getString(R.string.cancel), new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                    }
+                                }).show();
                     }
                 });
             } else {
@@ -234,8 +263,15 @@ public class MainActivity extends AppCompatActivity implements
         } else {
             // TODO: 2017/2/27 movie card hide
             movieCard.setVisibility(View.GONE);
-            doubanTitleTV.setVisibility(View.GONE);
         }
+    }
+
+    private boolean checkEmpty(String tableName) {
+        db = dbHelper.getReadableDatabase();
+        Cursor cursor = db.rawQuery("SELECT * FROM " + tableName, null);
+        boolean isEmpty = !cursor.moveToFirst();
+        cursor.close();
+        return isEmpty;
     }
 
     private void initCalendar() {
@@ -296,7 +332,7 @@ public class MainActivity extends AppCompatActivity implements
 
         if (!checkPermission()) {
 
-            initWeatherCard.setVisibility(View.VISIBLE);
+            weatherCard.setVisibility(View.VISIBLE);
             weatherHolder.setVisibility(View.GONE);
 
             getWeatherTV.setOnClickListener(new View.OnClickListener() {
@@ -331,13 +367,17 @@ public class MainActivity extends AppCompatActivity implements
                 }
             });
         } else {
-            initWeatherCard.setVisibility(View.GONE);
+            weatherCard.setVisibility(View.GONE);
             if (sharedPref.getString("weather_json", "").equals("")) {
                 getWeather();
             } else {
                 setWeather();
             }
         }
+    }
+
+    private void initThings() {
+
     }
 
     private void initMovieDB() {
@@ -743,10 +783,12 @@ public class MainActivity extends AppCompatActivity implements
 
                 hideProgressDialog();
                 getTop250Btn.setVisibility(View.GONE);
+                movieCardCover.setVisibility(View.GONE);
                 setMovieInfoRandom();
             } else {
                 hideProgressDialog();
                 getTop250Btn.setVisibility(View.VISIBLE);
+                movieCardCover.setVisibility(View.VISIBLE);
 
                 Snackbar.make(coordinatorLayout, "豆瓣服务器开小差了", Snackbar.LENGTH_LONG)
                         .setAction("重试", new View.OnClickListener() {

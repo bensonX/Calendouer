@@ -9,7 +9,6 @@ import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
-import android.preference.PreferenceManager;
 import android.view.View;
 import android.widget.RemoteViews;
 
@@ -19,9 +18,9 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
+import cn.sealiu.calendouer.until.DBHelper;
 import cn.sealiu.calendouer.until.LunarCalendar;
 import cn.sealiu.calendouer.until.MovieContract;
-import cn.sealiu.calendouer.until.MovieDBHelper;
 
 public class DourAppWidget extends AppWidgetProvider {
 
@@ -45,17 +44,21 @@ public class DourAppWidget extends AppWidgetProvider {
         views.setTextViewText(R.id.lunar_date, lunarText);
 
         //movie
-        MovieDBHelper dbHelper = new MovieDBHelper(context);
+
+        DBHelper dbHelper = new DBHelper(context);
         SQLiteDatabase db = dbHelper.getReadableDatabase();
         Cursor cursor = db.rawQuery("SELECT * FROM " + MovieContract.MovieEntry.TABLE_NAME, null);
         boolean isEmpty = !cursor.moveToFirst();
         cursor.close();
 
         if (!isEmpty) {
-            SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(context);
+            SharedPreferences sharedPref = context.getSharedPreferences("calendouer", Context.MODE_PRIVATE);
             String datePref = sharedPref.getString("DATE", "null");
             String idPref = sharedPref.getString("ID", "null");
             DateFormat df = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+
+            views.setViewVisibility(R.id.init_movie_btn, View.GONE);
+            views.setViewVisibility(R.id.movie_holder, View.VISIBLE);
 
             if (!datePref.equals(df.format(new Date()))) {
 
@@ -65,54 +68,47 @@ public class DourAppWidget extends AppWidgetProvider {
                         MovieContract.MovieEntry.COLUMN_NAME_ID + "=?",
                         new String[]{idPref}
                 );
-            }
-            views.setViewVisibility(R.id.init_movie_btn, View.GONE);
-            views.setViewVisibility(R.id.movie_holder, View.VISIBLE);
+            } else {
+                db = dbHelper.getReadableDatabase();
+                String[] projection = {
+                        MovieContract.MovieEntry.COLUMN_NAME_ID,
+                        MovieContract.MovieEntry.COLUMN_NAME_TITLE,
+                        MovieContract.MovieEntry.COLUMN_NAME_AVERAGE,
+                        MovieContract.MovieEntry.COLUMN_NAME_ALT,
+                };
 
-            db = dbHelper.getReadableDatabase();
-            String[] projection = {
-                    MovieContract.MovieEntry.COLUMN_NAME_ID,
-                    MovieContract.MovieEntry.COLUMN_NAME_TITLE,
-                    MovieContract.MovieEntry.COLUMN_NAME_AVERAGE,
-                    MovieContract.MovieEntry.COLUMN_NAME_ALT,
-            };
-
-            cursor = db.query(
-                    MovieContract.MovieEntry.TABLE_NAME,
-                    projection,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    "1"
-            );
-
-            String id = "null";
-            if (cursor.moveToFirst()) {
-                id = cursor.getString(cursor.getColumnIndex(MovieContract.MovieEntry.COLUMN_NAME_ID));
-                String title = cursor.getString(cursor.getColumnIndex(MovieContract.MovieEntry.COLUMN_NAME_TITLE));
-                float average = cursor.getFloat(cursor.getColumnIndex(MovieContract.MovieEntry.COLUMN_NAME_AVERAGE));
-                String alt = cursor.getString(cursor.getColumnIndex(MovieContract.MovieEntry.COLUMN_NAME_ALT));
-
-                views.setTextViewText(R.id.rating__average, Float.toString(average));
-                views.setTextViewText(R.id.movie_title, context.getString(
-                        R.string.movie_recommended) +
-                        "\n" +
-                        title
+                cursor = db.query(
+                        MovieContract.MovieEntry.TABLE_NAME, //table
+                        projection, //columns
+                        MovieContract.MovieEntry.COLUMN_NAME_ID + " = ?", //selection
+                        new String[]{idPref}, //selectionArgs
+                        null, //groupBy
+                        null, //having
+                        null, //orderBy
+                        "1" //limit
                 );
 
-                Intent doubanIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(alt));
-                PendingIntent pendingIntent1 = PendingIntent.getActivity(context, 0, doubanIntent, 0);
-                views.setOnClickPendingIntent(R.id.movie_title, pendingIntent1);
+                if (cursor.moveToFirst()) {
+                    String title = cursor.getString(cursor.getColumnIndex(MovieContract.MovieEntry.COLUMN_NAME_TITLE));
+                    float average = cursor.getFloat(cursor.getColumnIndex(MovieContract.MovieEntry.COLUMN_NAME_AVERAGE));
+                    String alt = cursor.getString(cursor.getColumnIndex(MovieContract.MovieEntry.COLUMN_NAME_ALT));
 
-                Intent openAppIntent = new Intent(context, MainActivity.class);
-                PendingIntent pendingIntent2 = PendingIntent.getActivity(context, 0, openAppIntent, 0);
-                views.setOnClickPendingIntent(R.id.calendar_holder, pendingIntent2);
+                    views.setTextViewText(R.id.rating__average, Float.toString(average));
+                    views.setTextViewText(R.id.movie_title, context.getString(
+                            R.string.movie_recommended) +
+                            "\n" +
+                            title
+                    );
+
+                    Intent doubanIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(alt));
+                    PendingIntent pendingIntent1 = PendingIntent.getActivity(context, 0, doubanIntent, 0);
+                    views.setOnClickPendingIntent(R.id.movie_title, pendingIntent1);
+
+                    Intent openAppIntent = new Intent(context, MainActivity.class);
+                    PendingIntent pendingIntent2 = PendingIntent.getActivity(context, 0, openAppIntent, 0);
+                    views.setOnClickPendingIntent(R.id.calendar_holder, pendingIntent2);
+                }
             }
-
-            sharedPref.edit().putString("DATE", df.format(new Date())).apply();
-            sharedPref.edit().putString("ID", id).apply();
 
         } else {
             views.setViewVisibility(R.id.init_movie_btn, View.VISIBLE);

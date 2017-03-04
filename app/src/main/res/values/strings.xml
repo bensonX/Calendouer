@@ -62,5 +62,11 @@
     <string name="douban_group">去豆瓣小组畅聊</string>
     <string name="pref_rate">去评分</string>
     <string name="google_play" translatable="false">Google Play</string>
+    <string name="things">事情</string>
+    <string name="all_things_have_done">所有事情都已处理</string>
+    <string name="weather_title">天气</string>
+    <string name="download_movie_data">下载电影数据</string>
+    <string name="download_tips">这需要耗费些许流量,继续下载吗</string>
+    <string name="cancel">取消</string>
 </resources>
 
