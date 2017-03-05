@@ -80,5 +80,8 @@
     <string name="action_save">保存</string>
     <string name="add_things_do">我要看…</string>
     <string name="add_things_do_content">我要看%1$s</string>
+    <string name="content_require">填写事情内容</string>
+    <string name="error">发生错误</string>
+    <string name="things_view_all">所有事情</string>
 </resources>
 

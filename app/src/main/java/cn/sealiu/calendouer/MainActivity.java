@@ -18,12 +18,14 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.design.widget.CoordinatorLayout;
+import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.AppCompatButton;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -52,6 +54,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -64,6 +67,7 @@ import cn.sealiu.calendouer.bean.XzBean;
 import cn.sealiu.calendouer.bean.XzLocationBean;
 import cn.sealiu.calendouer.bean.XzResultsBean;
 import cn.sealiu.calendouer.bean.XzWeatherBean;
+import cn.sealiu.calendouer.model.Thing;
 import cn.sealiu.calendouer.until.DBHelper;
 import cn.sealiu.calendouer.until.FestivalCalendar;
 import cn.sealiu.calendouer.until.LunarCalendar;
@@ -83,8 +87,11 @@ public class MainActivity extends AppCompatActivity implements
     private final static int STAR = 5;
     private final static int MAX_COUNT = 100;
     private final static int LOCATION_PERM = 100;
+    private final static int THINGS_MAX_LINE = 3;
 
     private final static int WEATHER_REQUEST_CODE = 114;
+    private final static int ADD_THINGS_CODE = 200;
+
     Toolbar toolbar;
     TextView monthTV;
     TextView weekTV;
@@ -117,6 +124,8 @@ public class MainActivity extends AppCompatActivity implements
     LinearLayout thingsCard;
     LinearLayout movieCard;
 
+    AppCompatButton thingsAllBtn;
+
     RecyclerView thingsRecyclerView;
     TextView thingsEmpty;
 
@@ -125,6 +134,7 @@ public class MainActivity extends AppCompatActivity implements
     LocationManager locationMgr;
 
     CoordinatorLayout coordinatorLayout;
+    FloatingActionButton fab;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -134,7 +144,8 @@ public class MainActivity extends AppCompatActivity implements
         setSupportActionBar(toolbar);
 
         coordinatorLayout = (CoordinatorLayout) findViewById(R.id.activity_main);
-        findViewById(R.id.fab).setOnClickListener(this);
+        fab = (FloatingActionButton) findViewById(R.id.fab);
+        fab.setOnClickListener(this);
         monthTV = (TextView) findViewById(R.id.month);
         weekTV = (TextView) findViewById(R.id.week_day);
         lunarTV = (TextView) findViewById(R.id.lunar_date);
@@ -153,6 +164,7 @@ public class MainActivity extends AppCompatActivity implements
         thingsCard = (LinearLayout) findViewById(R.id.things_card);
         thingsEmpty = (TextView) findViewById(R.id.things_empty);
         thingsRecyclerView = (RecyclerView) findViewById(R.id.things_recycler_view);
+        thingsAllBtn = (AppCompatButton) findViewById(R.id.things_all_btn);
 
         movieCardCover = (ImageView) findViewById(R.id.movie_card_cover);
         movieCard = (LinearLayout) findViewById(R.id.movie_card);
@@ -205,14 +217,18 @@ public class MainActivity extends AppCompatActivity implements
 
         if (settingPref.getBoolean("things_show", true)) {
             thingsCard.setVisibility(View.VISIBLE);
-            if (checkEmpty(ThingsEntry.TABLE_NAME)) {
+            fab.setVisibility(View.VISIBLE);
+            if (checkAllDone()) {
                 thingsEmpty.setVisibility(View.VISIBLE);
             } else {
                 // TODO: 2017/3/4 set adapter to recycler view
+                LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
+                thingsRecyclerView.setLayoutManager(linearLayoutManager);
+                initThings();
             }
-            initThings();
         } else {
             thingsCard.setVisibility(View.GONE);
+            fab.setVisibility(View.GONE);
         }
 
         if (settingPref.getBoolean("movie_recommended_show", true)) {
@@ -274,6 +290,23 @@ public class MainActivity extends AppCompatActivity implements
         boolean isEmpty = !cursor.moveToFirst();
         cursor.close();
         return isEmpty;
+    }
+
+    private boolean checkAllDone() {
+        db = dbHelper.getReadableDatabase();
+        Cursor cursor = db.query(
+                ThingsEntry.TABLE_NAME, //table
+                null, //columns
+                ThingsEntry.COLUMN_NAME_DONE + " = ?", //selection
+                new String[]{"0"}, //selectionArgs
+                null, //groupBy
+                null, //having
+                ThingsEntry.COLUMN_NAME_NOTIFICATION_DATETIME, //orderBy
+                null //limit
+        );
+        boolean isAllDone = !cursor.moveToFirst();
+        cursor.close();
+        return isAllDone;
     }
 
     private void initCalendar() {
@@ -379,7 +412,60 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     private void initThings() {
-        // TODO: 2017/3/4 tings
+
+        final List<Thing> dataSet = new ArrayList<>();
+        db = dbHelper.getReadableDatabase();
+
+        String[] projection = {
+                ThingsEntry.COLUMN_NAME_ID,
+                ThingsEntry.COLUMN_NAME_TITLE,
+                ThingsEntry.COLUMN_NAME_NOTIFICATION_DATETIME
+        };
+
+        Cursor cursor = db.query(
+                ThingsEntry.TABLE_NAME, //table
+                projection, //columns
+                ThingsEntry.COLUMN_NAME_DONE + " = ?", //selection
+                new String[]{"0"}, //selectionArgs
+                null, //groupBy
+                null, //having
+                ThingsEntry.COLUMN_NAME_NOTIFICATION_DATETIME, //orderBy
+                String.valueOf(THINGS_MAX_LINE) //limit
+        );
+
+        cursor.moveToFirst();
+        do {
+            String id = cursor.getString(cursor.getColumnIndex(ThingsEntry.COLUMN_NAME_ID));
+            String title = cursor.getString(cursor.getColumnIndex(ThingsEntry.COLUMN_NAME_TITLE));
+            String notification_datetime = cursor.getString(
+                    cursor.getColumnIndex(ThingsEntry.COLUMN_NAME_NOTIFICATION_DATETIME)
+            );
+            dataSet.add(new Thing(id, title, notification_datetime));
+        } while (cursor.moveToNext());
+
+        if (cursor.getCount() == THINGS_MAX_LINE) {
+            thingsAllBtn.setVisibility(View.VISIBLE);
+            thingsAllBtn.setOnClickListener(this);
+        } else {
+            thingsAllBtn.setVisibility(View.GONE);
+        }
+        cursor.close();
+
+        thingsRecyclerView.setAdapter(new ThingsItemAdapter(dataSet) {
+            @Override
+            public void onBindViewHolder(ViewHolder holder, int position) {
+                final Thing thing = dataSet.get(position);
+                super.onBindViewHolder(holder, position);
+
+                holder.view.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        // TODO: 2017/3/5 handle click things event
+                        Toast.makeText(MainActivity.this, thing.getTitle(), Toast.LENGTH_SHORT).show();
+                    }
+                });
+            }
+        });
     }
 
     private void initMovieDB() {
@@ -677,7 +763,10 @@ public class MainActivity extends AppCompatActivity implements
                 openMovieFragment();
                 break;
             case R.id.fab:
-                startActivity(new Intent(this, AddThingsActivity.class));
+                startActivityForResult(new Intent(this, AddThingsActivity.class), ADD_THINGS_CODE);
+                break;
+            case R.id.things_all_btn:
+                // TODO: 2017/3/5 check all things
                 break;
         }
     }
@@ -752,7 +841,7 @@ public class MainActivity extends AppCompatActivity implements
         Intent intent = new Intent(this, AddThingsActivity.class);
 
         intent.putExtra("movie_title", movieTitleTV.getText());
-        startActivity(intent);
+        startActivityForResult(intent, ADD_THINGS_CODE);
     }
 
     private void openMovieFragment() {
@@ -767,6 +856,15 @@ public class MainActivity extends AppCompatActivity implements
 
             movieFragment.setArguments(bundle);
             movieFragment.show(getSupportFragmentManager(), movieFragment.getTag());
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == ADD_THINGS_CODE && resultCode == RESULT_OK) {
+            Log.d("Things", "add things success");
+            initThings();
         }
     }
 

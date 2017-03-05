@@ -34,7 +34,7 @@ public class DBHelper extends SQLiteOpenHelper {
 
     private static final String PERSONAL_CREATE_ENTRIES =
             "CREATE TABLE IF NOT EXISTS " + MovieEntry.TABLE_NAME + "(" +
-                    PersonalEntry.COLUMN_NAME_ID + "TEXT PRIMARY KEY, " +
+                    PersonalEntry.COLUMN_NAME_ID + " TEXT PRIMARY KEY, " +
                     PersonalEntry.COLUMN_NAME_KEY + " TEXT, " +
                     PersonalEntry.COLUMN_NAME_VALUE + " TEXT, " +
                     PersonalEntry.COLUMN_NAME_LEVEL + " TEXT, " +
@@ -57,12 +57,12 @@ public class DBHelper extends SQLiteOpenHelper {
 
     private static final String THINGS_CREATE_ENTRIES =
             "CREATE TABLE IF NOT EXISTS " + ThingsEntry.TABLE_NAME + "(" +
-                    ThingsEntry.COLUMN_NAME_ID + "TEXT PRIMARY KEY, " +
-                    ThingsEntry.COLUMN_NAME_TITLE + "TEXT, " +
-                    ThingsEntry.COLUMN_NAME_DATETIME + "TEXT, " +
-                    ThingsEntry.COLUMN_NAME_NOTIFICATION_DATETIME + "TEXT, " +
-                    ThingsEntry.COLUMN_NAME_TIME_ADVANCE + "INTEGER, " +
-                    ThingsEntry.COLUMN_NAME_done + "INTEGER)";
+                    ThingsEntry.COLUMN_NAME_ID + " TEXT PRIMARY KEY, " +
+                    ThingsEntry.COLUMN_NAME_TITLE + " TEXT, " +
+                    ThingsEntry.COLUMN_NAME_DATETIME + " TEXT, " +
+                    ThingsEntry.COLUMN_NAME_NOTIFICATION_DATETIME + " TEXT, " +
+                    ThingsEntry.COLUMN_NAME_TIME_ADVANCE + " INTEGER, " +
+                    ThingsEntry.COLUMN_NAME_DONE + " INTEGER)";
     private static final String THINGS_DELETE_ENTRIES =
             "DROP TABLE IF EXISTS " + ThingsEntry.TABLE_NAME;
 
