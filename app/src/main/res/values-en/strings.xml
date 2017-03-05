@@ -60,4 +60,7 @@
     <string name="add_things_do">I want to do...</string>
     <string name="ok">OK</string>
     <string name="add_things_do_content">Watch %1$s</string>
+    <string name="content_require">Input thing\'s content</string>
+    <string name="error">ERROR</string>
+    <string name="things_view_all">All Things</string>
 </resources>

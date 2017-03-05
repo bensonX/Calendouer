@@ -36,7 +36,7 @@
     <string name="update_content" translatable="false">✱修改应用布局\n✱天气预报自动刷新与缓存\n✱修改电影推荐模式\n</string>
 
     <string name="pref_card_settings">卡片设置</string>
-    <string name="pref_title_things">事情</string>
+    <string name="pref_title_things">事情备忘</string>
     <string name="pref_title_movie">每日电影</string>
     <string name="pref_title_weather">天气预报</string>
     <string name="open_location">开启定位服务</string>
@@ -63,9 +63,9 @@
     <string name="douban_group">去豆瓣小组畅聊</string>
     <string name="pref_rate">去评分</string>
     <string name="google_play" translatable="false">Google Play</string>
-    <string name="things">事情</string>
+    <string name="things">事情备忘</string>
     <string name="all_things_have_done">所有事情都已处理</string>
-    <string name="weather_title">天气</string>
+
     <string name="download_movie_data">下载电影数据</string>
     <string name="download_tips">这需要耗费些许流量,继续下载吗</string>
     <string name="cancel">取消</string>
@@ -83,5 +83,12 @@
     <string name="content_require">填写事情内容</string>
     <string name="error">发生错误</string>
     <string name="things_view_all">所有事情</string>
+    <string name="things_notification">通知</string>
+    <string name="things_ringtone">铃声</string>
+    <string name="things_vibrate">振动</string>
+
+    <string name="weather_title">天气</string>
+    <string name="movie_title">电影</string>
+    <string name="things_title">事情</string>
 </resources>
 

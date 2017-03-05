@@ -8,7 +8,7 @@
     <color name="primaryText">#212121</color>
     <color name="secondaryText">#757575</color>
     <color name="disabled">#BDBDBD</color>
-    <color name="colorDivider">#b3fafafa</color>
+    <color name="colorDivider">#e6e6e6</color>
 
     <color name="tomato">#F44336</color>
     <color name="banana">#FFC107</color>

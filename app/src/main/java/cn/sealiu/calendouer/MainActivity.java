@@ -221,7 +221,6 @@ public class MainActivity extends AppCompatActivity implements
             if (checkAllDone()) {
                 thingsEmpty.setVisibility(View.VISIBLE);
             } else {
-                // TODO: 2017/3/4 set adapter to recycler view
                 LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
                 thingsRecyclerView.setLayoutManager(linearLayoutManager);
                 initThings();
@@ -433,39 +432,43 @@ public class MainActivity extends AppCompatActivity implements
                 String.valueOf(THINGS_MAX_LINE) //limit
         );
 
-        cursor.moveToFirst();
-        do {
-            String id = cursor.getString(cursor.getColumnIndex(ThingsEntry.COLUMN_NAME_ID));
-            String title = cursor.getString(cursor.getColumnIndex(ThingsEntry.COLUMN_NAME_TITLE));
-            String notification_datetime = cursor.getString(
-                    cursor.getColumnIndex(ThingsEntry.COLUMN_NAME_NOTIFICATION_DATETIME)
-            );
-            dataSet.add(new Thing(id, title, notification_datetime));
-        } while (cursor.moveToNext());
+        if (cursor.moveToFirst()) {
+            thingsEmpty.setVisibility(View.GONE);
+            do {
+                String id = cursor.getString(cursor.getColumnIndex(ThingsEntry.COLUMN_NAME_ID));
+                String title = cursor.getString(cursor.getColumnIndex(ThingsEntry.COLUMN_NAME_TITLE));
+                String notification_datetime = cursor.getString(
+                        cursor.getColumnIndex(ThingsEntry.COLUMN_NAME_NOTIFICATION_DATETIME)
+                );
+                dataSet.add(new Thing(id, title, notification_datetime));
+            } while (cursor.moveToNext());
 
-        if (cursor.getCount() == THINGS_MAX_LINE) {
-            thingsAllBtn.setVisibility(View.VISIBLE);
-            thingsAllBtn.setOnClickListener(this);
-        } else {
-            thingsAllBtn.setVisibility(View.GONE);
-        }
-        cursor.close();
-
-        thingsRecyclerView.setAdapter(new ThingsItemAdapter(dataSet) {
-            @Override
-            public void onBindViewHolder(ViewHolder holder, int position) {
-                final Thing thing = dataSet.get(position);
-                super.onBindViewHolder(holder, position);
-
-                holder.view.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        // TODO: 2017/3/5 handle click things event
-                        Toast.makeText(MainActivity.this, thing.getTitle(), Toast.LENGTH_SHORT).show();
-                    }
-                });
+            if (cursor.getCount() == THINGS_MAX_LINE) {
+                thingsAllBtn.setVisibility(View.VISIBLE);
+                thingsAllBtn.setOnClickListener(this);
+            } else {
+                thingsAllBtn.setVisibility(View.GONE);
             }
-        });
+            cursor.close();
+
+            thingsRecyclerView.setAdapter(new ThingsItemAdapter(dataSet) {
+                @Override
+                public void onBindViewHolder(ViewHolder holder, int position) {
+                    final Thing thing = dataSet.get(position);
+                    super.onBindViewHolder(holder, position);
+
+                    holder.view.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            // TODO: 2017/3/5 handle click things event
+                            Toast.makeText(MainActivity.this, thing.getTitle(), Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                }
+            });
+        } else {
+            thingsEmpty.setVisibility(View.VISIBLE);
+        }
     }
 
     private void initMovieDB() {
