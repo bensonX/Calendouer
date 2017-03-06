@@ -32,6 +32,34 @@ Calendouer-豆瓣日历(农历, 天气, 电影推荐)
 ```
 
 - 暂时没有对 `apikey` 进行验证，为避免后期验证策略修改最好替换
+- 若使用 `Firebase` 请替换 `app` 目录下的 `google-services.json` 文件，否则会导致错误。
+- 若不使用 `Firebase` 请删除 `app` 目录下的 `google-services.json` 文件。并删除 `build.gradle(Project)` 文件中关于 Google Services 的依赖，以及 `build.gradle(Module)` 中对 Firebase 的依赖，否则会导致错误。
+
+```
+//build.gradle(Project)
+buildscript {
+    repositories {
+        jcenter()
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:2.3.0'
+        // 删除下面这行
+        classpath 'com.google.gms:google-services:3.0.0'
+    }
+}
+
+//build.gradle(Module)
+dependencies {
+    compile fileTree(include: ['*.jar'], dir: 'libs')
+    androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
+        exclude group: 'com.android.support', module: 'support-annotations'
+    })
+
+    ...
+    // 删除下面这行
+    compile 'com.google.firebase:firebase-crash:9.6.1'
+    ...
+```
 
 ## 下载：
 - [Google Play](https://play.google.com/store/apps/details?id=cn.sealiu.calendouer)
