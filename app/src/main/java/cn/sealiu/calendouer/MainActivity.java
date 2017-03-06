@@ -540,6 +540,7 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     private void getWeather() {
+        Log.d("weather", "getWeather");
         weatherHolder.setVisibility(View.VISIBLE);
 
         String lat = sharedPref.getString("Latitude", "");
@@ -549,7 +550,9 @@ public class MainActivity extends AppCompatActivity implements
             String apiStr = "https://api.thinkpage.cn/v3/weather/daily.json?key=txyws41isbyqnma5&" +
                     "location=" + lat + ":" + lng + "&language=zh-Hans&unit=c";
             new GetWeather().execute(apiStr);
+            Log.d("weather", "Location already know");
         } else {
+            Log.d("weather", "startLocation");
             mLocationClient.startLocation();
         }
     }

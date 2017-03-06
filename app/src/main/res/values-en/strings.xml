@@ -52,12 +52,12 @@
         <item>every 8 hours</item>
     </array>
     <string name="action_save">Save</string>
-    <string name="casts">casts: %1$s</string>
+    <string name="casts">Casts: %1$s</string>
     <string name="default_date_picker">%4$s, %3$s/%2$s, %1$s</string>
     <string name="default_time_picker">%1$s:%2$s</string>
-    <string name="directors">directors: %1$s</string>
-    <string name="ratings_count">rating count: %1$s</string>
-    <string name="add_things_do">content...</string>
+    <string name="directors">Directors: %1$s</string>
+    <string name="ratings_count">Rating Count: %1$s</string>
+    <string name="add_things_do">content…</string>
     <string name="ok">OK</string>
     <string name="add_things_do_movie">#Movie# %1$s</string>
     <string name="content_require">content required</string>
@@ -69,4 +69,7 @@
     <string name="things_title">Things</string>
     <string name="things_vibrate">Vibrate</string>
     <string name="things_notification_datetime">Set Notification Time</string>
+    <string name="add_to_things">Add to Things</string>
+    <string name="goto_douban">Open Douban</string>
+    <string name="introduction">Introduction</string>
 </resources>

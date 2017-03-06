@@ -84,52 +84,59 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:textSize="12sp" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:paddingTop="@dimen/activity_vertical_margin">
+
+                    <android.support.v7.widget.AppCompatButton
+                        android:id="@+id/bs_goto_douban"
+                        style="?attr/borderlessButtonStyle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:drawablePadding="4dp"
+                        android:text="@string/goto_douban"
+                        android:textAllCaps="false"
+                        android:textColor="@color/colorAccent" />
+
+                    <android.support.v7.widget.AppCompatButton
+                        android:id="@+id/bs_add_things"
+                        style="?attr/borderlessButtonStyle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:drawableLeft="@drawable/ic_things_add_24dp"
+                        android:drawablePadding="6dp"
+                        android:drawableStart="@drawable/ic_things_add_24dp"
+                        android:text="@string/add_to_things"
+                        android:textAllCaps="false"
+                        android:textColor="@color/colorAccent" />
+                </LinearLayout>
             </LinearLayout>
         </LinearLayout>
 
-        <LinearLayout
+        <View
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:paddingTop="@dimen/activity_vertical_margin">
-
-            <android.support.v7.widget.AppCompatButton
-                android:id="@+id/bs_goto_douban"
-                style="?attr/borderlessButtonStyle"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="start"
-                android:drawablePadding="4dp"
-                android:text="@string/goto_douban"
-                android:textAllCaps="false"
-                android:textColor="@color/colorAccent" />
-
-            <android.support.v7.widget.AppCompatButton
-                android:id="@+id/bs_add_things"
-                style="?attr/borderlessButtonStyle"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:drawableLeft="@drawable/ic_things_add_24dp"
-                android:drawablePadding="6dp"
-                android:drawableStart="@drawable/ic_things_add_24dp"
-                android:text="@string/add_to_things"
-                android:textAllCaps="false"
-                android:textColor="@color/colorAccent" />
-        </LinearLayout>
+            android:layout_height="1dp"
+            android:layout_marginTop="@dimen/activity_vertical_margin"
+            android:background="@color/colorDivider" />
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="@dimen/activity_vertical_margin"
+            android:layout_marginEnd="@dimen/activity_horizontal_margin"
+            android:layout_marginStart="@dimen/activity_horizontal_margin"
             android:layout_marginTop="@dimen/activity_vertical_margin"
-            android:text="@string/introduction"
-            android:textColor="@color/secondaryText"
-            android:textSize="14sp" />
+            android:text="@string/introduction" />
 
         <TextView
             android:id="@+id/bs_summary"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginEnd="@dimen/activity_horizontal_margin"
+            android:layout_marginStart="@dimen/activity_horizontal_margin"
             android:ellipsize="end" />
 
     </LinearLayout>

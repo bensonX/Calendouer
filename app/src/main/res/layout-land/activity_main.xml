@@ -206,6 +206,7 @@
                         android:layout_marginBottom="8dp"
                         android:layout_marginTop="8dp"
                         android:text="@string/getWeatherInfo"
+                        android:textAllCaps="false"
                         android:textColor="@color/blueSky" />
                 </LinearLayout>
 
@@ -245,6 +246,7 @@
                         android:layout_marginBottom="8dp"
                         android:layout_marginTop="8dp"
                         android:text="@string/getTop250"
+                        android:textAllCaps="false"
                         android:textColor="@color/navyGray"
                         android:visibility="gone" />
 
@@ -367,6 +369,7 @@
                     android:layout_gravity="center_horizontal"
                     android:layout_marginTop="8dp"
                     android:text="@string/things_view_all"
+                    android:textAllCaps="false"
                     android:textColor="@color/colorAccent"
                     android:visibility="gone" />
             </LinearLayout>

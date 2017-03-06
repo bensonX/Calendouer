@@ -91,5 +91,8 @@
     <string name="movie_title">电影</string>
     <string name="things_title">事情</string>
     <string name="things_notification_datetime">设置提醒时间</string>
+    <string name="goto_douban">去豆瓣</string>
+    <string name="add_to_things">添加到事情</string>
+    <string name="introduction">简介</string>
 </resources>
 
