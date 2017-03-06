@@ -74,7 +74,7 @@ public class AddThingsActivity extends AppCompatActivity implements View.OnClick
 
         Bundle extras = getIntent().getExtras();
         if (extras != null) {
-            String str = String.format(getString(R.string.add_things_do_content), extras.getString("movie_title"));
+            String str = String.format(getString(R.string.add_things_do_movie), extras.getString("movie_title"));
             contentET.setText(str);
             contentET.setSelection(str.length());
         }
@@ -97,6 +97,7 @@ public class AddThingsActivity extends AppCompatActivity implements View.OnClick
         if (item.getItemId() == R.id.action_save) {
             mContent = contentET.getText().toString();
             if (TextUtils.isEmpty(mContent)) {
+                contentET.setError(getString(R.string.content_require));
                 Snackbar.make(contentET, getString(R.string.content_require), Snackbar.LENGTH_SHORT).show();
                 return true;
             }

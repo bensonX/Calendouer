@@ -9,6 +9,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.content.res.ColorStateList;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.location.LocationManager;
@@ -17,6 +18,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
+import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -87,11 +89,10 @@ public class MainActivity extends AppCompatActivity implements
     private final static int STAR = 5;
     private final static int MAX_COUNT = 100;
     private final static int LOCATION_PERM = 100;
-    private final static int THINGS_MAX_LINE = 3;
+    private final static int THINGS_MAX_LINE = 5;
 
     private final static int WEATHER_REQUEST_CODE = 114;
     private final static int ADD_THINGS_CODE = 200;
-
     Toolbar toolbar;
     TextView monthTV;
     TextView weekTV;
@@ -119,22 +120,19 @@ public class MainActivity extends AppCompatActivity implements
     AMapLocationClient mLocationClient;
     AMapLocationClientOption mLocationOption;
     DateFormat df;
-
     LinearLayout weatherCard;
     LinearLayout thingsCard;
     LinearLayout movieCard;
-
     AppCompatButton thingsAllBtn;
-
     RecyclerView thingsRecyclerView;
     TextView thingsEmpty;
-
     SharedPreferences sharedPref;
     SharedPreferences settingPref;
     LocationManager locationMgr;
-
     CoordinatorLayout coordinatorLayout;
     FloatingActionButton fab;
+    CollapsingToolbarLayout collapsingToolbarLayout;
+    private int festival = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -143,6 +141,7 @@ public class MainActivity extends AppCompatActivity implements
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        collapsingToolbarLayout = (CollapsingToolbarLayout) findViewById(R.id.collapsing_toolbar);
         coordinatorLayout = (CoordinatorLayout) findViewById(R.id.activity_main);
         fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(this);
@@ -196,6 +195,7 @@ public class MainActivity extends AppCompatActivity implements
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             this.getWindow().setNavigationBarColor(ContextCompat.getColor(this, R.color.colorPrimary));
+            this.getWindow().setStatusBarColor(ContextCompat.getColor(this, R.color.colorPrimaryDark));
         }
 
         mLocationClient = new AMapLocationClient(getApplicationContext());
@@ -278,7 +278,6 @@ public class MainActivity extends AppCompatActivity implements
                 }
             }
         } else {
-            // TODO: 2017/2/27 movie card hide
             movieCard.setVisibility(View.GONE);
         }
     }
@@ -357,8 +356,13 @@ public class MainActivity extends AppCompatActivity implements
         if (!festStr.equals("")) {
             festivalTV.setVisibility(View.VISIBLE);
             festivalTV.setText(festStr);
+            int tomato = ContextCompat.getColor(this, R.color.tomato);
+            int tomatoDark = ContextCompat.getColor(this, R.color.tomatoDark);
+            setCustomTheme(tomato, tomatoDark);
+            festival = 1;
         } else {
             festivalTV.setVisibility(View.GONE);
+            festival = 0;
         }
     }
 
@@ -631,7 +635,6 @@ public class MainActivity extends AppCompatActivity implements
                 MovieEntry.COLUMN_NAME_AVERAGE,
                 MovieEntry.COLUMN_NAME_STARS,
                 MovieEntry.COLUMN_NAME_IMAGES,
-                MovieEntry.COLUMN_NAME_ALT,
                 MovieEntry.COLUMN_NAME_SUMMARY
         };
 
@@ -649,7 +652,6 @@ public class MainActivity extends AppCompatActivity implements
         if (cursor.moveToFirst()) {
             String title = cursor.getString(cursor.getColumnIndex(MovieEntry.COLUMN_NAME_TITLE));
             String images = cursor.getString(cursor.getColumnIndex(MovieEntry.COLUMN_NAME_IMAGES));
-            final String alt = cursor.getString(cursor.getColumnIndex(MovieEntry.COLUMN_NAME_ALT));
             String stars = cursor.getString(cursor.getColumnIndex(MovieEntry.COLUMN_NAME_STARS));
             float average = cursor.getFloat(cursor.getColumnIndex(MovieEntry.COLUMN_NAME_AVERAGE));
             String summary = cursor.getString(cursor.getColumnIndex(MovieEntry.COLUMN_NAME_SUMMARY));
@@ -659,12 +661,12 @@ public class MainActivity extends AppCompatActivity implements
                 new GetMovieInfo().execute("http://api.douban.com/v2/movie/subject/" + id);
             }
 
-            setMovieInfo(title, images, alt, stars, average, summary);
+            setMovieInfo(title, images, stars, average, summary);
         }
         cursor.close();
     }
 
-    private void setMovieInfo(String title, String images, final String alt, String stars, float average, String summary) {
+    private void setMovieInfo(String title, String images, String stars, float average, String summary) {
 
         movieTitleTV.setText(title);
         movieAverageTV.setText(Float.toString(average));
@@ -806,9 +808,17 @@ public class MainActivity extends AppCompatActivity implements
         weatherTV.setText(weather);
 
         if (Calendar.getInstance().get(Calendar.HOUR_OF_DAY) < 18) { //day
-            weatherIconIV.setImageResource(icons.map.get(nowWeather.getCode_day()));
+            String weather_code = nowWeather.getCode_day();
+            weatherIconIV.setImageResource(icons.map.get(weather_code));
+            if (festival == 0) {
+                changeTheme(weather_code);
+            }
         } else {//night
-            weatherIconIV.setImageResource(icons.map.get(nowWeather.getCode_night()));
+            String weather_code = nowWeather.getCode_night();
+            weatherIconIV.setImageResource(icons.map.get(weather_code));
+            if (festival == 0) {
+                changeTheme(weather_code);
+            }
         }
 
         Calendar calendar = Calendar.getInstance();
@@ -868,6 +878,48 @@ public class MainActivity extends AppCompatActivity implements
         if (requestCode == ADD_THINGS_CODE && resultCode == RESULT_OK) {
             Log.d("Things", "add things success");
             initThings();
+        }
+    }
+
+    private void changeTheme(String weather_code) {
+        switch (icons.getWeather(weather_code)) {
+            case 1://sunny
+                int colorPrimary = ContextCompat.getColor(this, R.color.colorPrimary);
+                int colorPrimaryDark = ContextCompat.getColor(this, R.color.colorPrimaryDark);
+                setCustomTheme(colorPrimary, colorPrimaryDark);
+                break;
+            case 2://cloud
+                int gray = ContextCompat.getColor(this, R.color.gray);
+                int grayDark = ContextCompat.getColor(this, R.color.grayDark);
+                setCustomTheme(gray, grayDark);
+                break;
+            case 3://rain
+                int navyGray = ContextCompat.getColor(this, R.color.navyGray);
+                int navyGrayDark = ContextCompat.getColor(this, R.color.navyGrayDark);
+                setCustomTheme(navyGray, navyGrayDark);
+                break;
+            case 4://snow
+                int blueSky = ContextCompat.getColor(this, R.color.blueSky);
+                int blueSkyDark = ContextCompat.getColor(this, R.color.blueSkyDark);
+                setCustomTheme(blueSky, blueSkyDark);
+                break;
+            case 5://wind_sand
+                int orange = ContextCompat.getColor(this, R.color.orange);
+                int orangeDark = ContextCompat.getColor(this, R.color.orangeDark);
+                setCustomTheme(orange, orangeDark);
+                break;
+            default:
+                break;
+        }
+    }
+
+    private void setCustomTheme(int color, int colorDark) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            fab.setBackgroundTintList(ColorStateList.valueOf(color));
+            collapsingToolbarLayout.setContentScrimColor(color);
+            collapsingToolbarLayout.setBackgroundColor(color);
+            this.getWindow().setNavigationBarColor(color);
+            this.getWindow().setStatusBarColor(colorDark);
         }
     }
 
@@ -963,7 +1015,6 @@ public class MainActivity extends AppCompatActivity implements
                     setMovieInfo(
                             movieBean.getTitle(),
                             movieBean.getImages().getLarge(),
-                            movieBean.getAlt(),
                             movieBean.getRating().getStarts(),
                             movieBean.getRating().getAverage(),
                             movieBean.getSummary()

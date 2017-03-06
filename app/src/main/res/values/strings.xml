@@ -78,9 +78,9 @@
     <string name="default_date_picker">%1$s年%2$s月%3$s日%4$s</string>
     <string name="default_time_picker">%1$s:%2$s</string>
     <string name="action_save">保存</string>
-    <string name="add_things_do">我要看…</string>
-    <string name="add_things_do_content">我要看%1$s</string>
-    <string name="content_require">填写事情内容</string>
+    <string name="add_things_do">事情内容…</string>
+    <string name="add_things_do_movie">#电影# %1$s</string>
+    <string name="content_require">请填写事情内容</string>
     <string name="error">发生错误</string>
     <string name="things_view_all">所有事情</string>
     <string name="things_notification">通知</string>
@@ -90,5 +90,6 @@
     <string name="weather_title">天气</string>
     <string name="movie_title">电影</string>
     <string name="things_title">事情</string>
+    <string name="things_notification_datetime">设置提醒时间</string>
 </resources>
 

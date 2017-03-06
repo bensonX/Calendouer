@@ -28,7 +28,7 @@
     <string name="need_location_premission">Need Location Permission</string>
     <string name="open_location">Open Location</string>
     <string name="open_location_setting">Location Settings</string>
-    <string name="pref_card_settings">Feeds</string>
+    <string name="pref_card_settings">Feeds Setting</string>
     <string name="update_frequency">Update Frequency</string>
     <string name="pref_title_weather">Weather Forecast</string>
     <string name="pref_title_things">Todo Things</string>
@@ -39,7 +39,7 @@
     <string name="pref_rate">Rating</string>
     <string name="douban_group">Douban Group</string>
     <string name="all_things_have_done">all things have been done</string>
-    <string name="things">Things</string>
+    <string name="things">Todo Things</string>
     <string name="weather_title">Weather</string>
     <string name="cancel">Cancel</string>
     <string name="download_movie_data">Download Movie Mate-Data</string>
@@ -57,10 +57,16 @@
     <string name="default_time_picker">%1$s:%2$s</string>
     <string name="directors">directors: %1$s</string>
     <string name="ratings_count">rating count: %1$s</string>
-    <string name="add_things_do">I want to do...</string>
+    <string name="add_things_do">content...</string>
     <string name="ok">OK</string>
-    <string name="add_things_do_content">Watch %1$s</string>
-    <string name="content_require">Input thing\'s content</string>
+    <string name="add_things_do_movie">#Movie# %1$s</string>
+    <string name="content_require">content required</string>
     <string name="error">ERROR</string>
     <string name="things_view_all">All Things</string>
+    <string name="movie_title">Movie</string>
+    <string name="things_notification">Notification</string>
+    <string name="things_ringtone">Ringtone</string>
+    <string name="things_title">Things</string>
+    <string name="things_vibrate">Vibrate</string>
+    <string name="things_notification_datetime">Set Notification Time</string>
 </resources>
