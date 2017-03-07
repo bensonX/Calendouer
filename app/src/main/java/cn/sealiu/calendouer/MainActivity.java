@@ -75,8 +75,10 @@ import cn.sealiu.calendouer.until.FestivalCalendar;
 import cn.sealiu.calendouer.until.LunarCalendar;
 import cn.sealiu.calendouer.until.MovieContract.MovieEntry;
 import cn.sealiu.calendouer.until.SolarTermCalendar;
+import cn.sealiu.calendouer.until.ThingsContract;
 import cn.sealiu.calendouer.until.ThingsContract.ThingsEntry;
 import cn.sealiu.calendouer.until.WeatherIcon;
+import co.dift.ui.SwipeToAction;
 
 import static android.Manifest.permission;
 
@@ -132,6 +134,9 @@ public class MainActivity extends AppCompatActivity implements
     CoordinatorLayout coordinatorLayout;
     FloatingActionButton fab;
     CollapsingToolbarLayout collapsingToolbarLayout;
+    List<Thing> dataSet = new ArrayList<>();
+    SwipeToAction swipeToAction;
+    ThingsItemAdapter thingsAdapter;
     private int festival = 0;
 
     @Override
@@ -218,9 +223,7 @@ public class MainActivity extends AppCompatActivity implements
         if (settingPref.getBoolean("things_show", true)) {
             thingsCard.setVisibility(View.VISIBLE);
             fab.setVisibility(View.VISIBLE);
-            if (checkAllDone()) {
-                thingsEmpty.setVisibility(View.VISIBLE);
-            } else {
+            if (!checkAllDone()) {
                 LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
                 thingsRecyclerView.setLayoutManager(linearLayoutManager);
                 initThings();
@@ -304,6 +307,13 @@ public class MainActivity extends AppCompatActivity implements
         );
         boolean isAllDone = !cursor.moveToFirst();
         cursor.close();
+        if (isAllDone) {
+            thingsEmpty.setVisibility(View.VISIBLE);
+            findViewById(R.id.things_divider).setVisibility(View.GONE);
+        } else {
+            thingsEmpty.setVisibility(View.GONE);
+            findViewById(R.id.things_divider).setVisibility(View.VISIBLE);
+        }
         return isAllDone;
     }
 
@@ -415,8 +425,6 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     private void initThings() {
-
-        final List<Thing> dataSet = new ArrayList<>();
         db = dbHelper.getReadableDatabase();
 
         String[] projection = {
@@ -437,7 +445,7 @@ public class MainActivity extends AppCompatActivity implements
         );
 
         if (cursor.moveToFirst()) {
-            thingsEmpty.setVisibility(View.GONE);
+            dataSet.clear();
             do {
                 String id = cursor.getString(cursor.getColumnIndex(ThingsEntry.COLUMN_NAME_ID));
                 String title = cursor.getString(cursor.getColumnIndex(ThingsEntry.COLUMN_NAME_TITLE));
@@ -455,21 +463,38 @@ public class MainActivity extends AppCompatActivity implements
             }
             cursor.close();
 
-            thingsRecyclerView.setAdapter(new ThingsItemAdapter(dataSet) {
-                @Override
-                public void onBindViewHolder(ViewHolder holder, int position) {
-                    final Thing thing = dataSet.get(position);
-                    super.onBindViewHolder(holder, position);
+            thingsAdapter = new ThingsItemAdapter(dataSet);
+            thingsRecyclerView.setAdapter(thingsAdapter);
+            swipeToAction = new SwipeToAction(thingsRecyclerView, new SwipeToAction.SwipeListener<Thing>() {
 
-                    holder.view.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            // TODO: 2017/3/5 handle click things event
-                            Toast.makeText(MainActivity.this, thing.getTitle(), Toast.LENGTH_SHORT).show();
-                        }
-                    });
+                @Override
+                public boolean swipeLeft(final Thing itemData) {
+//                    Log.d("Thing", "swipe left");
+//                    removeThing(itemData);
+//                    return true;
+                    return false;
+                }
+
+                @Override
+                public boolean swipeRight(final Thing itemData) {
+                    Log.d("Thing", "swipe right");
+                    removeThing(itemData);
+                    return true;
+                }
+
+                @Override
+                public void onClick(Thing itemData) {
+                    Log.d("Thing", "click");
+                    displaySnackBar(itemData.getTitle() + "click", null, null);
+                }
+
+                @Override
+                public void onLongClick(Thing itemData) {
+                    Log.d("Thing", "long click");
+                    displaySnackBar(itemData.getTitle() + "long click", null, null);
                 }
             });
+
         } else {
             thingsEmpty.setVisibility(View.VISIBLE);
         }
@@ -924,6 +949,59 @@ public class MainActivity extends AppCompatActivity implements
             this.getWindow().setNavigationBarColor(color);
             this.getWindow().setStatusBarColor(colorDark);
         }
+    }
+
+    private void displaySnackBar(String text, String actionName, View.OnClickListener action) {
+        Snackbar snackbar = Snackbar.make(coordinatorLayout, text, Snackbar.LENGTH_LONG)
+                .setAction(actionName, action);
+        View v = snackbar.getView();
+        ((TextView) v.findViewById(android.support.design.R.id.snackbar_text)).setTextColor(ContextCompat.getColor(this, R.color.textOrIcons));
+        ((TextView) v.findViewById(android.support.design.R.id.snackbar_action)).setTextColor(ContextCompat.getColor(this, R.color.colorAccent));
+
+        snackbar.show();
+    }
+
+    private void removeThing(final Thing thing) {
+        final int pos = dataSet.indexOf(thing);
+        String snackBarTitle = String.format(getString(R.string.snackbar_thing_delete), thing.getTitle());
+        dataSet.remove(thing);
+        thingsAdapter.notifyItemRemoved(pos);
+
+        db = dbHelper.getWritableDatabase();
+
+        boolean isDelete = db.delete(
+                ThingsEntry.TABLE_NAME,
+                ThingsEntry.COLUMN_NAME_ID + "=?",
+                new String[]{thing.getId()}) == 1;
+        if (isDelete) {
+            displaySnackBar(snackBarTitle, getString(R.string.revoke), new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    restoreThing(pos, thing);
+                }
+            });
+            checkAllDone();
+        } else {
+            displaySnackBar(getString(R.string.error), null, null);
+        }
+
+    }
+
+    private void restoreThing(int pos, Thing thing) {
+        dataSet.add(pos, thing);
+        thingsAdapter.notifyItemInserted(pos);
+
+        db = dbHelper.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(ThingsContract.ThingsEntry.COLUMN_NAME_ID, thing.getId());
+        values.put(ThingsContract.ThingsEntry.COLUMN_NAME_TITLE, thing.getTitle());
+        values.put(ThingsContract.ThingsEntry.COLUMN_NAME_DATETIME, thing.getDatetime());
+        values.put(ThingsContract.ThingsEntry.COLUMN_NAME_NOTIFICATION_DATETIME, thing.getNotification_datetime());
+        values.put(ThingsContract.ThingsEntry.COLUMN_NAME_TIME_ADVANCE, thing.getTime_advance());
+        values.put(ThingsContract.ThingsEntry.COLUMN_NAME_DONE, thing.getDone());
+
+        db.insert(ThingsContract.ThingsEntry.TABLE_NAME, null, values);
+        checkAllDone();
     }
 
     private class GetTop250 extends AsyncTask<String, String, String> {

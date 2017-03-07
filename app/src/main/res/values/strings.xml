@@ -24,7 +24,7 @@
     <string name="pref_about_calendouer">关于豆瓣日历</string>
     <string name="pref_version">版本</string>
     <string name="version" translatable="false">1.5</string>
-    <string name="about_content" translatable="false">"Calendouer(豆瓣日历)一词取自Calendar和Doubaner。豆瓣日历可以提供星期，农历和阳历日期，天气信息，最重要的是它和纸质的豆瓣日历一样为你每日推荐一部佳片。\n\n反馈: sealiu0217@gmail.com"</string>
+    <string name="about_content" translatable="false">Calendouer(豆瓣日历)一词取自Calendar和Doubaner。豆瓣日历可以提供星期，农历和阳历日期，天气信息，最重要的是它和纸质的豆瓣日历一样为你每日推荐一部佳片。\n\n反馈: sealiu0217@gmail.com</string>
     <string name="location_error">无法定位</string>
     <string name="initMovieRecommended">初始化电影推荐</string>
     <string name="unknown_weahter">未知天气</string>
@@ -33,7 +33,7 @@
     <string name="close">关闭</string>
     <string name="weather_preview">3日天气预报</string>
     <string name="what_new">更新内容</string>
-    <string name="update_content" translatable="false">✱修改应用布局\n✱天气预报自动刷新与缓存\n✱修改电影推荐模式\n</string>
+    <string name="update_content">✱ 更新样式，应用主题跟随天气情况而变化\n✱ 定时刷新与缓存天气预报\n✱ 优化电影推荐模式\n✱ 添加事情备忘，可将推荐电影写入备忘</string>
 
     <string name="pref_card_settings">卡片设置</string>
     <string name="pref_title_things">事情备忘</string>
@@ -94,5 +94,7 @@
     <string name="goto_douban">去豆瓣</string>
     <string name="add_to_things">添加到事情</string>
     <string name="introduction">简介</string>
+    <string name="snackbar_thing_delete">事情备忘已删除\n"%1$s"</string>
+    <string name="revoke">撤销</string>
 </resources>
 

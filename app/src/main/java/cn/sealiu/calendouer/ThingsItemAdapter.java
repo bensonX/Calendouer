@@ -9,13 +9,14 @@ import android.widget.TextView;
 import java.util.List;
 
 import cn.sealiu.calendouer.model.Thing;
+import co.dift.ui.SwipeToAction;
 
 /**
  * Created by liuyang
  * on 2017/3/5.
  */
 
-public class ThingsItemAdapter extends RecyclerView.Adapter<ThingsItemAdapter.ViewHolder> {
+public class ThingsItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private List<Thing> dataSet;
 
     public ThingsItemAdapter(List<Thing> dataSet) {
@@ -23,24 +24,27 @@ public class ThingsItemAdapter extends RecyclerView.Adapter<ThingsItemAdapter.Vi
     }
 
     @Override
-    public void onBindViewHolder(ViewHolder holder, int position) {
-        holder.titleTV.setText(dataSet.get(position).getTitle());
-        holder.notificationTV.setText(dataSet.get(position).getNotification_datetime());
+    public int getItemCount() {
+        return dataSet.size();
     }
 
     @Override
-    public ThingsItemAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.things_item, parent, false);
         return new ViewHolder(view);
     }
 
     @Override
-    public int getItemCount() {
-        return dataSet.size();
+    public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
+        Thing thing = dataSet.get(position);
+        ViewHolder vh = (ViewHolder) holder;
+        vh.titleTV.setText(thing.getTitle());
+        vh.notificationTV.setText(dataSet.get(position).getNotification_datetime());
+        vh.data = thing;
     }
 
-    public class ViewHolder extends RecyclerView.ViewHolder {
+    public class ViewHolder extends SwipeToAction.ViewHolder<Thing> {
 
         View view;
         TextView titleTV;

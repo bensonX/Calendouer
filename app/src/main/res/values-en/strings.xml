@@ -72,4 +72,7 @@
     <string name="add_to_things">Add to Things</string>
     <string name="goto_douban">Open Douban</string>
     <string name="introduction">Introduction</string>
+    <string name="revoke">UNDO</string>
+    <string name="snackbar_thing_delete">Todo Things Deleted\n"%1$s"</string>
+    <string name="update_content">✱ Update style, the application theme follows the weather changes.\n✱ Refresh the weather forecast every x hour.\n✱ Optimize the mode of movie recommendation.\n✱ Add todo things.</string>
 </resources>

@@ -8,7 +8,7 @@
     <color name="primaryText">#212121</color>
     <color name="secondaryText">#757575</color>
     <color name="disabled">#BDBDBD</color>
-    <color name="colorDivider">#e6e6e6</color>
+    <color name="colorDivider">#dedede</color>
 
     <color name="navyGray">#607D8B</color>
     <color name="navyGrayDark">#455A64</color>
