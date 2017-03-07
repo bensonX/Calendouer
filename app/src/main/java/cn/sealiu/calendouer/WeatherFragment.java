@@ -2,7 +2,9 @@ package cn.sealiu.calendouer;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.content.Context;
 import android.content.DialogInterface;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
@@ -26,6 +28,8 @@ import cn.sealiu.calendouer.until.WeatherIcon;
 
 public class WeatherFragment extends DialogFragment {
 
+    SharedPreferences sharedPref;
+
     public WeatherFragment() {
         // Required empty public constructor
     }
@@ -33,6 +37,8 @@ public class WeatherFragment extends DialogFragment {
     @NonNull
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
+        sharedPref = getActivity().getSharedPreferences("calendouer", Context.MODE_PRIVATE);
+
         View view = LayoutInflater.from(getActivity()).inflate(R.layout.fragment_weather, null);
 
         WeatherIcon icons = new WeatherIcon();
@@ -77,7 +83,7 @@ public class WeatherFragment extends DialogFragment {
             last_update.setText(
                     String.format(
                             getResources().getString(R.string.last_update),
-                            resultsBean.getLast_update().substring(11, 16)
+                            sharedPref.getString("update_time", "")
                     )
             );
             wind.setText(

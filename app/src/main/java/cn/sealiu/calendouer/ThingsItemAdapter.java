@@ -40,7 +40,7 @@ public class ThingsItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
         Thing thing = dataSet.get(position);
         ViewHolder vh = (ViewHolder) holder;
         vh.titleTV.setText(thing.getTitle());
-        vh.notificationTV.setText(dataSet.get(position).getNotification_datetime());
+        vh.notificationTV.setText(dataSet.get(position).getNotification_datetime().substring(0, 16));
         vh.data = thing;
     }
 

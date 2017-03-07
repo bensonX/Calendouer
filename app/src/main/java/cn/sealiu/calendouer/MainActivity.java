@@ -122,6 +122,7 @@ public class MainActivity extends AppCompatActivity implements
     AMapLocationClient mLocationClient;
     AMapLocationClientOption mLocationOption;
     DateFormat df;
+    DateFormat dfTime;
     LinearLayout weatherCard;
     LinearLayout thingsCard;
     LinearLayout movieCard;
@@ -191,6 +192,7 @@ public class MainActivity extends AppCompatActivity implements
         sharedPref.registerOnSharedPreferenceChangeListener(this);
 
         df = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+        dfTime = new SimpleDateFormat("HH:mm", Locale.getDefault());
         locationMgr = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
     }
 
@@ -815,7 +817,7 @@ public class MainActivity extends AppCompatActivity implements
                 locationBean.getName() + "\n" +
                         String.format(
                                 getResources().getString(R.string.last_update),
-                                resultsBean.getLast_update().substring(11, 16)
+                                sharedPref.getString("update_time", "")
                         )
         );
         XzWeatherBean nowWeather = weatherBeans[0];
@@ -824,7 +826,11 @@ public class MainActivity extends AppCompatActivity implements
         if (nowWeather.getText_night().equals(nowWeather.getText_day())) {
             weathersText = nowWeather.getText_day();
         } else {
-            weathersText = nowWeather.getText_day() + ", " + nowWeather.getText_night();
+            weathersText = String.format(
+                    getString(R.string.weather_info),
+                    nowWeather.getText_day(),
+                    nowWeather.getText_night()
+            );
         }
         String weather = String.format(
                 getResources().getString(R.string.weather),
@@ -1129,6 +1135,7 @@ public class MainActivity extends AppCompatActivity implements
             super.onPostExecute(s);
             if (s != null && !s.equals("")) {
                 sharedPref.edit().putString("weather_json", s).apply();
+                sharedPref.edit().putString("update_time", dfTime.format(new Date())).apply();
                 setWeather();
             } else {
 
