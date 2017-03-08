@@ -1,4 +1,4 @@
-package cn.sealiu.calendouer;
+package cn.sealiu.calendouer.fragment;
 
 import android.app.Dialog;
 import android.content.Context;
@@ -20,6 +20,7 @@ import android.widget.TextView;
 import com.bumptech.glide.Glide;
 import com.google.gson.Gson;
 
+import cn.sealiu.calendouer.R;
 import cn.sealiu.calendouer.bean.MovieBean;
 
 /**

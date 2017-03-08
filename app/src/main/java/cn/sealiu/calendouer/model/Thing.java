@@ -1,32 +1,31 @@
 package cn.sealiu.calendouer.model;
 
+import java.io.Serializable;
+
 /**
  * Created by liuyang
  * on 2017/3/5.
  */
 
-public class Thing {
+public class Thing implements Serializable {
     private String id;
     private String title;
     private String datetime;
     private String notification_datetime;
-    private String time_advance;
+    private int time_advance;
     private int done;
+    private int request_code;
 
 
-    public Thing(String id, String title, String datetime, String notification_datetime, String time_advance, int done) {
+    public Thing(String id, String title, String datetime, String notification_datetime,
+                 int time_advance, int done, int request_code) {
         this.id = id;
         this.title = title;
         this.datetime = datetime;
         this.notification_datetime = notification_datetime;
         this.time_advance = time_advance;
         this.done = done;
-    }
-
-    public Thing(String id, String title, String notification_datetime) {
-        this.id = id;
-        this.title = title;
-        this.notification_datetime = notification_datetime;
+        this.request_code = request_code;
     }
 
     public String getId() {
@@ -61,11 +60,11 @@ public class Thing {
         this.notification_datetime = notification_datetime;
     }
 
-    public String getTime_advance() {
+    public int getTime_advance() {
         return time_advance;
     }
 
-    public void setTime_advance(String time_advance) {
+    public void setTime_advance(int time_advance) {
         this.time_advance = time_advance;
     }
 
@@ -75,5 +74,13 @@ public class Thing {
 
     public void setDone(int done) {
         this.done = done;
+    }
+
+    public int getRequest_code() {
+        return request_code;
+    }
+
+    public void setRequest_code(int request_code) {
+        this.request_code = request_code;
     }
 }

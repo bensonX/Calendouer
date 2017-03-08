@@ -74,5 +74,14 @@
     <string name="introduction">Introduction</string>
     <string name="revoke">UNDO</string>
     <string name="snackbar_thing_delete">Todo Things Deleted\n"%1$s"</string>
-    <string name="update_content">✱ Update style, the application theme follows the weather changes.\n✱ Refresh the weather forecast every x hour.\n✱ Optimize the mode of movie recommendation.\n✱ Add todo things.</string>
+    <string name="update_content">✱ Update style, the application theme follows the weather changes.\n✱ Refresh the weather forecast every x hour.\n✱ Optimize the mode of movie recommendation.\n✱ Add a Movie to \"Todo Things\", and you will receive a reminder.</string>
+    <string name="delete">Delete</string>
+    <string name="delete_confirm">Are you sure</string>
+    <string name="douban_error">Douban Server is dead</string>
+    <string name="mark_done">Mark Done</string>
+    <string name="retry">Retry</string>
+    <string name="snackbar_thing_done">Mark This Done \"%1$s\"</string>
+    <string name="things_date_show">%2$s/%1$s, %3$s</string>
+    <string name="things_time_show">%1$s:%2$s</string>
+    <string name="weather_error">Fail to get weather info</string>
 </resources>

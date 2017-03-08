@@ -1,4 +1,4 @@
-package cn.sealiu.calendouer;
+package cn.sealiu.calendouer.widget;
 
 import android.app.PendingIntent;
 import android.appwidget.AppWidgetManager;
@@ -18,6 +18,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
+import cn.sealiu.calendouer.MainActivity;
+import cn.sealiu.calendouer.R;
 import cn.sealiu.calendouer.until.DBHelper;
 import cn.sealiu.calendouer.until.LunarCalendar;
 import cn.sealiu.calendouer.until.MovieContract;

@@ -45,13 +45,13 @@ public class DBHelper extends SQLiteOpenHelper {
 
     private static final String SIMILAR_CREATE_ENTRIES =
             "CREATE TABLE IF NOT EXISTS " + SimilarEntry.TABLE_NAME + "(" +
-                    MovieEntry.COLUMN_NAME_ID + " TEXT PRIMARY KEY, " +
-                    MovieEntry.COLUMN_NAME_TITLE + " TEXT, " +
-                    MovieEntry.COLUMN_NAME_IMAGES + " TEXT, " +
-                    MovieEntry.COLUMN_NAME_AVERAGE + " FLOAT, " +
-                    MovieEntry.COLUMN_NAME_STARS + " TEXT, " +
-                    MovieEntry.COLUMN_NAME_ALT + " TEXT, " +
-                    MovieEntry.COLUMN_NAME_YEAR + " TEXT)";
+                    SimilarEntry.COLUMN_NAME_ID + " TEXT PRIMARY KEY, " +
+                    SimilarEntry.COLUMN_NAME_TITLE + " TEXT, " +
+                    SimilarEntry.COLUMN_NAME_IMAGES + " TEXT, " +
+                    SimilarEntry.COLUMN_NAME_AVERAGE + " FLOAT, " +
+                    SimilarEntry.COLUMN_NAME_STARS + " TEXT, " +
+                    SimilarEntry.COLUMN_NAME_ALT + " TEXT, " +
+                    SimilarEntry.COLUMN_NAME_YEAR + " TEXT)";
     private static final String SIMILAR_DELETE_ENTRIES =
             "DROP TABLE IF EXISTS " + SimilarEntry.TABLE_NAME;
 
@@ -62,7 +62,8 @@ public class DBHelper extends SQLiteOpenHelper {
                     ThingsEntry.COLUMN_NAME_DATETIME + " TEXT, " +
                     ThingsEntry.COLUMN_NAME_NOTIFICATION_DATETIME + " TEXT, " +
                     ThingsEntry.COLUMN_NAME_TIME_ADVANCE + " INTEGER, " +
-                    ThingsEntry.COLUMN_NAME_DONE + " INTEGER)";
+                    ThingsEntry.COLUMN_NAME_DONE + " INTEGER, " +
+                    ThingsEntry.COLUMN_NAME_REQUEST_CODE + " INTEGER)";
     private static final String THINGS_DELETE_ENTRIES =
             "DROP TABLE IF EXISTS " + ThingsEntry.TABLE_NAME;
 

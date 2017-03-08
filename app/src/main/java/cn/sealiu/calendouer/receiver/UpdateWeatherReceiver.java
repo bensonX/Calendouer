@@ -1,4 +1,4 @@
-package cn.sealiu.calendouer;
+package cn.sealiu.calendouer.receiver;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;

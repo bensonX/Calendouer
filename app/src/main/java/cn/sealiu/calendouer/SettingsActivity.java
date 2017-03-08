@@ -173,9 +173,6 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
             setHasOptionsMenu(true);
 
             bindPreferenceSummaryToValue(findPreference("update_frequency"));
-//            bindPreferenceSummaryToValue(findPreference("weather_show"));
-//            bindPreferenceSummaryToValue(findPreference("notification_show"));
-//            bindPreferenceSummaryToValue(findPreference("movie_recommended_show"));
         }
 
         @Override

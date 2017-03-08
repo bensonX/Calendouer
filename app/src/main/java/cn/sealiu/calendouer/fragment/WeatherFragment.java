@@ -1,4 +1,4 @@
-package cn.sealiu.calendouer;
+package cn.sealiu.calendouer.fragment;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
+import cn.sealiu.calendouer.R;
 import cn.sealiu.calendouer.bean.XzBean;
 import cn.sealiu.calendouer.bean.XzLocationBean;
 import cn.sealiu.calendouer.bean.XzResultsBean;

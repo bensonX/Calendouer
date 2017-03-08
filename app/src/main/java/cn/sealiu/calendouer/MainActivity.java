@@ -1,7 +1,5 @@
 package cn.sealiu.calendouer;
 
-import android.app.AlarmManager;
-import android.app.PendingIntent;
 import android.app.ProgressDialog;
 import android.content.ContentValues;
 import android.content.Context;
@@ -9,23 +7,18 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.content.res.ColorStateList;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.location.LocationManager;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.design.widget.CollapsingToolbarLayout;
-import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.widget.NestedScrollView;
 import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.AppCompatButton;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -54,14 +47,12 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 
+import cn.sealiu.calendouer.adapter.ThingsItemAdapter;
 import cn.sealiu.calendouer.bean.MovieBaseBean;
 import cn.sealiu.calendouer.bean.MovieBean;
 import cn.sealiu.calendouer.bean.Top250Bean;
@@ -69,7 +60,10 @@ import cn.sealiu.calendouer.bean.XzBean;
 import cn.sealiu.calendouer.bean.XzLocationBean;
 import cn.sealiu.calendouer.bean.XzResultsBean;
 import cn.sealiu.calendouer.bean.XzWeatherBean;
+import cn.sealiu.calendouer.fragment.MovieFragment;
+import cn.sealiu.calendouer.fragment.WeatherFragment;
 import cn.sealiu.calendouer.model.Thing;
+import cn.sealiu.calendouer.receiver.UpdateWeatherReceiver;
 import cn.sealiu.calendouer.until.DBHelper;
 import cn.sealiu.calendouer.until.FestivalCalendar;
 import cn.sealiu.calendouer.until.LunarCalendar;
@@ -82,19 +76,12 @@ import co.dift.ui.SwipeToAction;
 
 import static android.Manifest.permission;
 
-public class MainActivity extends AppCompatActivity implements
+public class MainActivity extends CalendouerActivity implements
         AMapLocationListener,
         View.OnClickListener,
         SharedPreferences.OnSharedPreferenceChangeListener,
         MovieFragment.MovieListener {
 
-    private final static int STAR = 5;
-    private final static int MAX_COUNT = 100;
-    private final static int LOCATION_PERM = 100;
-    private final static int THINGS_MAX_LINE = 5;
-
-    private final static int WEATHER_REQUEST_CODE = 114;
-    private final static int ADD_THINGS_CODE = 200;
     Toolbar toolbar;
     TextView monthTV;
     TextView weekTV;
@@ -121,23 +108,22 @@ public class MainActivity extends AppCompatActivity implements
     WeatherIcon icons;
     AMapLocationClient mLocationClient;
     AMapLocationClientOption mLocationOption;
-    DateFormat df;
-    DateFormat dfTime;
     LinearLayout weatherCard;
     LinearLayout thingsCard;
     LinearLayout movieCard;
     AppCompatButton thingsAllBtn;
     RecyclerView thingsRecyclerView;
     TextView thingsEmpty;
-    SharedPreferences sharedPref;
-    SharedPreferences settingPref;
     LocationManager locationMgr;
-    CoordinatorLayout coordinatorLayout;
     FloatingActionButton fab;
     CollapsingToolbarLayout collapsingToolbarLayout;
+    NestedScrollView nestedScrollView;
     List<Thing> dataSet = new ArrayList<>();
     SwipeToAction swipeToAction;
     ThingsItemAdapter thingsAdapter;
+    View progressOfDay;
+
+    int color, colorDark;
     private int festival = 0;
 
     @Override
@@ -147,8 +133,9 @@ public class MainActivity extends AppCompatActivity implements
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        progressOfDay = findViewById(R.id.progress_day);
         collapsingToolbarLayout = (CollapsingToolbarLayout) findViewById(R.id.collapsing_toolbar);
-        coordinatorLayout = (CoordinatorLayout) findViewById(R.id.activity_main);
+        nestedScrollView = (NestedScrollView) findViewById(R.id.nest_scroll_view);
         fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(this);
         monthTV = (TextView) findViewById(R.id.month);
@@ -181,29 +168,20 @@ public class MainActivity extends AppCompatActivity implements
 
         getTop250Btn = (AppCompatButton) findViewById(R.id.getTop250_btn);
         movieRecommendedHolder = (LinearLayout) findViewById(R.id.movie_recommended_holder);
-
         dbHelper = new DBHelper(this);
-
         icons = new WeatherIcon();
-
-        sharedPref = this.getSharedPreferences("calendouer", Context.MODE_PRIVATE);
-        settingPref = PreferenceManager.getDefaultSharedPreferences(this);
-
         sharedPref.registerOnSharedPreferenceChangeListener(this);
-
-        df = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
-        dfTime = new SimpleDateFormat("HH:mm", Locale.getDefault());
         locationMgr = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
+
+        color = ContextCompat.getColor(this, R.color.colorPrimary);
+        colorDark = ContextCompat.getColor(this, R.color.colorPrimaryDark);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            this.getWindow().setNavigationBarColor(ContextCompat.getColor(this, R.color.colorPrimary));
-            this.getWindow().setStatusBarColor(ContextCompat.getColor(this, R.color.colorPrimaryDark));
-        }
+        setCustomTheme(color, colorDark, fab, collapsingToolbarLayout);
 
         mLocationClient = new AMapLocationClient(getApplicationContext());
         mLocationClient.setLocationListener(this);
@@ -267,7 +245,7 @@ public class MainActivity extends AppCompatActivity implements
                 if (datePref.equals("") || idPref.equals("")) {
                     setMovieInfoRandom();
                 } else {
-                    if (!datePref.equals(df.format(new Date()))) {
+                    if (!datePref.equals(df_ymd.format(new Date()))) {
                         //new day
                         db = dbHelper.getWritableDatabase();
                         if (db.delete(
@@ -285,6 +263,8 @@ public class MainActivity extends AppCompatActivity implements
         } else {
             movieCard.setVisibility(View.GONE);
         }
+
+        setProgressInPd(progressOfDay);
     }
 
     private boolean checkEmpty(String tableName) {
@@ -368,9 +348,9 @@ public class MainActivity extends AppCompatActivity implements
         if (!festStr.equals("")) {
             festivalTV.setVisibility(View.VISIBLE);
             festivalTV.setText(festStr);
-            int tomato = ContextCompat.getColor(this, R.color.tomato);
-            int tomatoDark = ContextCompat.getColor(this, R.color.tomatoDark);
-            setCustomTheme(tomato, tomatoDark);
+            color = ContextCompat.getColor(this, R.color.tomato);
+            colorDark = ContextCompat.getColor(this, R.color.tomatoDark);
+            setCustomTheme(color, colorDark, fab, collapsingToolbarLayout);
             festival = 1;
         } else {
             festivalTV.setVisibility(View.GONE);
@@ -380,7 +360,7 @@ public class MainActivity extends AppCompatActivity implements
 
     private void initWeather() {
 
-        if (!checkPermission()) {
+        if (!checkLocationPermission()) {
 
             weatherCard.setVisibility(View.VISIBLE);
             weatherHolder.setVisibility(View.GONE);
@@ -432,7 +412,11 @@ public class MainActivity extends AppCompatActivity implements
         String[] projection = {
                 ThingsEntry.COLUMN_NAME_ID,
                 ThingsEntry.COLUMN_NAME_TITLE,
-                ThingsEntry.COLUMN_NAME_NOTIFICATION_DATETIME
+                ThingsEntry.COLUMN_NAME_DATETIME,
+                ThingsEntry.COLUMN_NAME_NOTIFICATION_DATETIME,
+                ThingsEntry.COLUMN_NAME_TIME_ADVANCE,
+                ThingsEntry.COLUMN_NAME_DONE,
+                ThingsEntry.COLUMN_NAME_REQUEST_CODE
         };
 
         Cursor cursor = db.query(
@@ -451,10 +435,25 @@ public class MainActivity extends AppCompatActivity implements
             do {
                 String id = cursor.getString(cursor.getColumnIndex(ThingsEntry.COLUMN_NAME_ID));
                 String title = cursor.getString(cursor.getColumnIndex(ThingsEntry.COLUMN_NAME_TITLE));
+                String datetime = cursor.getString(cursor.getColumnIndex(ThingsEntry.COLUMN_NAME_DATETIME));
                 String notification_datetime = cursor.getString(
                         cursor.getColumnIndex(ThingsEntry.COLUMN_NAME_NOTIFICATION_DATETIME)
                 );
-                dataSet.add(new Thing(id, title, notification_datetime));
+                int time_advance = cursor.getInt(cursor.getColumnIndex(ThingsEntry.COLUMN_NAME_TIME_ADVANCE));
+                int done = cursor.getInt(cursor.getColumnIndex(ThingsEntry.COLUMN_NAME_DONE));
+                int request_code = cursor.getInt(cursor.getColumnIndex(ThingsEntry.COLUMN_NAME_REQUEST_CODE));
+
+                dataSet.add(
+                        new Thing(
+                                id,
+                                title,
+                                datetime,
+                                notification_datetime,
+                                time_advance,
+                                done,
+                                request_code
+                        )
+                );
             } while (cursor.moveToNext());
 
             if (cursor.getCount() == THINGS_MAX_LINE) {
@@ -471,29 +470,29 @@ public class MainActivity extends AppCompatActivity implements
 
                 @Override
                 public boolean swipeLeft(final Thing itemData) {
-//                    Log.d("Thing", "swipe left");
-//                    removeThing(itemData);
-//                    return true;
-                    return false;
-                }
-
-                @Override
-                public boolean swipeRight(final Thing itemData) {
-                    Log.d("Thing", "swipe right");
                     removeThing(itemData);
                     return true;
                 }
 
                 @Override
+                public boolean swipeRight(final Thing itemData) {
+                    doneThing(itemData);
+                    return true;
+                }
+
+                @Override
                 public void onClick(Thing itemData) {
-                    Log.d("Thing", "click");
-                    displaySnackBar(itemData.getTitle() + "click", null, null);
+                    Intent intent = new Intent(MainActivity.this, ThingsDetailActivity.class);
+                    intent.putExtra("thing", itemData);
+                    intent.putExtra("color", color);
+                    intent.putExtra("colorDark", colorDark);
+                    startActivityForResult(intent, DETAIL_THINGS_CODE);
                 }
 
                 @Override
                 public void onLongClick(Thing itemData) {
                     Log.d("Thing", "long click");
-                    displaySnackBar(itemData.getTitle() + "long click", null, null);
+                    displaySnackBar(nestedScrollView, itemData.getTitle() + "long click", null, null);
                 }
             });
 
@@ -528,6 +527,10 @@ public class MainActivity extends AppCompatActivity implements
                 sharedPref.getString("weather_json", "").equals("")) {
             getWeather();
         }
+
+        if (key.equals("update_frequency")) {
+            getWeather();
+        }
     }
 
     @Override
@@ -541,8 +544,11 @@ public class MainActivity extends AppCompatActivity implements
                 sharedPref.edit().putString("Longitude", lng).apply();
 
             } else {
-                Snackbar.make(coordinatorLayout, aMapLocation.getErrorInfo(), Snackbar.LENGTH_LONG)
-                        .setAction("重试", new View.OnClickListener() {
+                displaySnackBar(
+                        nestedScrollView,
+                        aMapLocation.getErrorInfo(),
+                        getString(R.string.retry),
+                        new View.OnClickListener() {
                             @Override
                             public void onClick(View v) {
                                 mLocationClient.startLocation();
@@ -561,7 +567,10 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == R.id.action_setting) {
-            startActivity(new Intent(this, SettingsActivity.class));
+            Intent intent = new Intent(this, SettingsActivity.class);
+            intent.putExtra("color", color);
+            intent.putExtra("colorDark", colorDark);
+            startActivity(intent);
         }
         return super.onOptionsItemSelected(item);
     }
@@ -645,7 +654,7 @@ public class MainActivity extends AppCompatActivity implements
 
         if (cursor.moveToFirst()) {
             String id = cursor.getString(cursor.getColumnIndex(MovieEntry.COLUMN_NAME_ID));
-            sharedPref.edit().putString("DATE", df.format(new Date())).apply();
+            sharedPref.edit().putString("DATE", df_ymd.format(new Date())).apply();
             sharedPref.edit().putString("ID", id).apply();
             setMovieInfoRepeat(id);
         }
@@ -767,12 +776,6 @@ public class MainActivity extends AppCompatActivity implements
         super.onDestroy();
     }
 
-    private boolean checkPermission() {
-        return ActivityCompat.checkSelfPermission(this, permission.ACCESS_COARSE_LOCATION)
-                == PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this,
-                permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED;
-    }
-
     @Override
     public void onClick(View v) {
 
@@ -798,7 +801,10 @@ public class MainActivity extends AppCompatActivity implements
                 openMovieFragment();
                 break;
             case R.id.fab:
-                startActivityForResult(new Intent(this, AddThingsActivity.class), ADD_THINGS_CODE);
+                Intent intent = new Intent(this, AddThingsActivity.class);
+                intent.putExtra("color", color);
+                intent.putExtra("colorDark", colorDark);
+                startActivityForResult(intent, ADD_THINGS_CODE);
                 break;
             case R.id.things_all_btn:
                 // TODO: 2017/3/5 check all things
@@ -854,40 +860,15 @@ public class MainActivity extends AppCompatActivity implements
                 changeTheme(weather_code);
             }
         }
-
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(new Date());
-
-        calendar.add(
-                Calendar.HOUR_OF_DAY,
-                Integer.parseInt(settingPref.getString("update_frequency", "2"))
-        );
-        setTrigger(WEATHER_REQUEST_CODE, calendar.getTimeInMillis());
-    }
-
-    private void setTrigger(int requestCode, long triggerAtMillis) {
-        AlarmManager alarmMgr = (AlarmManager) getSystemService(ALARM_SERVICE);
-        Intent intent = new Intent(this, UpdateWeatherReceiver.class);
-
-        PendingIntent alarmIntent = PendingIntent.getBroadcast(
-                this,
-                requestCode,
-                intent,
-                PendingIntent.FLAG_UPDATE_CURRENT
-        );
-
-        alarmMgr.set(
-                AlarmManager.RTC,
-                triggerAtMillis,
-                alarmIntent
-        );
     }
 
     @Override
     public void onAddThings() {
         Intent intent = new Intent(this, AddThingsActivity.class);
-
         intent.putExtra("movie_title", movieTitleTV.getText());
+        intent.putExtra("color", color);
+        intent.putExtra("colorDark", colorDark);
+
         startActivityForResult(intent, ADD_THINGS_CODE);
     }
 
@@ -913,58 +894,42 @@ public class MainActivity extends AppCompatActivity implements
             Log.d("Things", "add things success");
             initThings();
         }
+
+        if (requestCode == DETAIL_THINGS_CODE && resultCode == RESULT_OK && data != null) {
+            initThings();
+        }
     }
 
     private void changeTheme(String weather_code) {
         switch (icons.getWeather(weather_code)) {
             case 1://sunny
-                int colorPrimary = ContextCompat.getColor(this, R.color.colorPrimary);
-                int colorPrimaryDark = ContextCompat.getColor(this, R.color.colorPrimaryDark);
-                setCustomTheme(colorPrimary, colorPrimaryDark);
+                color = ContextCompat.getColor(this, R.color.colorPrimary);
+                colorDark = ContextCompat.getColor(this, R.color.colorPrimaryDark);
+                setCustomTheme(color, colorDark, fab, collapsingToolbarLayout);
                 break;
             case 2://cloud
-                int gray = ContextCompat.getColor(this, R.color.gray);
-                int grayDark = ContextCompat.getColor(this, R.color.grayDark);
-                setCustomTheme(gray, grayDark);
+                color = ContextCompat.getColor(this, R.color.gray);
+                colorDark = ContextCompat.getColor(this, R.color.grayDark);
+                setCustomTheme(color, colorDark, fab, collapsingToolbarLayout);
                 break;
             case 3://rain
-                int navyGray = ContextCompat.getColor(this, R.color.navyGray);
-                int navyGrayDark = ContextCompat.getColor(this, R.color.navyGrayDark);
-                setCustomTheme(navyGray, navyGrayDark);
+                color = ContextCompat.getColor(this, R.color.navyGray);
+                colorDark = ContextCompat.getColor(this, R.color.navyGrayDark);
+                setCustomTheme(color, colorDark, fab, collapsingToolbarLayout);
                 break;
             case 4://snow
-                int blueSky = ContextCompat.getColor(this, R.color.blueSky);
-                int blueSkyDark = ContextCompat.getColor(this, R.color.blueSkyDark);
-                setCustomTheme(blueSky, blueSkyDark);
+                color = ContextCompat.getColor(this, R.color.blueSky);
+                colorDark = ContextCompat.getColor(this, R.color.blueSkyDark);
+                setCustomTheme(color, colorDark, fab, collapsingToolbarLayout);
                 break;
             case 5://wind_sand
-                int orange = ContextCompat.getColor(this, R.color.orange);
-                int orangeDark = ContextCompat.getColor(this, R.color.orangeDark);
-                setCustomTheme(orange, orangeDark);
+                color = ContextCompat.getColor(this, R.color.orange);
+                colorDark = ContextCompat.getColor(this, R.color.orangeDark);
+                setCustomTheme(color, colorDark, fab, collapsingToolbarLayout);
                 break;
             default:
                 break;
         }
-    }
-
-    private void setCustomTheme(int color, int colorDark) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            fab.setBackgroundTintList(ColorStateList.valueOf(color));
-            collapsingToolbarLayout.setContentScrimColor(color);
-            collapsingToolbarLayout.setBackgroundColor(color);
-            this.getWindow().setNavigationBarColor(color);
-            this.getWindow().setStatusBarColor(colorDark);
-        }
-    }
-
-    private void displaySnackBar(String text, String actionName, View.OnClickListener action) {
-        Snackbar snackbar = Snackbar.make(coordinatorLayout, text, Snackbar.LENGTH_LONG)
-                .setAction(actionName, action);
-        View v = snackbar.getView();
-        ((TextView) v.findViewById(android.support.design.R.id.snackbar_text)).setTextColor(ContextCompat.getColor(this, R.color.textOrIcons));
-        ((TextView) v.findViewById(android.support.design.R.id.snackbar_action)).setTextColor(ContextCompat.getColor(this, R.color.colorAccent));
-
-        snackbar.show();
     }
 
     private void removeThing(final Thing thing) {
@@ -980,17 +945,59 @@ public class MainActivity extends AppCompatActivity implements
                 ThingsEntry.COLUMN_NAME_ID + "=?",
                 new String[]{thing.getId()}) == 1;
         if (isDelete) {
-            displaySnackBar(snackBarTitle, getString(R.string.revoke), new View.OnClickListener() {
+            cancelThingAlarm(thing.getId(), thing.getRequest_code());
+            displaySnackBar(nestedScrollView, snackBarTitle, getString(R.string.revoke), new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     restoreThing(pos, thing);
                 }
             });
-            checkAllDone();
-        } else {
-            displaySnackBar(getString(R.string.error), null, null);
-        }
 
+            if (!checkAllDone()) {
+                initThings();
+            }
+        } else {
+            displaySnackBar(nestedScrollView, getString(R.string.error), null, null);
+        }
+    }
+
+    private void doneThing(final Thing thing) {
+        final int pos = dataSet.indexOf(thing);
+        String snackBarTitle = String.format(getString(R.string.snackbar_thing_done), thing.getTitle());
+        dataSet.remove(thing);
+        thingsAdapter.notifyItemRemoved(pos);
+
+        ContentValues values = new ContentValues();
+        values.put(ThingsContract.ThingsEntry.COLUMN_NAME_ID, thing.getId());
+        values.put(ThingsContract.ThingsEntry.COLUMN_NAME_TITLE, thing.getTitle());
+        values.put(ThingsContract.ThingsEntry.COLUMN_NAME_DATETIME, thing.getDatetime());
+        values.put(ThingsContract.ThingsEntry.COLUMN_NAME_NOTIFICATION_DATETIME, thing.getNotification_datetime());
+        values.put(ThingsContract.ThingsEntry.COLUMN_NAME_TIME_ADVANCE, thing.getTime_advance());
+        values.put(ThingsContract.ThingsEntry.COLUMN_NAME_DONE, 1);
+        values.put(ThingsEntry.COLUMN_NAME_REQUEST_CODE, thing.getRequest_code());
+
+        db = dbHelper.getWritableDatabase();
+        boolean isDone = db.update(
+                ThingsContract.ThingsEntry.TABLE_NAME,
+                values,
+                ThingsContract.ThingsEntry.COLUMN_NAME_ID + "=?",
+                new String[]{thing.getId()}
+        ) == 1;
+
+        if (isDone) {
+            cancelThingAlarm(thing.getId(), thing.getRequest_code());
+            displaySnackBar(nestedScrollView, snackBarTitle, getString(R.string.revoke), new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    remarkThing(pos, thing);
+                }
+            });
+            if (!checkAllDone()) {
+                initThings();
+            }
+        } else {
+            displaySnackBar(nestedScrollView, getString(R.string.error), null, null);
+        }
     }
 
     private void restoreThing(int pos, Thing thing) {
@@ -1006,8 +1013,49 @@ public class MainActivity extends AppCompatActivity implements
         values.put(ThingsContract.ThingsEntry.COLUMN_NAME_TIME_ADVANCE, thing.getTime_advance());
         values.put(ThingsContract.ThingsEntry.COLUMN_NAME_DONE, thing.getDone());
 
-        db.insert(ThingsContract.ThingsEntry.TABLE_NAME, null, values);
-        checkAllDone();
+        if (db.insert(
+                ThingsContract.ThingsEntry.TABLE_NAME,
+                null,
+                values) != -1) {
+            setThingAlarm(
+                    thing.getId(),
+                    thing.getNotification_datetime(),
+                    thing.getRequest_code()
+            );
+        }
+        thingsEmpty.setVisibility(View.GONE);
+        findViewById(R.id.things_divider).setVisibility(View.VISIBLE);
+        initThings();
+    }
+
+    private void remarkThing(int pos, Thing thing) {
+        dataSet.add(pos, thing);
+        thingsAdapter.notifyItemInserted(pos);
+        db = dbHelper.getWritableDatabase();
+
+        ContentValues values = new ContentValues();
+        values.put(ThingsContract.ThingsEntry.COLUMN_NAME_ID, thing.getId());
+        values.put(ThingsContract.ThingsEntry.COLUMN_NAME_TITLE, thing.getTitle());
+        values.put(ThingsContract.ThingsEntry.COLUMN_NAME_DATETIME, thing.getDatetime());
+        values.put(ThingsContract.ThingsEntry.COLUMN_NAME_NOTIFICATION_DATETIME, thing.getNotification_datetime());
+        values.put(ThingsContract.ThingsEntry.COLUMN_NAME_TIME_ADVANCE, thing.getTime_advance());
+        values.put(ThingsContract.ThingsEntry.COLUMN_NAME_DONE, 0);
+
+        db = dbHelper.getWritableDatabase();
+        if (db.update(
+                ThingsContract.ThingsEntry.TABLE_NAME,
+                values,
+                ThingsContract.ThingsEntry.COLUMN_NAME_ID + "=?",
+                new String[]{thing.getId()}) != -1) {
+            setThingAlarm(
+                    thing.getId(),
+                    thing.getNotification_datetime(),
+                    thing.getRequest_code()
+            );
+        }
+        thingsEmpty.setVisibility(View.GONE);
+        findViewById(R.id.things_divider).setVisibility(View.VISIBLE);
+        initThings();
     }
 
     private class GetTop250 extends AsyncTask<String, String, String> {
@@ -1059,13 +1107,16 @@ public class MainActivity extends AppCompatActivity implements
                 getTop250Btn.setVisibility(View.VISIBLE);
                 movieCardCover.setVisibility(View.VISIBLE);
 
-                Snackbar.make(coordinatorLayout, "豆瓣服务器开小差了", Snackbar.LENGTH_LONG)
-                        .setAction("重试", new View.OnClickListener() {
+                displaySnackBar(
+                        nestedScrollView,
+                        getString(R.string.douban_error),
+                        getString(R.string.retry),
+                        new View.OnClickListener() {
                             @Override
                             public void onClick(View v) {
                                 initMovieDB();
                             }
-                        }).show();
+                        });
             }
 
         }
@@ -1109,8 +1160,11 @@ public class MainActivity extends AppCompatActivity implements
                 }
             } else {
                 Log.d("douban", "getMovieInfo: null");
-                Snackbar.make(coordinatorLayout, "豆瓣服务器开小差了", Snackbar.LENGTH_LONG)
-                        .setAction("重试", new View.OnClickListener() {
+                displaySnackBar(
+                        nestedScrollView,
+                        getString(R.string.douban_error),
+                        getString(R.string.retry),
+                        new View.OnClickListener() {
                             @Override
                             public void onClick(View v) {
                                 String id = sharedPref.getString("ID", "");
@@ -1118,7 +1172,7 @@ public class MainActivity extends AppCompatActivity implements
                                     setMovieInfoRepeat(id);
                                 }
                             }
-                        }).show();
+                        });
             }
         }
     }
@@ -1135,7 +1189,21 @@ public class MainActivity extends AppCompatActivity implements
             super.onPostExecute(s);
             if (s != null && !s.equals("")) {
                 sharedPref.edit().putString("weather_json", s).apply();
-                sharedPref.edit().putString("update_time", dfTime.format(new Date())).apply();
+                sharedPref.edit().putString("update_time", df_hm.format(new Date())).apply();
+
+                // update weather every x hours;
+                Calendar calendar = Calendar.getInstance();
+
+                calendar.add(
+                        Calendar.HOUR_OF_DAY,
+                        Integer.parseInt(settingPref.getString("update_frequency", "2"))
+                );
+
+                Intent intent = new Intent(MainActivity.this, UpdateWeatherReceiver.class);
+
+                setAlarm(intent, WEATHER_REQUEST_CODE, calendar.getTimeInMillis());
+
+                //set weather
                 setWeather();
             } else {
 
@@ -1146,8 +1214,11 @@ public class MainActivity extends AppCompatActivity implements
                         icons.map.get("99")
                 ));
 
-                Snackbar.make(coordinatorLayout, "请求天气失败", Snackbar.LENGTH_LONG)
-                        .setAction("重试", new View.OnClickListener() {
+                displaySnackBar(
+                        nestedScrollView,
+                        getString(R.string.weather_error),
+                        getString(R.string.retry),
+                        new View.OnClickListener() {
                             @Override
                             public void onClick(View v) {
                                 getWeather();

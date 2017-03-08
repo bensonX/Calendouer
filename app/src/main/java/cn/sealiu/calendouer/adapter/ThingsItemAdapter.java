@@ -1,4 +1,4 @@
-package cn.sealiu.calendouer;
+package cn.sealiu.calendouer.adapter;
 
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -8,6 +8,7 @@ import android.widget.TextView;
 
 import java.util.List;
 
+import cn.sealiu.calendouer.R;
 import cn.sealiu.calendouer.model.Thing;
 import co.dift.ui.SwipeToAction;
 
