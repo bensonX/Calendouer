@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "898381157755",
+    "firebase_url": "https://douer-47dfb.firebaseio.com",
+    "project_id": "douer-47dfb",
+    "storage_bucket": "douer-47dfb.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:898381157755:android:abd2edc713d18039",
+        "android_client_info": {
+          "package_name": "cn.sealiu.calendouer"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "898381157755-c477k9tf0eb04djsjdeo4ep08kntmec2.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "cn.sealiu.calendouer",
+            "certificate_hash": "db3d064a273238fbc99f6d58b4fff3890a8d4906"
+          }
+        },
+        {
+          "client_id": "898381157755-81gaf1qik4a9aivdfeo650f735kb3i6v.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDKfAeUiVLy19-vIgZD-FC7tBRrh-mU8M8"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "898381157755-81gaf1qik4a9aivdfeo650f735kb3i6v.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

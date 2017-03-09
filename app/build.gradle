@@ -3,7 +3,10 @@ apply plugin: 'com.android.application'
 android {
     signingConfigs {
         config {
-
+            keyAlias 'calendouer'
+            keyPassword 'sme0rmmly931119'
+            storeFile file('D:/Android/KeyStore/calendouer.jks')
+            storePassword 'sme0rmmly931119'
         }
     }
     compileSdkVersion 25
@@ -47,7 +50,6 @@ dependencies {
     compile 'com.google.firebase:firebase-crash:9.6.1'
     compile 'com.google.firebase:firebase-ads:10.2.0'
     compile 'co.dift.ui.swipetoaction:library:1.1'
-    compile 'com.android.support.constraint:constraint-layout:1.0.0-beta4'
     testCompile 'junit:junit:4.12'
 }
 
