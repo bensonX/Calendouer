@@ -49,7 +49,7 @@
             android:title="@string/pref_title_movie" />
 
         <SwitchPreference
-            android:defaultValue="true"
+            android:defaultValue="false"
             android:enabled="false"
             android:key="movie_similar_show"
             android:title="@string/pref_title_similar_movie" />
