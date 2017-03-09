@@ -105,5 +105,8 @@
     <string name="retry">重试</string>
     <string name="weather_error">请求天气失败</string>
     <string name="douban_error">豆瓣服务器开小差了</string>
+    <string name="native_ad_unit_id">ca-app-pub-6993844563211839/9791767307</string>
+    <string name="support_developer">支持开发者</string>
+    <string name="ad_title">广告卡片</string>
 </resources>
 

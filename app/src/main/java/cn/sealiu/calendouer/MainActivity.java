@@ -38,6 +38,8 @@ import com.amap.api.location.AMapLocationClient;
 import com.amap.api.location.AMapLocationClientOption;
 import com.amap.api.location.AMapLocationListener;
 import com.bumptech.glide.Glide;
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.NativeExpressAdView;
 import com.google.gson.Gson;
 
 import java.io.BufferedReader;
@@ -122,6 +124,7 @@ public class MainActivity extends CalendouerActivity implements
     SwipeToAction swipeToAction;
     ThingsItemAdapter thingsAdapter;
     View progressOfDay;
+    NativeExpressAdView adView;
 
     int color, colorDark;
     private int festival = 0;
@@ -133,6 +136,7 @@ public class MainActivity extends CalendouerActivity implements
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        adView = (NativeExpressAdView) findViewById(R.id.adView);
         progressOfDay = findViewById(R.id.progress_day);
         collapsingToolbarLayout = (CollapsingToolbarLayout) findViewById(R.id.collapsing_toolbar);
         nestedScrollView = (NestedScrollView) findViewById(R.id.nest_scroll_view);
@@ -265,6 +269,20 @@ public class MainActivity extends CalendouerActivity implements
         }
 
         setProgressInPd(progressOfDay);
+
+        initAd();
+    }
+
+    private void initAd() {
+        if (settingPref.getBoolean("ad_show", true)) {
+            adView.setVisibility(View.VISIBLE);
+            AdRequest request = new AdRequest.Builder()
+                    .addTestDevice("43FE98603DD8DD9E449808D85C7DBD45")
+                    .build();
+            adView.loadAd(request);
+        } else {
+            adView.setVisibility(View.GONE);
+        }
     }
 
     private boolean checkEmpty(String tableName) {

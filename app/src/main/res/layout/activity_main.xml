@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:ads="http://schemas.android.com/apk/res-auto"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/activity_main"
@@ -375,6 +376,13 @@
                 </LinearLayout>
             </LinearLayout>
 
+            <com.google.android.gms.ads.NativeExpressAdView
+                android:id="@+id/adView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/activity_vertical_margin"
+                ads:adSize="320x150"
+                ads:adUnitId="@string/native_ad_unit_id"></com.google.android.gms.ads.NativeExpressAdView>
         </LinearLayout>
 
     </android.support.v4.widget.NestedScrollView>
