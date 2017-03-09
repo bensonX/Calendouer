@@ -34,16 +34,6 @@
             android:label="@string/setting"
             android:parentActivityName=".MainActivity" />
 
-        <receiver android:name=".widget.DourAppWidget">
-            <intent-filter>
-                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
-            </intent-filter>
-
-            <meta-data
-                android:name="android.appwidget.provider"
-                android:resource="@xml/dour_app_widget_info" />
-        </receiver>
-
         <service android:name="com.amap.api.location.APSService" />
 
         <receiver android:name=".receiver.UpdateWeatherReceiver" />

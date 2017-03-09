@@ -84,4 +84,6 @@
     <string name="things_date_show">%2$s/%1$s, %3$s</string>
     <string name="things_time_show">%1$s:%2$s</string>
     <string name="weather_error">Fail to get weather info</string>
+    <string name="ad_title">Ad</string>
+    <string name="support_developer">Support for developer</string>
 </resources>
