@@ -63,7 +63,7 @@ dependencies {
 
 ## 下载：
 - [Google Play](https://play.google.com/store/apps/details?id=cn.sealiu.calendouer)
-- 百度手机助手——由于更新后网址会变化，请直接搜索 `豆瓣日历` (注意版本号)
+- [国内分发渠道：酷安](http://www.coolapk.com/apk/cn.sealiu.calendouer)
 
 ## 反馈
 - email
