@@ -178,7 +178,8 @@
                 android:layout_marginTop="@dimen/activity_vertical_margin"
                 android:background="@color/textOrIcons"
                 android:orientation="vertical"
-                android:paddingTop="@dimen/activity_vertical_margin">
+                android:paddingTop="@dimen/activity_vertical_margin"
+                android:visibility="gone">
 
                 <TextView
                     android:layout_width="match_parent"

@@ -202,6 +202,7 @@ public class MainActivity extends CalendouerActivity implements
             initWeather();
         } else {
             weatherHolder.setVisibility(View.GONE);
+            restoreTheme();
         }
 
         if (settingPref.getBoolean("things_show", true)) {
@@ -948,6 +949,12 @@ public class MainActivity extends CalendouerActivity implements
             default:
                 break;
         }
+    }
+
+    private void restoreTheme(){
+        color = ContextCompat.getColor(this, R.color.colorPrimary);
+        colorDark = ContextCompat.getColor(this, R.color.colorPrimaryDark);
+        setCustomTheme(color, colorDark, fab, collapsingToolbarLayout);
     }
 
     private void removeThing(final Thing thing) {
