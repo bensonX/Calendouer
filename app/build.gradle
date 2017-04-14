@@ -3,7 +3,10 @@ apply plugin: 'com.android.application'
 android {
     signingConfigs {
         config {
-
+            keyAlias 'calendouer'
+            keyPassword 'sme0rmmly931119'
+            storeFile file('/Users/liuyang/Google 云端硬盘/归档/Calendouer/calendouer.jks')
+            storePassword 'sme0rmmly931119'
         }
     }
     compileSdkVersion 25
