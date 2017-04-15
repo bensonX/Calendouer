@@ -16,31 +16,6 @@
             android:title="@string/weather_update_frequency" />
     </PreferenceCategory>
 
-    <PreferenceCategory android:title="@string/things_title">
-        <SwitchPreference
-            android:defaultValue="true"
-            android:key="things_show"
-            android:title="@string/pref_title_things" />
-
-        <SwitchPreference
-            android:defaultValue="true"
-            android:dependency="things_show"
-            android:key="things_notification"
-            android:title="@string/things_notification" />
-
-        <RingtonePreference
-            android:defaultValue="content://settings/system/notification_sound"
-            android:dependency="things_notification"
-            android:key="things_ringtone"
-            android:ringtoneType="notification"
-            android:title="@string/things_ringtone" />
-
-        <SwitchPreference
-            android:defaultValue="true"
-            android:dependency="things_notification"
-            android:key="things_vibrate"
-            android:title="@string/things_vibrate" />
-    </PreferenceCategory>
 
     <PreferenceCategory android:title="@string/movie_title">
         <SwitchPreference
@@ -49,8 +24,7 @@
             android:title="@string/pref_title_movie" />
 
         <SwitchPreference
-            android:defaultValue="false"
-            android:enabled="false"
+            android:defaultValue="true"
             android:key="movie_similar_show"
             android:title="@string/pref_title_similar_movie" />
     </PreferenceCategory>

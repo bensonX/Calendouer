@@ -5,7 +5,7 @@ android {
         config {
             keyAlias 'calendouer'
             keyPassword 'sme0rmmly931119'
-            storeFile file('/Users/liuyang/Google 云端硬盘/归档/Calendouer/calendouer.jks')
+            storeFile file('/Users/liuyang/AndroidStudioProjects/calendouer.jks')
             storePassword 'sme0rmmly931119'
         }
     }
@@ -29,6 +29,9 @@ android {
         debug {
             signingConfig signingConfigs.config
         }
+    }
+    lintOptions {
+        disable 'RestrictedApi'
     }
 }
 

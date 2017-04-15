@@ -24,12 +24,9 @@ import android.view.View;
 import android.widget.TextView;
 
 import java.text.DateFormat;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Locale;
-
-import cn.sealiu.calendouer.receiver.NotificationReceiver;
 
 /**
  * Created by liuyang
@@ -41,12 +38,8 @@ public class CalendouerActivity extends AppCompatActivity {
     final static int STAR = 5;
     final static int MAX_COUNT = 100;
     final static int LOCATION_PERM = 100;
-    final static int THINGS_MAX_LINE = 5;
 
     final static int WEATHER_REQUEST_CODE = 114;
-    final static int ADD_THINGS_CODE = 200;
-    final static int DETAIL_THINGS_CODE = 201;
-    final static int MODIFY_THINGS_CODE = 202;
     DateFormat df_ymd, df_hm, df_ymd_hms;
 
     SharedPreferences sharedPref, settingPref;
@@ -132,27 +125,6 @@ public class CalendouerActivity extends AppCompatActivity {
         );
 
         alarmMgr.cancel(alarmIntent);
-    }
-
-    void setThingAlarm(String thingId, String time, int request_code) {
-        Intent intent = new Intent(this, NotificationReceiver.class);
-        intent.putExtra("thing_id", thingId);
-
-        Calendar calendar = Calendar.getInstance();
-        try {
-            calendar.setTime(df_ymd_hms.parse(time));
-            setAlarm(intent, request_code, calendar.getTimeInMillis());
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
-    }
-
-    void cancelThingAlarm(String thingId, int request_code) {
-        //cancel old notification alarm
-        Intent intent = new Intent(getApplicationContext(), NotificationReceiver.class);
-        intent.putExtra("thing_id", thingId);
-
-        cancelAlarm(intent, request_code);
     }
 
     float getScreenWidthInPd() {

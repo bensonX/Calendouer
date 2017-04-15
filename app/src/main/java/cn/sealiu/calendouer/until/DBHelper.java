@@ -15,7 +15,7 @@ import static cn.sealiu.calendouer.until.ThingsContract.ThingsEntry;
  */
 
 public class DBHelper extends SQLiteOpenHelper {
-    private static final int DB_VERSION = 2;
+    private static final int DB_VERSION = 3;
     private static final String DB_NAME = "MOVIE.db";
 
     private static final String MOVIE_CREATE_ENTRIES =
@@ -55,17 +55,8 @@ public class DBHelper extends SQLiteOpenHelper {
     private static final String SIMILAR_DELETE_ENTRIES =
             "DROP TABLE IF EXISTS " + SimilarEntry.TABLE_NAME;
 
-    private static final String THINGS_CREATE_ENTRIES =
-            "CREATE TABLE IF NOT EXISTS " + ThingsEntry.TABLE_NAME + "(" +
-                    ThingsEntry.COLUMN_NAME_ID + " TEXT PRIMARY KEY, " +
-                    ThingsEntry.COLUMN_NAME_TITLE + " TEXT, " +
-                    ThingsEntry.COLUMN_NAME_DATETIME + " TEXT, " +
-                    ThingsEntry.COLUMN_NAME_NOTIFICATION_DATETIME + " TEXT, " +
-                    ThingsEntry.COLUMN_NAME_TIME_ADVANCE + " INTEGER, " +
-                    ThingsEntry.COLUMN_NAME_DONE + " INTEGER, " +
-                    ThingsEntry.COLUMN_NAME_REQUEST_CODE + " INTEGER)";
     private static final String THINGS_DELETE_ENTRIES =
-            "DROP TABLE IF EXISTS " + ThingsEntry.TABLE_NAME;
+            "DROP TABLE IF EXISTS things";
 
     public DBHelper(Context context) {
         super(context, DB_NAME, null, DB_VERSION);
@@ -76,18 +67,17 @@ public class DBHelper extends SQLiteOpenHelper {
         db.execSQL(MOVIE_CREATE_ENTRIES);
         db.execSQL(SIMILAR_CREATE_ENTRIES);
         db.execSQL(PERSONAL_CREATE_ENTRIES);
-        db.execSQL(THINGS_CREATE_ENTRIES);
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         if (oldVersion < DB_VERSION) {
             db.execSQL(MOVIE_DELETE_ENTRIES);
+            db.execSQL(THINGS_DELETE_ENTRIES);
 
             db.execSQL(MOVIE_CREATE_ENTRIES);
             db.execSQL(SIMILAR_CREATE_ENTRIES);
             db.execSQL(PERSONAL_CREATE_ENTRIES);
-            db.execSQL(THINGS_CREATE_ENTRIES);
         }
         onCreate(db);
     }

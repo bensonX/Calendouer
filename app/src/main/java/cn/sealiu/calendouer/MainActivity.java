@@ -20,8 +20,6 @@ import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.NestedScrollView;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.AppCompatButton;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
@@ -49,12 +47,10 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
-import cn.sealiu.calendouer.adapter.ThingsItemAdapter;
 import cn.sealiu.calendouer.bean.MovieBaseBean;
 import cn.sealiu.calendouer.bean.MovieBean;
 import cn.sealiu.calendouer.bean.Top250Bean;
@@ -64,25 +60,20 @@ import cn.sealiu.calendouer.bean.XzResultsBean;
 import cn.sealiu.calendouer.bean.XzWeatherBean;
 import cn.sealiu.calendouer.fragment.MovieFragment;
 import cn.sealiu.calendouer.fragment.WeatherFragment;
-import cn.sealiu.calendouer.model.Thing;
 import cn.sealiu.calendouer.receiver.UpdateWeatherReceiver;
 import cn.sealiu.calendouer.until.DBHelper;
 import cn.sealiu.calendouer.until.FestivalCalendar;
 import cn.sealiu.calendouer.until.LunarCalendar;
 import cn.sealiu.calendouer.until.MovieContract.MovieEntry;
 import cn.sealiu.calendouer.until.SolarTermCalendar;
-import cn.sealiu.calendouer.until.ThingsContract;
-import cn.sealiu.calendouer.until.ThingsContract.ThingsEntry;
 import cn.sealiu.calendouer.until.WeatherIcon;
-import co.dift.ui.SwipeToAction;
 
 import static android.Manifest.permission;
 
 public class MainActivity extends CalendouerActivity implements
         AMapLocationListener,
         View.OnClickListener,
-        SharedPreferences.OnSharedPreferenceChangeListener,
-        MovieFragment.MovieListener {
+        SharedPreferences.OnSharedPreferenceChangeListener{
 
     Toolbar toolbar;
     TextView monthTV;
@@ -111,18 +102,11 @@ public class MainActivity extends CalendouerActivity implements
     AMapLocationClient mLocationClient;
     AMapLocationClientOption mLocationOption;
     LinearLayout weatherCard;
-    LinearLayout thingsCard;
     LinearLayout movieCard;
-    AppCompatButton thingsAllBtn;
-    RecyclerView thingsRecyclerView;
-    TextView thingsEmpty;
     LocationManager locationMgr;
     FloatingActionButton fab;
     CollapsingToolbarLayout collapsingToolbarLayout;
     NestedScrollView nestedScrollView;
-    List<Thing> dataSet = new ArrayList<>();
-    SwipeToAction swipeToAction;
-    ThingsItemAdapter thingsAdapter;
     View progressOfDay;
     NativeExpressAdView adView;
 
@@ -156,11 +140,6 @@ public class MainActivity extends CalendouerActivity implements
         weatherTV = (TextView) findViewById(R.id.weather);
         weatherIconIV = (ImageView) findViewById(R.id.weather_icon);
         weatherIconIV.setOnClickListener(this);
-
-        thingsCard = (LinearLayout) findViewById(R.id.things_card);
-        thingsEmpty = (TextView) findViewById(R.id.things_empty);
-        thingsRecyclerView = (RecyclerView) findViewById(R.id.things_recycler_view);
-        thingsAllBtn = (AppCompatButton) findViewById(R.id.things_all_btn);
 
         movieCardCover = (ImageView) findViewById(R.id.movie_card_cover);
         movieCard = (LinearLayout) findViewById(R.id.movie_card);
@@ -203,19 +182,6 @@ public class MainActivity extends CalendouerActivity implements
         } else {
             weatherHolder.setVisibility(View.GONE);
             restoreTheme();
-        }
-
-        if (settingPref.getBoolean("things_show", true)) {
-            thingsCard.setVisibility(View.VISIBLE);
-            fab.setVisibility(View.VISIBLE);
-            if (!checkAllDone()) {
-                LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
-                thingsRecyclerView.setLayoutManager(linearLayoutManager);
-                initThings();
-            }
-        } else {
-            thingsCard.setVisibility(View.GONE);
-            fab.setVisibility(View.GONE);
         }
 
         if (settingPref.getBoolean("movie_recommended_show", true)) {
@@ -292,30 +258,6 @@ public class MainActivity extends CalendouerActivity implements
         boolean isEmpty = !cursor.moveToFirst();
         cursor.close();
         return isEmpty;
-    }
-
-    private boolean checkAllDone() {
-        db = dbHelper.getReadableDatabase();
-        Cursor cursor = db.query(
-                ThingsEntry.TABLE_NAME, //table
-                null, //columns
-                ThingsEntry.COLUMN_NAME_DONE + " = ?", //selection
-                new String[]{"0"}, //selectionArgs
-                null, //groupBy
-                null, //having
-                ThingsEntry.COLUMN_NAME_NOTIFICATION_DATETIME, //orderBy
-                null //limit
-        );
-        boolean isAllDone = !cursor.moveToFirst();
-        cursor.close();
-        if (isAllDone) {
-            thingsEmpty.setVisibility(View.VISIBLE);
-            findViewById(R.id.things_divider).setVisibility(View.GONE);
-        } else {
-            thingsEmpty.setVisibility(View.GONE);
-            findViewById(R.id.things_divider).setVisibility(View.VISIBLE);
-        }
-        return isAllDone;
     }
 
     private void initCalendar() {
@@ -422,101 +364,6 @@ public class MainActivity extends CalendouerActivity implements
             } else {
                 setWeather();
             }
-        }
-    }
-
-    private void initThings() {
-        db = dbHelper.getReadableDatabase();
-
-        String[] projection = {
-                ThingsEntry.COLUMN_NAME_ID,
-                ThingsEntry.COLUMN_NAME_TITLE,
-                ThingsEntry.COLUMN_NAME_DATETIME,
-                ThingsEntry.COLUMN_NAME_NOTIFICATION_DATETIME,
-                ThingsEntry.COLUMN_NAME_TIME_ADVANCE,
-                ThingsEntry.COLUMN_NAME_DONE,
-                ThingsEntry.COLUMN_NAME_REQUEST_CODE
-        };
-
-        Cursor cursor = db.query(
-                ThingsEntry.TABLE_NAME, //table
-                projection, //columns
-                ThingsEntry.COLUMN_NAME_DONE + " = ?", //selection
-                new String[]{"0"}, //selectionArgs
-                null, //groupBy
-                null, //having
-                ThingsEntry.COLUMN_NAME_NOTIFICATION_DATETIME, //orderBy
-                String.valueOf(THINGS_MAX_LINE) //limit
-        );
-
-        if (cursor.moveToFirst()) {
-            dataSet.clear();
-            do {
-                String id = cursor.getString(cursor.getColumnIndex(ThingsEntry.COLUMN_NAME_ID));
-                String title = cursor.getString(cursor.getColumnIndex(ThingsEntry.COLUMN_NAME_TITLE));
-                String datetime = cursor.getString(cursor.getColumnIndex(ThingsEntry.COLUMN_NAME_DATETIME));
-                String notification_datetime = cursor.getString(
-                        cursor.getColumnIndex(ThingsEntry.COLUMN_NAME_NOTIFICATION_DATETIME)
-                );
-                int time_advance = cursor.getInt(cursor.getColumnIndex(ThingsEntry.COLUMN_NAME_TIME_ADVANCE));
-                int done = cursor.getInt(cursor.getColumnIndex(ThingsEntry.COLUMN_NAME_DONE));
-                int request_code = cursor.getInt(cursor.getColumnIndex(ThingsEntry.COLUMN_NAME_REQUEST_CODE));
-
-                dataSet.add(
-                        new Thing(
-                                id,
-                                title,
-                                datetime,
-                                notification_datetime,
-                                time_advance,
-                                done,
-                                request_code
-                        )
-                );
-            } while (cursor.moveToNext());
-
-            if (cursor.getCount() == THINGS_MAX_LINE) {
-                thingsAllBtn.setVisibility(View.VISIBLE);
-                thingsAllBtn.setOnClickListener(this);
-            } else {
-                thingsAllBtn.setVisibility(View.GONE);
-            }
-            cursor.close();
-
-            thingsAdapter = new ThingsItemAdapter(dataSet);
-            thingsRecyclerView.setAdapter(thingsAdapter);
-            swipeToAction = new SwipeToAction(thingsRecyclerView, new SwipeToAction.SwipeListener<Thing>() {
-
-                @Override
-                public boolean swipeLeft(final Thing itemData) {
-                    removeThing(itemData);
-                    return true;
-                }
-
-                @Override
-                public boolean swipeRight(final Thing itemData) {
-                    doneThing(itemData);
-                    return true;
-                }
-
-                @Override
-                public void onClick(Thing itemData) {
-                    Intent intent = new Intent(MainActivity.this, ThingsDetailActivity.class);
-                    intent.putExtra("thing", itemData);
-                    intent.putExtra("color", color);
-                    intent.putExtra("colorDark", colorDark);
-                    startActivityForResult(intent, DETAIL_THINGS_CODE);
-                }
-
-                @Override
-                public void onLongClick(Thing itemData) {
-                    Log.d("Thing", "long click");
-                    displaySnackBar(nestedScrollView, itemData.getTitle() + "long click", null, null);
-                }
-            });
-
-        } else {
-            thingsEmpty.setVisibility(View.VISIBLE);
         }
     }
 
@@ -820,13 +667,13 @@ public class MainActivity extends CalendouerActivity implements
                 openMovieFragment();
                 break;
             case R.id.fab:
-                Intent intent = new Intent(this, AddThingsActivity.class);
+                /*
                 intent.putExtra("color", color);
                 intent.putExtra("colorDark", colorDark);
                 startActivityForResult(intent, ADD_THINGS_CODE);
+                */
                 break;
-            case R.id.things_all_btn:
-                // TODO: 2017/3/5 check all things
+            default:
                 break;
         }
     }
@@ -881,16 +728,6 @@ public class MainActivity extends CalendouerActivity implements
         }
     }
 
-    @Override
-    public void onAddThings() {
-        Intent intent = new Intent(this, AddThingsActivity.class);
-        intent.putExtra("movie_title", movieTitleTV.getText());
-        intent.putExtra("color", color);
-        intent.putExtra("colorDark", colorDark);
-
-        startActivityForResult(intent, ADD_THINGS_CODE);
-    }
-
     private void openMovieFragment() {
         String movieJson = sharedPref.getString("movie_json", "");
 
@@ -903,19 +740,6 @@ public class MainActivity extends CalendouerActivity implements
 
             movieFragment.setArguments(bundle);
             movieFragment.show(getSupportFragmentManager(), movieFragment.getTag());
-        }
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == ADD_THINGS_CODE && resultCode == RESULT_OK) {
-            Log.d("Things", "add things success");
-            initThings();
-        }
-
-        if (requestCode == DETAIL_THINGS_CODE && resultCode == RESULT_OK && data != null) {
-            initThings();
         }
     }
 
@@ -955,132 +779,6 @@ public class MainActivity extends CalendouerActivity implements
         color = ContextCompat.getColor(this, R.color.colorPrimary);
         colorDark = ContextCompat.getColor(this, R.color.colorPrimaryDark);
         setCustomTheme(color, colorDark, fab, collapsingToolbarLayout);
-    }
-
-    private void removeThing(final Thing thing) {
-        final int pos = dataSet.indexOf(thing);
-        String snackBarTitle = String.format(getString(R.string.snackbar_thing_delete), thing.getTitle());
-        dataSet.remove(thing);
-        thingsAdapter.notifyItemRemoved(pos);
-
-        db = dbHelper.getWritableDatabase();
-
-        boolean isDelete = db.delete(
-                ThingsEntry.TABLE_NAME,
-                ThingsEntry.COLUMN_NAME_ID + "=?",
-                new String[]{thing.getId()}) == 1;
-        if (isDelete) {
-            cancelThingAlarm(thing.getId(), thing.getRequest_code());
-            displaySnackBar(nestedScrollView, snackBarTitle, getString(R.string.revoke), new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    restoreThing(pos, thing);
-                }
-            });
-
-            if (!checkAllDone()) {
-                initThings();
-            }
-        } else {
-            displaySnackBar(nestedScrollView, getString(R.string.error), null, null);
-        }
-    }
-
-    private void doneThing(final Thing thing) {
-        final int pos = dataSet.indexOf(thing);
-        String snackBarTitle = String.format(getString(R.string.snackbar_thing_done), thing.getTitle());
-        dataSet.remove(thing);
-        thingsAdapter.notifyItemRemoved(pos);
-
-        ContentValues values = new ContentValues();
-        values.put(ThingsContract.ThingsEntry.COLUMN_NAME_ID, thing.getId());
-        values.put(ThingsContract.ThingsEntry.COLUMN_NAME_TITLE, thing.getTitle());
-        values.put(ThingsContract.ThingsEntry.COLUMN_NAME_DATETIME, thing.getDatetime());
-        values.put(ThingsContract.ThingsEntry.COLUMN_NAME_NOTIFICATION_DATETIME, thing.getNotification_datetime());
-        values.put(ThingsContract.ThingsEntry.COLUMN_NAME_TIME_ADVANCE, thing.getTime_advance());
-        values.put(ThingsContract.ThingsEntry.COLUMN_NAME_DONE, 1);
-        values.put(ThingsEntry.COLUMN_NAME_REQUEST_CODE, thing.getRequest_code());
-
-        db = dbHelper.getWritableDatabase();
-        boolean isDone = db.update(
-                ThingsContract.ThingsEntry.TABLE_NAME,
-                values,
-                ThingsContract.ThingsEntry.COLUMN_NAME_ID + "=?",
-                new String[]{thing.getId()}
-        ) == 1;
-
-        if (isDone) {
-            cancelThingAlarm(thing.getId(), thing.getRequest_code());
-            displaySnackBar(nestedScrollView, snackBarTitle, getString(R.string.revoke), new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    remarkThing(pos, thing);
-                }
-            });
-            if (!checkAllDone()) {
-                initThings();
-            }
-        } else {
-            displaySnackBar(nestedScrollView, getString(R.string.error), null, null);
-        }
-    }
-
-    private void restoreThing(int pos, Thing thing) {
-        dataSet.add(pos, thing);
-        thingsAdapter.notifyItemInserted(pos);
-
-        db = dbHelper.getWritableDatabase();
-        ContentValues values = new ContentValues();
-        values.put(ThingsContract.ThingsEntry.COLUMN_NAME_ID, thing.getId());
-        values.put(ThingsContract.ThingsEntry.COLUMN_NAME_TITLE, thing.getTitle());
-        values.put(ThingsContract.ThingsEntry.COLUMN_NAME_DATETIME, thing.getDatetime());
-        values.put(ThingsContract.ThingsEntry.COLUMN_NAME_NOTIFICATION_DATETIME, thing.getNotification_datetime());
-        values.put(ThingsContract.ThingsEntry.COLUMN_NAME_TIME_ADVANCE, thing.getTime_advance());
-        values.put(ThingsContract.ThingsEntry.COLUMN_NAME_DONE, thing.getDone());
-
-        if (db.insert(
-                ThingsContract.ThingsEntry.TABLE_NAME,
-                null,
-                values) != -1) {
-            setThingAlarm(
-                    thing.getId(),
-                    thing.getNotification_datetime(),
-                    thing.getRequest_code()
-            );
-        }
-        thingsEmpty.setVisibility(View.GONE);
-        findViewById(R.id.things_divider).setVisibility(View.VISIBLE);
-        initThings();
-    }
-
-    private void remarkThing(int pos, Thing thing) {
-        dataSet.add(pos, thing);
-        thingsAdapter.notifyItemInserted(pos);
-        db = dbHelper.getWritableDatabase();
-
-        ContentValues values = new ContentValues();
-        values.put(ThingsContract.ThingsEntry.COLUMN_NAME_ID, thing.getId());
-        values.put(ThingsContract.ThingsEntry.COLUMN_NAME_TITLE, thing.getTitle());
-        values.put(ThingsContract.ThingsEntry.COLUMN_NAME_DATETIME, thing.getDatetime());
-        values.put(ThingsContract.ThingsEntry.COLUMN_NAME_NOTIFICATION_DATETIME, thing.getNotification_datetime());
-        values.put(ThingsContract.ThingsEntry.COLUMN_NAME_TIME_ADVANCE, thing.getTime_advance());
-        values.put(ThingsContract.ThingsEntry.COLUMN_NAME_DONE, 0);
-
-        db = dbHelper.getWritableDatabase();
-        if (db.update(
-                ThingsContract.ThingsEntry.TABLE_NAME,
-                values,
-                ThingsContract.ThingsEntry.COLUMN_NAME_ID + "=?",
-                new String[]{thing.getId()}) != -1) {
-            setThingAlarm(
-                    thing.getId(),
-                    thing.getNotification_datetime(),
-                    thing.getRequest_code()
-            );
-        }
-        thingsEmpty.setVisibility(View.GONE);
-        findViewById(R.id.things_divider).setVisibility(View.VISIBLE);
-        initThings();
     }
 
     private class GetTop250 extends AsyncTask<String, String, String> {

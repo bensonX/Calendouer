@@ -31,7 +31,6 @@ import cn.sealiu.calendouer.bean.MovieBean;
 public class MovieFragment extends BottomSheetDialogFragment implements View.OnClickListener {
 
     private final static int STAR = 5;
-    MovieListener listener;
     private ImageView imageIV;
     private TextView ratingTV;
     private TextView titleTV;
@@ -43,17 +42,6 @@ public class MovieFragment extends BottomSheetDialogFragment implements View.OnC
     private String image_uri;
     private String directors = "";
     private String casts = "";
-
-    @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-        try {
-            listener = (MovieListener) context;
-        } catch (ClassCastException e) {
-            throw new ClassCastException(context.toString()
-                    + "must implement MovieFragment");
-        }
-    }
 
     @Override
     public void setupDialog(Dialog dialog, int style) {
@@ -154,13 +142,9 @@ public class MovieFragment extends BottomSheetDialogFragment implements View.OnC
                 }
                 break;
             case R.id.bs_add_things:
-                listener.onAddThings();
+                Log.d("MovieFragment", "add_things");
                 dismiss();
                 break;
         }
-    }
-
-    public interface MovieListener {
-        void onAddThings();
     }
 }

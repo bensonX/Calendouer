@@ -8,7 +8,6 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
-    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
     <application
         android:allowBackup="true"
@@ -37,33 +36,6 @@
         <service android:name="com.amap.api.location.APSService" />
 
         <receiver android:name=".receiver.UpdateWeatherReceiver" />
-        <receiver android:name=".receiver.NotificationReceiver" />
-        <receiver android:name=".receiver.BootReceiver">
-            <intent-filter>
-                <action android:name="android.intent.action.BOOT_COMPLETED" />
-            </intent-filter>
-        </receiver>
-
-        <activity
-            android:name=".AddThingsActivity"
-            android:parentActivityName=".MainActivity" />
-        <activity
-            android:name=".ThingsDetailActivity"
-            android:parentActivityName=".MainActivity" />
-
-        <service
-            android:name=".service.NotificationService"
-            android:exported="false" />
-        <service
-            android:name=".service.DoneOrDeleteService"
-            android:exported="false">
-            <intent-filter>
-                <action android:name="cn.sealiu.calendouer.service.action.DONE" />
-                <action android:name="cn.sealiu.calendouer.service.action.DELETE" />
-            </intent-filter>
-        </service>
-
-        <service android:name=".service.SystemBootService" />
     </application>
 
 </manifest>
