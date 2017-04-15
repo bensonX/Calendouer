@@ -10,6 +10,7 @@
     <color name="secondaryText">#757575</color>
     <color name="disabled">#BDBDBD</color>
     <color name="colorDivider">#dedede</color>
+    <color name="lightBg">#f4f4f4</color>
 
     <color name="navyGray">#607D8B</color>
     <color name="navyGrayDark">#455A64</color>

@@ -14,7 +14,6 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.CollapsingToolbarLayout;
-import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.NestedScrollView;
@@ -104,11 +103,11 @@ public class MainActivity extends CalendouerActivity implements
     LinearLayout weatherCard;
     LinearLayout movieCard;
     LocationManager locationMgr;
-    FloatingActionButton fab;
     CollapsingToolbarLayout collapsingToolbarLayout;
     NestedScrollView nestedScrollView;
     View progressOfDay;
     NativeExpressAdView adView;
+    LinearLayout ratingUs;
 
     int color, colorDark;
     private int festival = 0;
@@ -120,12 +119,12 @@ public class MainActivity extends CalendouerActivity implements
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        ratingUs = (LinearLayout) findViewById(R.id.rating_us_card);
         adView = (NativeExpressAdView) findViewById(R.id.adView);
         progressOfDay = findViewById(R.id.progress_day);
         collapsingToolbarLayout = (CollapsingToolbarLayout) findViewById(R.id.collapsing_toolbar);
         nestedScrollView = (NestedScrollView) findViewById(R.id.nest_scroll_view);
-        fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(this);
+
         monthTV = (TextView) findViewById(R.id.month);
         weekTV = (TextView) findViewById(R.id.week_day);
         lunarTV = (TextView) findViewById(R.id.lunar_date);
@@ -164,7 +163,7 @@ public class MainActivity extends CalendouerActivity implements
     protected void onResume() {
         super.onResume();
 
-        setCustomTheme(color, colorDark, fab, collapsingToolbarLayout);
+        setCustomTheme(color, colorDark, collapsingToolbarLayout);
 
         mLocationClient = new AMapLocationClient(getApplicationContext());
         mLocationClient.setLocationListener(this);
@@ -243,12 +242,14 @@ public class MainActivity extends CalendouerActivity implements
     private void initAd() {
         if (settingPref.getBoolean("ad_show", true)) {
             adView.setVisibility(View.VISIBLE);
+            ratingUs.setVisibility(View.GONE);
             AdRequest request = new AdRequest.Builder()
                     .addTestDevice("43FE98603DD8DD9E449808D85C7DBD45")
                     .build();
             adView.loadAd(request);
         } else {
             adView.setVisibility(View.GONE);
+            ratingUs.setVisibility(View.VISIBLE);
         }
     }
 
@@ -311,7 +312,7 @@ public class MainActivity extends CalendouerActivity implements
             festivalTV.setText(festStr);
             color = ContextCompat.getColor(this, R.color.tomato);
             colorDark = ContextCompat.getColor(this, R.color.tomatoDark);
-            setCustomTheme(color, colorDark, fab, collapsingToolbarLayout);
+            setCustomTheme(color, colorDark, collapsingToolbarLayout);
             festival = 1;
         } else {
             festivalTV.setVisibility(View.GONE);
@@ -666,13 +667,13 @@ public class MainActivity extends CalendouerActivity implements
             case R.id.movie_summary:
                 openMovieFragment();
                 break;
-            case R.id.fab:
-                /*
+            /*case R.id.fab:
+
                 intent.putExtra("color", color);
                 intent.putExtra("colorDark", colorDark);
                 startActivityForResult(intent, ADD_THINGS_CODE);
-                */
-                break;
+
+                break; */
             default:
                 break;
         }
@@ -748,27 +749,27 @@ public class MainActivity extends CalendouerActivity implements
             case 1://sunny
                 color = ContextCompat.getColor(this, R.color.colorPrimary);
                 colorDark = ContextCompat.getColor(this, R.color.colorPrimaryDark);
-                setCustomTheme(color, colorDark, fab, collapsingToolbarLayout);
+                setCustomTheme(color, colorDark, collapsingToolbarLayout);
                 break;
             case 2://cloud
                 color = ContextCompat.getColor(this, R.color.gray);
                 colorDark = ContextCompat.getColor(this, R.color.grayDark);
-                setCustomTheme(color, colorDark, fab, collapsingToolbarLayout);
+                setCustomTheme(color, colorDark, collapsingToolbarLayout);
                 break;
             case 3://rain
                 color = ContextCompat.getColor(this, R.color.navyGray);
                 colorDark = ContextCompat.getColor(this, R.color.navyGrayDark);
-                setCustomTheme(color, colorDark, fab, collapsingToolbarLayout);
+                setCustomTheme(color, colorDark, collapsingToolbarLayout);
                 break;
             case 4://snow
                 color = ContextCompat.getColor(this, R.color.blueSky);
                 colorDark = ContextCompat.getColor(this, R.color.blueSkyDark);
-                setCustomTheme(color, colorDark, fab, collapsingToolbarLayout);
+                setCustomTheme(color, colorDark, collapsingToolbarLayout);
                 break;
             case 5://wind_sand
                 color = ContextCompat.getColor(this, R.color.orange);
                 colorDark = ContextCompat.getColor(this, R.color.orangeDark);
-                setCustomTheme(color, colorDark, fab, collapsingToolbarLayout);
+                setCustomTheme(color, colorDark, collapsingToolbarLayout);
                 break;
             default:
                 break;
@@ -778,7 +779,7 @@ public class MainActivity extends CalendouerActivity implements
     private void restoreTheme(){
         color = ContextCompat.getColor(this, R.color.colorPrimary);
         colorDark = ContextCompat.getColor(this, R.color.colorPrimaryDark);
-        setCustomTheme(color, colorDark, fab, collapsingToolbarLayout);
+        setCustomTheme(color, colorDark, collapsingToolbarLayout);
     }
 
     private class GetTop250 extends AsyncTask<String, String, String> {

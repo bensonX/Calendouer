@@ -25,6 +25,16 @@
 
         <SwitchPreference
             android:defaultValue="true"
+            android:key="movie_in_theaters"
+            android:title="正在热映" />
+
+        <SwitchPreference
+            android:defaultValue="true"
+            android:key="movie_coming_soon"
+            android:title="即将上映" />
+
+        <SwitchPreference
+            android:defaultValue="true"
             android:key="movie_similar_show"
             android:title="@string/pref_title_similar_movie" />
     </PreferenceCategory>
