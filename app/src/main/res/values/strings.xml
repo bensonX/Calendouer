@@ -107,10 +107,14 @@
     <string name="douban_error">豆瓣服务器开小差了</string>
     <string name="native_ad_unit_id" translatable="false">ca-app-pub-6993844563211839/9791767307</string>
     <string name="support_developer">支持开发者</string>
-    <string name="ad_title">广告卡片</string>
+    <string name="ad_title">广告</string>
     <string name="pref_open_source_license">开源许可</string>
     <string name="update_weather">更新天气</string>
-    <string name="weather_updating">更新天气中...</string>
+    <string name="weather_updating">更新天气中…</string>
     <string name="weather_update_too_often">天气信息不会变化这么快，5分钟后再试</string>
+    <string name="location_city">当前城市</string>
+    <string name="manual_location">手动选择城市</string>
+    <string name="restore_ad">开启广告</string>
+    <string name="after_ad_closed_beg">广告已关闭，以另一种方式支持我们?</string>
 </resources>
 

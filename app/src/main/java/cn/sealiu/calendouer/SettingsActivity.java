@@ -129,7 +129,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
                 }
-                    }).show();
+            }).show();
         }
 
         if (header.id == R.id.rating) {

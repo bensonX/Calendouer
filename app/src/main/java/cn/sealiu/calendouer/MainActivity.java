@@ -1,6 +1,7 @@
 package cn.sealiu.calendouer;
 
 import android.app.ProgressDialog;
+import android.content.ActivityNotFoundException;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -10,6 +11,7 @@ import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.location.LocationManager;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -160,6 +162,9 @@ public class MainActivity extends CalendouerActivity implements
 
         color = ContextCompat.getColor(this, R.color.colorPrimary);
         colorDark = ContextCompat.getColor(this, R.color.colorPrimaryDark);
+
+        findViewById(R.id.after_ad_closed_rate).setOnClickListener(this);
+        findViewById(R.id.after_ad_closed_restore).setOnClickListener(this);
     }
 
     @Override
@@ -674,13 +679,24 @@ public class MainActivity extends CalendouerActivity implements
             case R.id.movie_summary:
                 openMovieFragment();
                 break;
-            /*case R.id.fab:
-
-                intent.putExtra("color", color);
-                intent.putExtra("colorDark", colorDark);
-                startActivityForResult(intent, ADD_THINGS_CODE);
-
-                break; */
+            case R.id.after_ad_closed_rate:
+                Uri uri = Uri.parse("market://details?id=" + getApplication().getPackageName());
+                Intent goToMarket = new Intent(Intent.ACTION_VIEW, uri);
+                try {
+                    startActivity(goToMarket);
+                } catch (ActivityNotFoundException e) {
+                    startActivity(new Intent(Intent.ACTION_VIEW,
+                            Uri.parse(
+                                    "http://play.google.com/store/apps/details?id=" +
+                                            getApplication().getPackageName()
+                            )
+                    ));
+                }
+                break;
+            case R.id.after_ad_closed_restore:
+                settingPref.edit().putBoolean("ad_show", true).apply();
+                initAd();
+                break;
             default:
                 break;
         }

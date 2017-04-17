@@ -14,6 +14,14 @@
             android:entryValues="@array/update_frequency_values"
             android:key="update_frequency"
             android:title="@string/weather_update_frequency" />
+        <!--<SwitchPreference-->
+        <!--android:defaultValue="false"-->
+        <!--android:key="manual_location"-->
+        <!--android:title="@string/manual_location"/>-->
+        <!--<EditTextPreference-->
+        <!--android:dependency="manual_location"-->
+        <!--android:key="city"-->
+        <!--android:title="@string/location_city"/>-->
     </PreferenceCategory>
 
 
@@ -34,7 +42,7 @@
             android:title="即将上映" />
 
         <SwitchPreference
-            android:defaultValue="true"
+            android:defaultValue="false"
             android:key="movie_similar_show"
             android:title="@string/pref_title_similar_movie" />
     </PreferenceCategory>
