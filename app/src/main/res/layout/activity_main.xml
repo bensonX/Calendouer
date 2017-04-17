@@ -332,51 +332,57 @@
                         android:padding="16dp">
 
                         <TextView
+                            android:id="@+id/director"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginRight="@dimen/activity_horizontal_margin"
                             android:background="@drawable/chip"
-                            android:text="导演/吴宇森"
+                            android:text="@string/chip_director"
                             android:textColor="@color/textOrIcons" />
 
                         <TextView
+                            android:id="@+id/casts_1"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginRight="@dimen/activity_horizontal_margin"
                             android:background="@drawable/chip"
-                            android:text="主演/周润发"
+                            android:text="@string/chip_casts"
                             android:textColor="@color/textOrIcons" />
 
                         <TextView
+                            android:id="@+id/casts_2"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginRight="@dimen/activity_horizontal_margin"
                             android:background="@drawable/chip"
-                            android:text="主演/张国荣"
+                            android:text="@string/chip_casts"
                             android:textColor="@color/textOrIcons" />
 
                         <TextView
+                            android:id="@+id/genres_1"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginRight="@dimen/activity_horizontal_margin"
                             android:background="@drawable/chip"
-                            android:text="类型/剧情"
+                            android:text="@string/chip_genres"
                             android:textColor="@color/textOrIcons" />
 
                         <TextView
+                            android:id="@+id/genres_2"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginRight="@dimen/activity_horizontal_margin"
                             android:background="@drawable/chip"
-                            android:text="类型/喜剧"
+                            android:text="@string/chip_genres"
                             android:textColor="@color/textOrIcons" />
 
                         <TextView
+                            android:id="@+id/same_name"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginRight="@dimen/activity_horizontal_margin"
                             android:background="@drawable/chip"
-                            android:text="同名作"
+                            android:text="@string/chip_same_name"
                             android:textColor="@color/textOrIcons" />
                     </LinearLayout>
                 </HorizontalScrollView>

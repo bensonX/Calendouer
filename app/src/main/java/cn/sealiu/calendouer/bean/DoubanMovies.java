@@ -2,10 +2,10 @@ package cn.sealiu.calendouer.bean;
 
 /**
  * Created by liuyang
- * on 2017/1/15.
+ * on 2017/4/17.
  */
 
-public class Top250Bean {
+public class DoubanMovies {
     private int count;
     private int start;
     private int total;

@@ -116,5 +116,9 @@
     <string name="manual_location">手动选择城市</string>
     <string name="restore_ad">开启广告</string>
     <string name="after_ad_closed_beg">广告已关闭，以另一种方式支持我们?</string>
+    <string name="chip_director">导演/%1$s</string>
+    <string name="chip_casts">演员/%1$s</string>
+    <string name="chip_genres">类型/%1$s</string>
+    <string name="chip_same_name">同名作</string>
 </resources>
 

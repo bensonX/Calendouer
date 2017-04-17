@@ -54,9 +54,10 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
+import cn.sealiu.calendouer.bean.CelebrityBean;
+import cn.sealiu.calendouer.bean.DoubanMovies;
 import cn.sealiu.calendouer.bean.MovieBaseBean;
 import cn.sealiu.calendouer.bean.MovieBean;
-import cn.sealiu.calendouer.bean.Top250Bean;
 import cn.sealiu.calendouer.bean.XzBean;
 import cn.sealiu.calendouer.bean.XzLocationBean;
 import cn.sealiu.calendouer.bean.XzResultsBean;
@@ -112,6 +113,7 @@ public class MainActivity extends CalendouerActivity implements
     View progressOfDay;
     NativeExpressAdView adView;
     LinearLayout ratingUs;
+    TextView directorTV, castsTV1, castsTV2, genresTV1, genresTV2, sameNameTV;
 
     int color, colorDark;
     private int festival = 0;
@@ -122,6 +124,13 @@ public class MainActivity extends CalendouerActivity implements
         setContentView(R.layout.activity_main);
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        directorTV = (TextView) findViewById(R.id.director);
+        castsTV1 = (TextView) findViewById(R.id.casts_1);
+        castsTV2 = (TextView) findViewById(R.id.casts_2);
+        genresTV1 = (TextView) findViewById(R.id.genres_1);
+        genresTV2 = (TextView) findViewById(R.id.genres_2);
+        sameNameTV = (TextView) findViewById(R.id.same_name);
 
         ratingUs = (LinearLayout) findViewById(R.id.rating_us_card);
         adView = (NativeExpressAdView) findViewById(R.id.adView);
@@ -226,12 +235,12 @@ public class MainActivity extends CalendouerActivity implements
                     if (!datePref.equals(df_ymd.format(new Date()))) {
                         //new day
                         db = dbHelper.getWritableDatabase();
-                        if (db.delete(
+                        db.delete(
                                 MovieEntry.TABLE_NAME,
                                 MovieEntry.COLUMN_NAME_ID + "=?",
-                                new String[]{idPref}) == 1) {
-                            setMovieInfoRandom();
-                        }
+                                new String[]{idPref}
+                        );
+                        setMovieInfoRandom();
                     } else {
                         //same day
                         setMovieInfoRepeat(idPref);
@@ -535,6 +544,7 @@ public class MainActivity extends CalendouerActivity implements
             String id = cursor.getString(cursor.getColumnIndex(MovieEntry.COLUMN_NAME_ID));
             sharedPref.edit().putString("DATE", df_ymd.format(new Date())).apply();
             sharedPref.edit().putString("ID", id).apply();
+            sharedPref.edit().putString("movie_json", "").apply();
             setMovieInfoRepeat(id);
         }
         cursor.close();
@@ -544,51 +554,19 @@ public class MainActivity extends CalendouerActivity implements
      * show the same movie in the same day
      */
     private void setMovieInfoRepeat(String id) {
-
-        db = dbHelper.getReadableDatabase();
-
-        String[] projection = {
-                MovieEntry.COLUMN_NAME_ID,
-                MovieEntry.COLUMN_NAME_TITLE,
-                MovieEntry.COLUMN_NAME_AVERAGE,
-                MovieEntry.COLUMN_NAME_STARS,
-                MovieEntry.COLUMN_NAME_IMAGES,
-                MovieEntry.COLUMN_NAME_SUMMARY
-        };
-
-        Cursor cursor = db.query(
-                MovieEntry.TABLE_NAME, //table
-                projection, //columns
-                MovieEntry.COLUMN_NAME_ID + " = ?", //selection
-                new String[]{id}, //selectionArgs
-                null, //groupBy
-                null, //having
-                null, //orderBy
-                "1" //limit
-        );
-
-        if (cursor.moveToFirst()) {
-            String title = cursor.getString(cursor.getColumnIndex(MovieEntry.COLUMN_NAME_TITLE));
-            String images = cursor.getString(cursor.getColumnIndex(MovieEntry.COLUMN_NAME_IMAGES));
-            String stars = cursor.getString(cursor.getColumnIndex(MovieEntry.COLUMN_NAME_STARS));
-            float average = cursor.getFloat(cursor.getColumnIndex(MovieEntry.COLUMN_NAME_AVERAGE));
-            String summary = cursor.getString(cursor.getColumnIndex(MovieEntry.COLUMN_NAME_SUMMARY));
-
-            if (summary.equals("")) {
-                Log.d("douban", "get_movie_info: " + id);
-                new GetMovieInfo().execute("http://api.douban.com/v2/movie/subject/" + id);
-            }
-
-            setMovieInfo(title, images, stars, average, summary);
+        String movieJson = sharedPref.getString("movie_json", "");
+        if (movieJson.equals("")) {
+            new GetMovieInfo().execute("http://api.douban.com/v2/movie/subject/" + id);
+        } else {
+            MovieBean todayMovie = new Gson().fromJson(movieJson, MovieBean.class);
+            setMovieInfo(todayMovie);
         }
-        cursor.close();
     }
 
-    private void setMovieInfo(String title, String images, String stars, float average, String summary) {
-
-        movieTitleTV.setText(title);
-        movieAverageTV.setText(Float.toString(average));
-        double stars_num = Double.parseDouble(stars) / 10;
+    private void setMovieInfo(MovieBean todayMovie) {
+        movieTitleTV.setText(todayMovie.getTitle());
+        movieAverageTV.setText(Float.toString(todayMovie.getRating().getAverage()));
+        double stars_num = Double.parseDouble(todayMovie.getRating().getStarts()) / 10;
 
         int full_star_num = (int) Math.floor(stars_num);
         int half_star_num = (int) (Math.floor((stars_num - full_star_num) * 2));
@@ -613,12 +591,37 @@ public class MainActivity extends CalendouerActivity implements
             starsHolderLL.addView(star);
         }
 
-        movieSummaryTV.setText(summary);
+        movieSummaryTV.setText(todayMovie.getSummary());
         movieSummaryTV.setOnClickListener(this);
 
-        Glide.with(this).load(images).into(movieImageIV);
+        Glide.with(this).load(todayMovie.getImages().getLarge()).into(movieImageIV);
 
         movieImageIV.setOnClickListener(this);
+
+        CelebrityBean director = todayMovie.getDirectors()[0];
+        CelebrityBean[] casts = todayMovie.getCasts();
+        String[] genres = todayMovie.getGenres();
+        if (director != null && director.getName().equals(""))
+            directorTV.setText(String.format(getString(R.string.chip_director), director.getName()));
+        else
+            directorTV.setVisibility(View.GONE);
+        if (casts.length > 0)
+            castsTV1.setText(String.format(getString(R.string.chip_casts), casts[0].getName()));
+        else
+            castsTV1.setVisibility(View.GONE);
+        if (casts.length > 1)
+            castsTV2.setText(String.format(getString(R.string.chip_casts), casts[1].getName()));
+        else
+            castsTV2.setVisibility(View.GONE);
+        if (genres.length > 0)
+            genresTV1.setText(String.format(getString(R.string.chip_genres), genres[0]));
+        else
+            genresTV1.setVisibility(View.GONE);
+        if (genres.length > 1)
+            genresTV2.setText(String.format(getString(R.string.chip_genres), genres[1]));
+        else
+            genresTV2.setVisibility(View.GONE);
+
     }
 
     private void showProgressDialog(String content) {
@@ -839,7 +842,7 @@ public class MainActivity extends CalendouerActivity implements
             super.onPostExecute(s);
             mProgressDialog.setMessage(getResources().getString(R.string.downloaded));
 
-            Top250Bean top250Bean = new Gson().fromJson(s, Top250Bean.class);
+            DoubanMovies top250Bean = new Gson().fromJson(s, DoubanMovies.class);
             if (top250Bean != null) {
                 MovieBaseBean[] movieBaseBeans = top250Bean.getSubjects();
 
@@ -903,29 +906,22 @@ public class MainActivity extends CalendouerActivity implements
             super.onPostExecute(s);
 
             if (s != null && !s.equals("")) {
-                Log.d("douban", "getMovieInfo: " + s);
                 sharedPref.edit().putString("movie_json", s).apply();
-                final MovieBean movieBean = new Gson().fromJson(s, MovieBean.class);
+                MovieBean todayMovie = new Gson().fromJson(s, MovieBean.class);
                 db = dbHelper.getWritableDatabase();
 
                 ContentValues values = new ContentValues();
-                values.put(MovieEntry.COLUMN_NAME_SUMMARY, movieBean.getSummary());
+                values.put(MovieEntry.COLUMN_NAME_SUMMARY, todayMovie.getSummary());
 
                 String selection = MovieEntry.COLUMN_NAME_ID + "=?";
-                String[] selectionArgs = {movieBean.getId()};
+                String[] selectionArgs = {todayMovie.getId()};
 
                 if (db.update(
                         MovieEntry.TABLE_NAME,
                         values,
                         selection,
                         selectionArgs) == 1) {
-                    setMovieInfo(
-                            movieBean.getTitle(),
-                            movieBean.getImages().getLarge(),
-                            movieBean.getRating().getStarts(),
-                            movieBean.getRating().getAverage(),
-                            movieBean.getSummary()
-                    );
+                    setMovieInfo(todayMovie);
                 }
             } else {
                 Log.d("douban", "getMovieInfo: null");
