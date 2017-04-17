@@ -14,6 +14,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.CollapsingToolbarLayout;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.NestedScrollView;
@@ -46,6 +47,7 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.text.ParseException;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -59,7 +61,6 @@ import cn.sealiu.calendouer.bean.XzResultsBean;
 import cn.sealiu.calendouer.bean.XzWeatherBean;
 import cn.sealiu.calendouer.fragment.MovieFragment;
 import cn.sealiu.calendouer.fragment.WeatherFragment;
-import cn.sealiu.calendouer.receiver.UpdateWeatherReceiver;
 import cn.sealiu.calendouer.until.DBHelper;
 import cn.sealiu.calendouer.until.FestivalCalendar;
 import cn.sealiu.calendouer.until.LunarCalendar;
@@ -72,7 +73,8 @@ import static android.Manifest.permission;
 public class MainActivity extends CalendouerActivity implements
         AMapLocationListener,
         View.OnClickListener,
-        SharedPreferences.OnSharedPreferenceChangeListener{
+        SharedPreferences.OnSharedPreferenceChangeListener,
+        WeatherFragment.UpdateWeatherListener {
 
     Toolbar toolbar;
     TextView monthTV;
@@ -153,6 +155,7 @@ public class MainActivity extends CalendouerActivity implements
         dbHelper = new DBHelper(this);
         icons = new WeatherIcon();
         sharedPref.registerOnSharedPreferenceChangeListener(this);
+        settingPref.registerOnSharedPreferenceChangeListener(this);
         locationMgr = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
 
         color = ContextCompat.getColor(this, R.color.colorPrimary);
@@ -363,7 +366,11 @@ public class MainActivity extends CalendouerActivity implements
             if (sharedPref.getString("weather_json", "").equals("")) {
                 getWeather();
             } else {
-                setWeather();
+                if (needUpdateWeather()) {
+                    getWeather();
+                } else {
+                    setWeather();
+                }
             }
         }
     }
@@ -395,7 +402,7 @@ public class MainActivity extends CalendouerActivity implements
             getWeather();
         }
 
-        if (key.equals("update_frequency")) {
+        if (key.equals("update_frequency") && needUpdateWeather()) {
             getWeather();
         }
     }
@@ -695,16 +702,11 @@ public class MainActivity extends CalendouerActivity implements
         );
         XzWeatherBean nowWeather = weatherBeans[0];
 
-        String weathersText;
-        if (nowWeather.getText_night().equals(nowWeather.getText_day())) {
-            weathersText = nowWeather.getText_day();
-        } else {
-            weathersText = String.format(
-                    getString(R.string.weather_info),
-                    nowWeather.getText_day(),
-                    nowWeather.getText_night()
-            );
-        }
+        String weathersText = getTextDayNight(
+                nowWeather.getText_day(),
+                nowWeather.getText_night()
+        );
+
         String weather = String.format(
                 getResources().getString(R.string.weather),
                 weathersText,
@@ -776,10 +778,37 @@ public class MainActivity extends CalendouerActivity implements
         }
     }
 
-    private void restoreTheme(){
+    private void restoreTheme() {
         color = ContextCompat.getColor(this, R.color.colorPrimary);
         colorDark = ContextCompat.getColor(this, R.color.colorPrimaryDark);
         setCustomTheme(color, colorDark, collapsingToolbarLayout);
+    }
+
+    @Override
+    public void onUpdateWeather() {
+        String lastWeatherUpdate = sharedPref.getString("update_datetime", "");
+
+        try {
+            Date lastUpdateDate = df_ymd_hms.parse(lastWeatherUpdate);
+            // 刷新频率最高：5min
+            if (new Date().getTime() - lastUpdateDate.getTime() > 5 * 60 * 1000) {
+                Snackbar.make(
+                        nestedScrollView,
+                        getString(R.string.weather_updating),
+                        Snackbar.LENGTH_SHORT
+                ).show();
+                getWeather();
+            } else {
+                Snackbar.make(
+                        nestedScrollView,
+                        getString(R.string.weather_update_too_often),
+                        Snackbar.LENGTH_SHORT
+                ).show();
+            }
+        } catch (ParseException e) {
+            e.printStackTrace();
+            getWeather();
+        }
     }
 
     private class GetTop250 extends AsyncTask<String, String, String> {
@@ -914,18 +943,7 @@ public class MainActivity extends CalendouerActivity implements
             if (s != null && !s.equals("")) {
                 sharedPref.edit().putString("weather_json", s).apply();
                 sharedPref.edit().putString("update_time", df_hm.format(new Date())).apply();
-
-                // update weather every x hours;
-                Calendar calendar = Calendar.getInstance();
-
-                calendar.add(
-                        Calendar.HOUR_OF_DAY,
-                        Integer.parseInt(settingPref.getString("update_frequency", "2"))
-                );
-
-                Intent intent = new Intent(MainActivity.this, UpdateWeatherReceiver.class);
-
-                setAlarm(intent, WEATHER_REQUEST_CODE, calendar.getTimeInMillis());
+                sharedPref.edit().putString("update_datetime", df_ymd_hms.format(new Date())).apply();
 
                 //set weather
                 setWeather();

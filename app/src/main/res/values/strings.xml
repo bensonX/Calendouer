@@ -109,5 +109,8 @@
     <string name="support_developer">支持开发者</string>
     <string name="ad_title">广告卡片</string>
     <string name="pref_open_source_license">开源许可</string>
+    <string name="update_weather">更新天气</string>
+    <string name="weather_updating">更新天气中...</string>
+    <string name="weather_update_too_often">天气信息不会变化这么快，5分钟后再试</string>
 </resources>
 

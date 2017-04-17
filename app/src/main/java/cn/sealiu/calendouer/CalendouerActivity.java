@@ -1,10 +1,7 @@
 package cn.sealiu.calendouer;
 
 import android.Manifest;
-import android.app.AlarmManager;
-import android.app.PendingIntent;
 import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
@@ -24,8 +21,10 @@ import android.view.View;
 import android.widget.TextView;
 
 import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.Locale;
 
 /**
@@ -39,7 +38,6 @@ public class CalendouerActivity extends AppCompatActivity {
     final static int MAX_COUNT = 100;
     final static int LOCATION_PERM = 100;
 
-    final static int WEATHER_REQUEST_CODE = 114;
     DateFormat df_ymd, df_hm, df_ymd_hms;
 
     SharedPreferences sharedPref, settingPref;
@@ -97,6 +95,7 @@ public class CalendouerActivity extends AppCompatActivity {
                 Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED;
     }
 
+    /*
     void setAlarm(Intent intent, int requestCode, long triggerAtMillis) {
         AlarmManager alarmMgr = (AlarmManager) getSystemService(ALARM_SERVICE);
 
@@ -125,7 +124,7 @@ public class CalendouerActivity extends AppCompatActivity {
         );
 
         alarmMgr.cancel(alarmIntent);
-    }
+    }*/
 
     float getScreenWidthInPd() {
         Display display = getWindowManager().getDefaultDisplay();
@@ -187,6 +186,35 @@ public class CalendouerActivity extends AppCompatActivity {
 
         view.requestLayout();
         view.getLayoutParams().width = widthInPx;
+    }
+
+    boolean needUpdateWeather() {
+        int frequency = Integer.parseInt(settingPref.getString("update_frequency", "2"));
+
+        String lastWeatherUpdate = sharedPref.getString("update_datetime", "");
+        if (!lastWeatherUpdate.equals("")) {
+            try {
+                Date lastUpdateDate = df_ymd_hms.parse(lastWeatherUpdate);
+                return new Date().getTime() - lastUpdateDate.getTime() > frequency * 60 * 60 * 1000;
+            } catch (ParseException e) {
+                e.printStackTrace();
+                return false;
+            }
+        } else {
+            return true;
+        }
+    }
+
+    public String getTextDayNight(String text_day, String text_night) {
+
+        if (text_day.equals(text_night)) {
+            return text_day;
+        } else {
+            return String.format(getString(R.string.weather_info),
+                    text_day,
+                    text_night
+            );
+        }
     }
 }
 

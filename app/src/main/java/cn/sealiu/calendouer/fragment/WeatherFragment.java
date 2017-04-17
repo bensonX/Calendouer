@@ -30,9 +30,21 @@ import cn.sealiu.calendouer.until.WeatherIcon;
 public class WeatherFragment extends DialogFragment {
 
     SharedPreferences sharedPref;
+    UpdateWeatherListener listener;
 
     public WeatherFragment() {
         // Required empty public constructor
+    }
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        try {
+            listener = (UpdateWeatherListener) context;
+        } catch (ClassCastException e) {
+            throw new ClassCastException(context.toString()
+                    + "must implement ChooseCityFragment");
+        }
     }
 
     @NonNull
@@ -135,7 +147,7 @@ public class WeatherFragment extends DialogFragment {
                         getTextDayNight(
                                 weatherBeans[i].getText_day(),
                                 weatherBeans[i].getText_night()
-                        ) + String.format(
+                        ) + " " + String.format(
                                 getResources().getString(R.string.weather_high_low),
                                 weatherBeans[i].getHigh(),
                                 weatherBeans[i].getLow()
@@ -149,9 +161,11 @@ public class WeatherFragment extends DialogFragment {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setView(view);
 
-        builder.setNegativeButton(getString(R.string.close), new DialogInterface.OnClickListener() {
+        builder.setPositiveButton(getString(R.string.update_weather), new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
+                UpdateWeatherListener listener = (UpdateWeatherListener) getActivity();
+                listener.onUpdateWeather();
                 dismiss();
             }
         }).setTitle(getString(R.string.weather_preview));
@@ -170,5 +184,9 @@ public class WeatherFragment extends DialogFragment {
                     text_night
             );
         }
+    }
+
+    public interface UpdateWeatherListener {
+        void onUpdateWeather();
     }
 }

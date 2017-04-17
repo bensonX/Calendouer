@@ -34,8 +34,6 @@
             android:parentActivityName=".MainActivity" />
 
         <service android:name="com.amap.api.location.APSService" />
-
-        <receiver android:name=".receiver.UpdateWeatherReceiver" />
     </application>
 
 </manifest>
