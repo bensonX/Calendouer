@@ -42,9 +42,9 @@
             android:title="即将上映" />
 
         <SwitchPreference
-            android:defaultValue="false"
-            android:key="movie_similar_show"
-            android:title="@string/pref_title_similar_movie" />
+            android:defaultValue="true"
+            android:key="movie_you_may_like"
+            android:title="@string/pref_you_may_like_movie" />
     </PreferenceCategory>
 
     <PreferenceCategory android:title="@string/ad_title">

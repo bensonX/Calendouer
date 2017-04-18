@@ -87,7 +87,6 @@ public class MainActivity extends CalendouerActivity implements
     TextView solarTermTV;
     TextView festivalTV;
     RelativeLayout weatherHolder;
-    LinearLayout movieRecommendedHolder;
     AppCompatButton getWeatherTV;
     TextView cityNameTV;
     TextView weatherTV;
@@ -105,15 +104,16 @@ public class MainActivity extends CalendouerActivity implements
     WeatherIcon icons;
     AMapLocationClient mLocationClient;
     AMapLocationClientOption mLocationOption;
-    LinearLayout weatherCard;
-    LinearLayout movieCard;
     LocationManager locationMgr;
     CollapsingToolbarLayout collapsingToolbarLayout;
     NestedScrollView nestedScrollView;
     View progressOfDay;
-    NativeExpressAdView adView;
-    LinearLayout ratingUs;
     TextView directorTV, castsTV1, castsTV2, genresTV1, genresTV2, sameNameTV;
+
+    LinearLayout weatherCard, movieCard, todayMovieCard,
+            inTheatersCard, comingSoonCard, youMayLikeCard;
+    LinearLayout ratingUs;
+    NativeExpressAdView adView;
 
     int color, colorDark;
     private int festival = 0;
@@ -125,6 +125,15 @@ public class MainActivity extends CalendouerActivity implements
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        weatherCard = (LinearLayout) findViewById(R.id.weather_card);
+        movieCard = (LinearLayout) findViewById(R.id.movie_card);
+        todayMovieCard = (LinearLayout) findViewById(R.id.today_movie_card);
+        inTheatersCard = (LinearLayout) findViewById(R.id.in_theaters_card);
+        comingSoonCard = (LinearLayout) findViewById(R.id.coming_soon_card);
+        youMayLikeCard = (LinearLayout) findViewById(R.id.you_may_like_card);
+        ratingUs = (LinearLayout) findViewById(R.id.rating_us_card);
+        adView = (NativeExpressAdView) findViewById(R.id.adView);
+
         directorTV = (TextView) findViewById(R.id.director);
         castsTV1 = (TextView) findViewById(R.id.casts_1);
         castsTV2 = (TextView) findViewById(R.id.casts_2);
@@ -132,8 +141,6 @@ public class MainActivity extends CalendouerActivity implements
         genresTV2 = (TextView) findViewById(R.id.genres_2);
         sameNameTV = (TextView) findViewById(R.id.same_name);
 
-        ratingUs = (LinearLayout) findViewById(R.id.rating_us_card);
-        adView = (NativeExpressAdView) findViewById(R.id.adView);
         progressOfDay = findViewById(R.id.progress_day);
         collapsingToolbarLayout = (CollapsingToolbarLayout) findViewById(R.id.collapsing_toolbar);
         nestedScrollView = (NestedScrollView) findViewById(R.id.nest_scroll_view);
@@ -146,15 +153,12 @@ public class MainActivity extends CalendouerActivity implements
         festivalTV = (TextView) findViewById(R.id.festival);
         weatherHolder = (RelativeLayout) findViewById(R.id.weatherHolder);
         getWeatherTV = (AppCompatButton) findViewById(R.id.getWeatherInfo);
-
-        weatherCard = (LinearLayout) findViewById(R.id.weather_card);
         cityNameTV = (TextView) findViewById(R.id.city_name);
         weatherTV = (TextView) findViewById(R.id.weather);
         weatherIconIV = (ImageView) findViewById(R.id.weather_icon);
         weatherIconIV.setOnClickListener(this);
 
         movieCardCover = (ImageView) findViewById(R.id.movie_card_cover);
-        movieCard = (LinearLayout) findViewById(R.id.movie_card);
         movieImageIV = (ImageView) findViewById(R.id.movie_image);
         movieAverageTV = (TextView) findViewById(R.id.rating__average);
         movieTitleTV = (TextView) findViewById(R.id.movie_title);
@@ -162,7 +166,6 @@ public class MainActivity extends CalendouerActivity implements
         starsHolderLL = (LinearLayout) findViewById(R.id.rating__stars_holder);
 
         getTop250Btn = (AppCompatButton) findViewById(R.id.getTop250_btn);
-        movieRecommendedHolder = (LinearLayout) findViewById(R.id.movie_recommended_holder);
         dbHelper = new DBHelper(this);
         icons = new WeatherIcon();
         sharedPref.registerOnSharedPreferenceChangeListener(this);
@@ -190,8 +193,10 @@ public class MainActivity extends CalendouerActivity implements
 
         mLocationClient.setLocationOption(mLocationOption);
 
+        //Calendar
         initCalendar();
 
+        //Weather
         if (settingPref.getBoolean("weather_show", true)) {
             weatherHolder.setVisibility(View.VISIBLE);
             initWeather();
@@ -200,32 +205,15 @@ public class MainActivity extends CalendouerActivity implements
             restoreTheme();
         }
 
-        if (settingPref.getBoolean("movie_recommended_show", true)) {
+        //Movie Recommendation
+        if (checkEmpty(MovieEntry.TABLE_NAME)) {
             movieCard.setVisibility(View.VISIBLE);
-            if (checkEmpty(MovieEntry.TABLE_NAME)) {
-                getTop250Btn.setVisibility(View.VISIBLE);
-                movieCardCover.setVisibility(View.VISIBLE);
-                movieRecommendedHolder.setVisibility(View.GONE);
-                getTop250Btn.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        new AlertDialog.Builder(MainActivity.this)
-                                .setTitle(getString(R.string.download_movie_data))
-                                .setMessage(getString(R.string.download_tips))
-                                .setPositiveButton(getString(R.string.ok), new DialogInterface.OnClickListener() {
-                                    @Override
-                                    public void onClick(DialogInterface dialog, int which) {
-                                        initMovieDB();
-                                    }
-                                })
-                                .setNegativeButton(getString(R.string.cancel), new DialogInterface.OnClickListener() {
-                                    @Override
-                                    public void onClick(DialogInterface dialog, int which) {
-                                    }
-                                }).show();
-                    }
-                });
-            } else {
+            todayMovieCard.setVisibility(View.GONE);
+            getTop250Btn.setOnClickListener(this);
+        } else {
+            if (settingPref.getBoolean("movie_recommended_show", true)) {
+                todayMovieCard.setVisibility(View.VISIBLE);
+
                 String datePref = sharedPref.getString("DATE", "null");
                 String idPref = sharedPref.getString("ID", "null");
 
@@ -246,9 +234,30 @@ public class MainActivity extends CalendouerActivity implements
                         setMovieInfoRepeat(idPref);
                     }
                 }
+            } else {
+                todayMovieCard.setVisibility(View.GONE);
             }
+        }
+
+        //Movie in_theaters
+        if (settingPref.getBoolean("movie_in_theaters", true)) {
+            inTheatersCard.setVisibility(View.VISIBLE);
         } else {
-            movieCard.setVisibility(View.GONE);
+            inTheatersCard.setVisibility(View.GONE);
+        }
+
+        //Movie coming soon
+        if (settingPref.getBoolean("movie_coming_soon", true)) {
+            comingSoonCard.setVisibility(View.VISIBLE);
+        } else {
+            comingSoonCard.setVisibility(View.GONE);
+        }
+
+        // TODO: 2017/4/18 you may like card init
+        if (settingPref.getBoolean("movie_you_may_like", true)) {
+            youMayLikeCard.setVisibility(View.VISIBLE);
+        } else {
+            youMayLikeCard.setVisibility(View.GONE);
         }
 
         setProgressInPd(progressOfDay);
@@ -598,11 +607,11 @@ public class MainActivity extends CalendouerActivity implements
 
         movieImageIV.setOnClickListener(this);
 
-        CelebrityBean director = todayMovie.getDirectors()[0];
+        CelebrityBean[] directors = todayMovie.getDirectors();
         CelebrityBean[] casts = todayMovie.getCasts();
         String[] genres = todayMovie.getGenres();
-        if (director != null && director.getName().equals(""))
-            directorTV.setText(String.format(getString(R.string.chip_director), director.getName()));
+        if (directors.length > 0)
+            directorTV.setText(String.format(getString(R.string.chip_director), directors[0].getName()));
         else
             directorTV.setVisibility(View.GONE);
         if (casts.length > 0)
@@ -662,6 +671,22 @@ public class MainActivity extends CalendouerActivity implements
     public void onClick(View v) {
 
         switch (v.getId()) {
+            case R.id.getTop250_btn:
+                new AlertDialog.Builder(MainActivity.this)
+                        .setTitle(getString(R.string.download_movie_data))
+                        .setMessage(getString(R.string.download_tips))
+                        .setPositiveButton(getString(R.string.ok), new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                initMovieDB();
+                            }
+                        })
+                        .setNegativeButton(getString(R.string.cancel), new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                            }
+                        }).show();
+                break;
             case R.id.weather_icon:
                 String weatherJson = sharedPref.getString("weather_json", "");
                 if (!weatherJson.equals("")) {
@@ -868,17 +893,13 @@ public class MainActivity extends CalendouerActivity implements
 
                 int start = sharedPref.getInt("START", 0) + top250Bean.getCount();
                 sharedPref.edit().putInt("START", start).apply();
-                movieRecommendedHolder.setVisibility(View.VISIBLE);
 
                 hideProgressDialog();
-                getTop250Btn.setVisibility(View.GONE);
-                movieCardCover.setVisibility(View.GONE);
+                movieCard.setVisibility(View.GONE);
+                todayMovieCard.setVisibility(View.VISIBLE);
                 setMovieInfoRandom();
             } else {
                 hideProgressDialog();
-                getTop250Btn.setVisibility(View.VISIBLE);
-                movieCardCover.setVisibility(View.VISIBLE);
-
                 displaySnackBar(
                         nestedScrollView,
                         getString(R.string.douban_error),

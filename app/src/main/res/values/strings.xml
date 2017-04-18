@@ -6,7 +6,7 @@
     <string name="weather" translatable="false">%1$s\n%2$s\u2103 | %3$s\u2103</string>
     <string name="weather_high_low" translatable="false">%1$s\u2103 | %2$s\u2103</string>
     <string name="rationale_location">位置信息仅用于天气预报</string>
-    <string name="getWeatherInfo">点击获取天气信息</string>
+    <string name="getWeatherInfo">获取天气信息</string>
     <string name="permission">权限请求</string>
     <string name="grant">同意授权</string>
     <string name="deny">拒绝</string>
@@ -59,7 +59,7 @@
         <item>"6"</item>
         <item>"8"</item>
     </array>
-    <string name="pref_title_similar_movie">猜你喜欢</string>
+    <string name="pref_you_may_like_movie">猜你喜欢</string>
     <string name="douban_group">去豆瓣小组畅聊</string>
     <string name="pref_rate">去评分</string>
     <string name="google_play" translatable="false">Google Play</string>
@@ -120,5 +120,6 @@
     <string name="chip_casts">演员/%1$s</string>
     <string name="chip_genres">类型/%1$s</string>
     <string name="chip_same_name">同名作</string>
+    <string name="all">全部</string>
 </resources>
 
