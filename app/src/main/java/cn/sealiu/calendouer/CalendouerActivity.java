@@ -4,13 +4,13 @@ import android.Manifest;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.content.res.ColorStateList;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.design.widget.CollapsingToolbarLayout;
-import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -18,6 +18,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.DisplayMetrics;
 import android.view.Display;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import java.text.DateFormat;
@@ -26,6 +28,8 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
+
+import cn.sealiu.calendouer.until.DBHelper;
 
 /**
  * Created by liuyang
@@ -66,20 +70,6 @@ public class CalendouerActivity extends AppCompatActivity {
     void setCustomTheme(
             int color,
             int colorDark,
-            FloatingActionButton fab,
-            CollapsingToolbarLayout collapsingToolbarLayout) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            fab.setBackgroundTintList(ColorStateList.valueOf(color));
-            collapsingToolbarLayout.setContentScrimColor(color);
-            collapsingToolbarLayout.setBackgroundColor(color);
-            this.getWindow().setNavigationBarColor(color);
-            this.getWindow().setStatusBarColor(colorDark);
-        }
-    }
-
-    void setCustomTheme(
-            int color,
-            int colorDark,
             CollapsingToolbarLayout collapsingToolbarLayout) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             collapsingToolbarLayout.setContentScrimColor(color);
@@ -94,37 +84,6 @@ public class CalendouerActivity extends AppCompatActivity {
                 == PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this,
                 Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED;
     }
-
-    /*
-    void setAlarm(Intent intent, int requestCode, long triggerAtMillis) {
-        AlarmManager alarmMgr = (AlarmManager) getSystemService(ALARM_SERVICE);
-
-        PendingIntent alarmIntent = PendingIntent.getBroadcast(
-                getApplicationContext(),
-                requestCode,
-                intent,
-                PendingIntent.FLAG_UPDATE_CURRENT
-        );
-
-        alarmMgr.set(
-                AlarmManager.RTC,
-                triggerAtMillis,
-                alarmIntent
-        );
-    }
-
-    void cancelAlarm(Intent intent, int requestCode) {
-        AlarmManager alarmMgr = (AlarmManager) getSystemService(ALARM_SERVICE);
-
-        PendingIntent alarmIntent = PendingIntent.getBroadcast(
-                getApplicationContext(),
-                requestCode,
-                intent,
-                PendingIntent.FLAG_UPDATE_CURRENT
-        );
-
-        alarmMgr.cancel(alarmIntent);
-    }*/
 
     float getScreenWidthInPd() {
         Display display = getWindowManager().getDefaultDisplay();
@@ -214,6 +173,41 @@ public class CalendouerActivity extends AppCompatActivity {
                     text_day,
                     text_night
             );
+        }
+    }
+
+    public boolean checkEmpty(DBHelper dbHelper, String tableName) {
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
+        Cursor cursor = db.rawQuery("SELECT * FROM " + tableName, null);
+        boolean isEmpty = !cursor.moveToFirst();
+        cursor.close();
+        db.close();
+        return isEmpty;
+    }
+
+    public void setRatingStar(ViewGroup holder, String stars) {
+        double stars_num = Double.parseDouble(stars) / 10;
+        int full_star_num = (int) Math.floor(stars_num);
+        int half_star_num = (int) (Math.floor((stars_num - full_star_num) * 2));
+        int blank_star_num = STAR - full_star_num - half_star_num;
+
+        holder.removeAllViews();
+
+        while (full_star_num-- > 0) {
+            ImageView star = new ImageView(this);
+            star.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.ic_star_16dp));
+            holder.addView(star);
+        }
+        while (half_star_num-- > 0) {
+            ImageView star = new ImageView(this);
+            star.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.ic_star_half_16dp));
+            holder.addView(star);
+        }
+
+        while (blank_star_num-- > 0) {
+            ImageView star = new ImageView(this);
+            star.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.ic_star_blank_16dp));
+            holder.addView(star);
         }
     }
 }

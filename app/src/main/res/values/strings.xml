@@ -94,7 +94,7 @@
     <string name="things_title">事情</string>
     <string name="things_notification_datetime">设置提醒时间</string>
     <string name="goto_douban">去豆瓣</string>
-    <string name="add_to_things">添加到事情</string>
+    <string name="movie_like">喜欢</string>
     <string name="introduction">简介</string>
     <string name="snackbar_thing_delete">已删除 \"%1$s\"</string>
     <string name="revoke">撤销</string>
@@ -121,5 +121,7 @@
     <string name="chip_genres">类型/%1$s</string>
     <string name="chip_same_name">同名作</string>
     <string name="all">全部</string>
+    <string name="transition.poster">TRANSITION_POSTER</string>
+    <string name="collect_num">%1$s 人想看</string>
 </resources>
 

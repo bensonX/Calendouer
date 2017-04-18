@@ -13,7 +13,7 @@ android {
     buildToolsVersion "25.0.2"
     defaultConfig {
         applicationId "cn.sealiu.calendouer"
-        minSdkVersion 16
+        minSdkVersion 17
         targetSdkVersion 25
         versionCode 7
         versionName "2.0.1"
@@ -53,6 +53,7 @@ dependencies {
     compile 'com.google.firebase:firebase-crash:9.6.1'
     compile 'com.google.firebase:firebase-ads:10.2.0'
     compile 'co.dift.ui.swipetoaction:library:1.1'
+    compile 'com.android.support.constraint:constraint-layout:1.0.2'
     testCompile 'junit:junit:4.12'
 }
 

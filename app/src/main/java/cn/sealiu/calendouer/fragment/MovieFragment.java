@@ -1,16 +1,12 @@
 package cn.sealiu.calendouer.fragment;
 
 import android.app.Dialog;
-import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomSheetDialogFragment;
 import android.support.v4.content.ContextCompat;
-import android.support.v7.widget.AppCompatButton;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
@@ -50,16 +46,8 @@ public class MovieFragment extends BottomSheetDialogFragment implements View.OnC
         dialog.setContentView(view);
 
         view.findViewById(R.id.bs_goto_douban).setOnClickListener(this);
-        AppCompatButton addThingsBtn = (AppCompatButton) view.findViewById(R.id.bs_add_things);
+        view.findViewById(R.id.bs_like_movie).setOnClickListener(this);
 
-        Log.d("Bottom_Sheet", "setupDialog");
-        SharedPreferences settingPref = PreferenceManager.getDefaultSharedPreferences(getActivity());
-        if (settingPref.getBoolean("things_show", true)) {
-            addThingsBtn.setOnClickListener(this);
-        } else {
-            addThingsBtn.setOnClickListener(null);
-            addThingsBtn.setVisibility(View.GONE);
-        }
 
         imageIV = (ImageView) view.findViewById(R.id.bs_image);
         titleTV = (TextView) view.findViewById(R.id.bs_movie_title);
@@ -141,9 +129,8 @@ public class MovieFragment extends BottomSheetDialogFragment implements View.OnC
                     startActivity(intent);
                 }
                 break;
-            case R.id.bs_add_things:
-                Log.d("MovieFragment", "add_things");
-                dismiss();
+            case R.id.bs_like_movie:
+                // TODO: 2017/4/18 add this movie to movie db and record this movie's features
                 break;
         }
     }

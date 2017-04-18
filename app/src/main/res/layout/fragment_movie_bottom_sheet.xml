@@ -31,7 +31,7 @@
 
             <LinearLayout
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:layout_weight="2"
                 android:minHeight="150dp"
                 android:orientation="vertical">
@@ -84,42 +84,43 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:textSize="12sp" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="bottom|end"
+                    android:orientation="horizontal"
+                    android:paddingTop="@dimen/activity_vertical_margin">
+
+                    <android.support.v7.widget.AppCompatButton
+                        android:id="@+id/bs_goto_douban"
+                        style="?attr/borderlessButtonStyle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="32dp"
+                        android:layout_marginLeft="16dp"
+                        android:background="@drawable/round_border"
+                        android:drawableLeft="@drawable/ic_launch_24dp"
+                        android:paddingLeft="8dp"
+                        android:paddingRight="8dp"
+                        android:text="@string/goto_douban"
+                        android:textAllCaps="false"
+                        android:textColor="@color/colorAccent" />
+
+                    <android.support.v7.widget.AppCompatButton
+                        android:id="@+id/bs_like_movie"
+                        style="?attr/borderlessButtonStyle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="32dp"
+                        android:layout_marginLeft="16dp"
+                        android:background="@drawable/round_border"
+                        android:drawableLeft="@drawable/ic_favorite_24dp"
+                        android:paddingLeft="8dp"
+                        android:paddingRight="8dp"
+                        android:text="@string/movie_like"
+                        android:textAllCaps="false"
+                        android:textColor="@color/colorAccent" />
+                </LinearLayout>
             </LinearLayout>
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="end"
-            android:orientation="horizontal"
-            android:paddingTop="@dimen/activity_vertical_margin">
-
-            <android.support.v7.widget.AppCompatButton
-                android:id="@+id/bs_goto_douban"
-                style="?attr/borderlessButtonStyle"
-                android:layout_width="wrap_content"
-                android:layout_height="36dp"
-                android:layout_gravity="start"
-                android:background="@drawable/round_border"
-                android:text="@string/goto_douban"
-                android:textAllCaps="false"
-                android:textColor="@color/colorAccent" />
-
-            <android.support.v7.widget.AppCompatButton
-                android:id="@+id/bs_add_things"
-                style="?attr/borderlessButtonStyle"
-                android:layout_width="wrap_content"
-                android:layout_height="36dp"
-                android:layout_marginLeft="16dp"
-                android:background="@drawable/round_border"
-                android:drawableLeft="@drawable/ic_things_add_24dp"
-                android:drawablePadding="6dp"
-                android:drawableStart="@drawable/ic_things_add_24dp"
-                android:paddingLeft="16dp"
-                android:paddingRight="16dp"
-                android:text="@string/add_to_things"
-                android:textAllCaps="false"
-                android:textColor="@color/colorAccent" />
         </LinearLayout>
 
         <TextView
