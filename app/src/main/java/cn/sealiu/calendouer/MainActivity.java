@@ -144,6 +144,8 @@ public class MainActivity extends CalendouerActivity implements
 
         inTheatersRecyclerHolder = (RecyclerView) findViewById(R.id.in_theaters_recycler_holder);
         comingSoonRecyclerHolder = (RecyclerView) findViewById(R.id.coming_soon_recycler_holder);
+        inTheatersRecyclerHolder.setNestedScrollingEnabled(false);
+        comingSoonRecyclerHolder.setNestedScrollingEnabled(false);
 
         directorTV = (TextView) findViewById(R.id.director);
         castsTV1 = (TextView) findViewById(R.id.casts_1);
@@ -733,7 +735,10 @@ public class MainActivity extends CalendouerActivity implements
 
     @Override
     public void onClick(View v) {
-
+        MovieBean todayMovie = new Gson().fromJson(
+                sharedPref.getString("movie_json", ""),
+                MovieBean.class
+        );
         switch (v.getId()) {
             case R.id.getTop250_btn:
                 new AlertDialog.Builder(MainActivity.this)
@@ -773,12 +778,16 @@ public class MainActivity extends CalendouerActivity implements
                 // TODO: 2017/4/19
                 break;
             case R.id.director:
+                startCelebrityActivity("director", todayMovie.getDirectors()[0].getId());
+                break;
             case R.id.casts_1:
+                startCelebrityActivity("casts", todayMovie.getCasts()[0].getId());
+                break;
             case R.id.casts_2:
-            case R.id.genres_1:
-            case R.id.genres_2:
+                startCelebrityActivity("casts", todayMovie.getDirectors()[0].getId());
+                break;
             case R.id.same_name:
-                startActivity(new Intent(MainActivity.this, CelebrityActivity.class));
+                // TODO: 2017/4/19
                 break;
             case R.id.city_name:
                 mLocationClient.startLocation();
@@ -868,6 +877,13 @@ public class MainActivity extends CalendouerActivity implements
             movieFragment.setArguments(bundle);
             movieFragment.show(getSupportFragmentManager(), movieFragment.getTag());
         }
+    }
+
+    private void startCelebrityActivity(String type, String celebrityName) {
+        Intent intent = new Intent(MainActivity.this, CelebrityActivity.class);
+        intent.putExtra("type", type);
+        intent.putExtra("name", celebrityName);
+        startActivity(intent);
     }
 
     private void changeTheme(String weather_code) {
