@@ -5,6 +5,7 @@ import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
@@ -162,8 +163,14 @@ public class WeatherFragment extends DialogFragment {
             }
         }).setTitle(getString(R.string.weather_preview));
 
+        Dialog dialog = builder.create();
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(
+                    ContextCompat.getColor(getActivity(), R.color.textOrIcons)
+            ));
+        }
 
-        return builder.create();
+        return dialog;
     }
 
     private String getTextDayNight(String text_day, String text_night) {

@@ -272,7 +272,7 @@ public class MainActivity extends CalendouerActivity implements
         }
 
         // TODO: 2017/4/18 you may like card init
-        if (settingPref.getBoolean("movie_you_may_like", true)) {
+        if (settingPref.getBoolean("movie_you_may_like", false)) {
             youMayLikeCard.setVisibility(View.VISIBLE);
         } else {
             youMayLikeCard.setVisibility(View.GONE);
@@ -798,20 +798,7 @@ public class MainActivity extends CalendouerActivity implements
                 }
                 break;
             case R.id.getTop250_btn:
-                new AlertDialog.Builder(MainActivity.this)
-                        .setTitle(getString(R.string.download_movie_data))
-                        .setMessage(getString(R.string.download_tips))
-                        .setPositiveButton(getString(R.string.ok), new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                initMovieDB();
-                            }
-                        })
-                        .setNegativeButton(getString(R.string.cancel), new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                            }
-                        }).show();
+                onConfirmDownloadMovie();
                 break;
             case R.id.weather_icon:
                 String weatherJson = sharedPref.getString("weather_json", "");
@@ -841,10 +828,16 @@ public class MainActivity extends CalendouerActivity implements
                 startCelebrityActivity("casts", todayMovie.getCasts()[0].getId());
                 break;
             case R.id.casts_2:
-                startCelebrityActivity("casts", todayMovie.getDirectors()[0].getId());
+                startCelebrityActivity("casts", todayMovie.getCasts()[1].getId());
+                break;
+            case R.id.genres_1:
+                startCelebrityActivity("genres", todayMovie.getGenres()[0]);
+                break;
+            case R.id.genres_2:
+                startCelebrityActivity("genres", todayMovie.getGenres()[1]);
                 break;
             case R.id.same_name:
-                // TODO: 2017/4/19
+                startCelebrityActivity("same_name", todayMovie.getTitle());
                 break;
             case R.id.city_name:
                 mLocationClient.startLocation();
@@ -874,6 +867,23 @@ public class MainActivity extends CalendouerActivity implements
             default:
                 break;
         }
+    }
+
+    private void onConfirmDownloadMovie() {
+        new AlertDialog.Builder(MainActivity.this)
+                .setTitle(getString(R.string.initMovieRecommended))
+                .setMessage(getString(R.string.download_tips))
+                .setPositiveButton(getString(R.string.ok), new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        initMovieDB();
+                    }
+                })
+                .setNegativeButton(getString(R.string.cancel), new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                    }
+                }).show();
     }
 
     private void setWeather() {
@@ -937,10 +947,10 @@ public class MainActivity extends CalendouerActivity implements
     }
 
     private void startCelebrityActivity(String type, String celebrityName) {
-        Intent intent = new Intent(MainActivity.this, CelebrityActivity.class);
-        intent.putExtra("type", type);
-        intent.putExtra("name", celebrityName);
-        startActivity(intent);
+//        Intent intent = new Intent(MainActivity.this, CelebrityActivity.class);
+//        intent.putExtra("type", type);
+//        intent.putExtra("name", celebrityName);
+//        startActivity(intent);
     }
 
     private void changeTheme(String weather_code) {
@@ -1010,16 +1020,23 @@ public class MainActivity extends CalendouerActivity implements
 
     @Override
     public void onLikeMovie(MovieBean movie) {
+        if (checkEmpty(dbHelper, MovieEntry.TABLE_NAME)) {
+            onConfirmDownloadMovie();
+            return;
+        }
 
-        String info = getString(R.string.error);
+        String info;
         if (movie != null && !movie.getId().equals("")) {
             if (insertMovieDB(dbHelper, movie) == -1) {
                 info = getString(R.string.like_movie_already_exist);
             } else {
                 info = getString(R.string.like_movie_success);
             }
+        } else {
+            info = getString(R.string.error);
         }
-        Snackbar.make(nestedScrollView, info, Snackbar.LENGTH_SHORT).show();
+
+        Snackbar.make(nestedScrollView, info, Snackbar.LENGTH_LONG).show();
     }
 
     private class GetTop250 extends AsyncTask<String, String, String> {
