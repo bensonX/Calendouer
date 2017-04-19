@@ -127,5 +127,7 @@
     <string name="in_theaters">正在热映</string>
     <string name="pin_active_info">已固定，"今日推荐"不再更新</string>
     <string name="pin_inactive_info">取消固定，"今日推荐"恢复更新</string>
+    <string name="tomorrow">明天</string>
+    <string name="day_after_tomorrow">后天</string>
 </resources>
 

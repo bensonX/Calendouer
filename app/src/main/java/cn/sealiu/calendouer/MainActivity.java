@@ -269,23 +269,26 @@ public class MainActivity extends CalendouerActivity implements
             youMayLikeCard.setVisibility(View.GONE);
         }
 
-        setProgressInPd(progressOfDay);
-
-        initAd();
-    }
-
-    private void initAd() {
+        // ad
         if (settingPref.getBoolean("ad_show", true)) {
             adView.setVisibility(View.VISIBLE);
             ratingUs.setVisibility(View.GONE);
-            AdRequest request = new AdRequest.Builder()
-                    .addTestDevice("43FE98603DD8DD9E449808D85C7DBD45")
-                    .build();
-            adView.loadAd(request);
+            initAd();
         } else {
             adView.setVisibility(View.GONE);
             ratingUs.setVisibility(View.VISIBLE);
         }
+
+        // day progress
+        setProgressInPd(progressOfDay);
+    }
+
+    private void initAd() {
+        ratingUs.setVisibility(View.GONE);
+        AdRequest request = new AdRequest.Builder()
+                .addTestDevice("43FE98603DD8DD9E449808D85C7DBD45")
+                .build();
+        adView.loadAd(request);
     }
 
     private void initCalendar() {

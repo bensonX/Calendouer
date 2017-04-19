@@ -5,9 +5,6 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
 import static cn.sealiu.calendouer.until.MovieContract.MovieEntry;
-import static cn.sealiu.calendouer.until.PersonalContract.PersonalEntry;
-import static cn.sealiu.calendouer.until.SimilarContract.SimilarEntry;
-import static cn.sealiu.calendouer.until.ThingsContract.ThingsEntry;
 
 /**
  * Created by liuyang
@@ -15,7 +12,7 @@ import static cn.sealiu.calendouer.until.ThingsContract.ThingsEntry;
  */
 
 public class DBHelper extends SQLiteOpenHelper {
-    private static final int DB_VERSION = 3;
+    private static final int DB_VERSION = 4;
     private static final String DB_NAME = "MOVIE.db";
 
     private static final String MOVIE_CREATE_ENTRIES =
@@ -32,28 +29,11 @@ public class DBHelper extends SQLiteOpenHelper {
     private static final String MOVIE_DELETE_ENTRIES =
             "DROP TABLE IF EXISTS " + MovieEntry.TABLE_NAME;
 
-    private static final String PERSONAL_CREATE_ENTRIES =
-            "CREATE TABLE IF NOT EXISTS " + MovieEntry.TABLE_NAME + "(" +
-                    PersonalEntry.COLUMN_NAME_ID + " TEXT PRIMARY KEY, " +
-                    PersonalEntry.COLUMN_NAME_KEY + " TEXT, " +
-                    PersonalEntry.COLUMN_NAME_VALUE + " TEXT, " +
-                    PersonalEntry.COLUMN_NAME_LEVEL + " TEXT, " +
-                    PersonalEntry.COLUMN_NAME_DATETIME + " TEXT, " +
-                    PersonalEntry.COLUMN_NAME_ALT + " TEXT)";
     private static final String PERSONAL_DELETE_ENTRIES =
-            "DROP TABLE IF EXISTS " + PersonalEntry.TABLE_NAME;
+            "DROP TABLE IF EXISTS personal";
 
-    private static final String SIMILAR_CREATE_ENTRIES =
-            "CREATE TABLE IF NOT EXISTS " + SimilarEntry.TABLE_NAME + "(" +
-                    SimilarEntry.COLUMN_NAME_ID + " TEXT PRIMARY KEY, " +
-                    SimilarEntry.COLUMN_NAME_TITLE + " TEXT, " +
-                    SimilarEntry.COLUMN_NAME_IMAGES + " TEXT, " +
-                    SimilarEntry.COLUMN_NAME_AVERAGE + " FLOAT, " +
-                    SimilarEntry.COLUMN_NAME_STARS + " TEXT, " +
-                    SimilarEntry.COLUMN_NAME_ALT + " TEXT, " +
-                    SimilarEntry.COLUMN_NAME_YEAR + " TEXT)";
     private static final String SIMILAR_DELETE_ENTRIES =
-            "DROP TABLE IF EXISTS " + SimilarEntry.TABLE_NAME;
+            "DROP TABLE IF EXISTS similar";
 
     private static final String THINGS_DELETE_ENTRIES =
             "DROP TABLE IF EXISTS things";
@@ -65,20 +45,19 @@ public class DBHelper extends SQLiteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase db) {
         db.execSQL(MOVIE_CREATE_ENTRIES);
-        db.execSQL(SIMILAR_CREATE_ENTRIES);
-        db.execSQL(PERSONAL_CREATE_ENTRIES);
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        if (oldVersion < DB_VERSION) {
+        if (oldVersion < 3) {
             db.execSQL(MOVIE_DELETE_ENTRIES);
-            db.execSQL(THINGS_DELETE_ENTRIES);
-
             db.execSQL(MOVIE_CREATE_ENTRIES);
-            db.execSQL(SIMILAR_CREATE_ENTRIES);
-            db.execSQL(PERSONAL_CREATE_ENTRIES);
         }
+
+        db.execSQL(PERSONAL_DELETE_ENTRIES);
+        db.execSQL(SIMILAR_DELETE_ENTRIES);
+        db.execSQL(THINGS_DELETE_ENTRIES);
+
         onCreate(db);
     }
 

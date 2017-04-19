@@ -69,13 +69,7 @@ public class WeatherFragment extends DialogFragment {
         weather_high_low.add(weather_high_low_1);
         weather_high_low.add(weather_high_low_2);
 
-        TextView date_0 = (TextView) view.findViewById(R.id.date_0);
-        TextView date_1 = (TextView) view.findViewById(R.id.date_1);
-        TextView date_2 = (TextView) view.findViewById(R.id.date_2);
-        List<TextView> date = new ArrayList<>();
-        date.add(date_0);
-        date.add(date_1);
-        date.add(date_2);
+        TextView date_today = (TextView) view.findViewById(R.id.date_0);
 
         ImageView weather_icon_0 = (ImageView) view.findViewById(R.id.weather_icon_0);
         ImageView weather_icon_1 = (ImageView) view.findViewById(R.id.weather_icon_1);
@@ -133,7 +127,7 @@ public class WeatherFragment extends DialogFragment {
                     )
             );
 
-            date_0.setText(weatherBeans[0].getDate());
+            date_today.setText(weatherBeans[0].getDate());
 
             for (int i = 1; i < 3; i++) {
                 weather_icon.get(i).setImageDrawable(
@@ -153,8 +147,6 @@ public class WeatherFragment extends DialogFragment {
                                 weatherBeans[i].getLow()
                         )
                 );
-
-                date.get(i).setText(weatherBeans[i].getDate());
             }
         }
 

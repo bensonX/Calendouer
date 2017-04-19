@@ -4,8 +4,6 @@
     android:layout_height="match_parent"
     android:layout_marginTop="@dimen/activity_vertical_margin"
     android:orientation="vertical"
-    android:paddingEnd="@dimen/activity_horizontal_margin"
-    android:paddingStart="@dimen/activity_horizontal_margin"
     tools:context="cn.sealiu.calendouer.fragment.WeatherFragment">
 
     <LinearLayout
@@ -89,11 +87,17 @@
         </LinearLayout>
     </LinearLayout>
 
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/colorDivider" />
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:baselineAligned="false"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:paddingTop="@dimen/activity_vertical_margin">
 
         <LinearLayout
             android:layout_width="0dp"
@@ -102,6 +106,12 @@
             android:gravity="center_horizontal"
             android:orientation="vertical">
 
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingBottom="6dp"
+                android:text="@string/tomorrow"
+                android:textSize="14sp" />
             <ImageView
                 android:id="@+id/weather_icon_1"
                 android:layout_width="wrap_content"
@@ -112,12 +122,6 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textSize="14sp" />
-
-            <TextView
-                android:id="@+id/date_1"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textSize="12sp" />
         </LinearLayout>
 
         <LinearLayout
@@ -127,6 +131,12 @@
             android:gravity="center_horizontal"
             android:orientation="vertical">
 
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingBottom="6dp"
+                android:text="@string/day_after_tomorrow"
+                android:textSize="14sp" />
             <ImageView
                 android:id="@+id/weather_icon_2"
                 android:layout_width="wrap_content"
@@ -138,13 +148,6 @@
                 android:layout_height="wrap_content"
                 android:gravity="center_horizontal"
                 android:textSize="14sp" />
-
-            <TextView
-                android:id="@+id/date_2"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:gravity="center_horizontal"
-                android:textSize="12sp" />
         </LinearLayout>
     </LinearLayout>
 
