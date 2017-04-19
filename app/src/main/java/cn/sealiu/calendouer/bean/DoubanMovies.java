@@ -10,7 +10,7 @@ public class DoubanMovies {
     private int start;
     private int total;
     private String title;
-    private MovieBaseBean[] subjects;
+    private MovieBean[] subjects;
 
     public int getCount() {
         return count;
@@ -44,11 +44,11 @@ public class DoubanMovies {
         this.title = title;
     }
 
-    public MovieBaseBean[] getSubjects() {
+    public MovieBean[] getSubjects() {
         return subjects;
     }
 
-    public void setSubjects(MovieBaseBean[] subjects) {
+    public void setSubjects(MovieBean[] subjects) {
         this.subjects = subjects;
     }
 }

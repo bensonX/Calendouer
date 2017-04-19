@@ -123,5 +123,8 @@
     <string name="all">全部</string>
     <string name="transition.poster">TRANSITION_POSTER</string>
     <string name="collect_num">%1$s 人想看</string>
+    <string name="all_movie">共 %1$s 部</string>
+    <string name="coming_soon">即将上映</string>
+    <string name="in_theaters">正在热映</string>
 </resources>
 

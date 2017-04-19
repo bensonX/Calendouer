@@ -19,11 +19,6 @@
         android:layout_height="wrap_content"
         android:paddingTop="8dp"
         android:textColor="@color/primaryText"
-        android:textSize="12sp" />
-
-    <TextView
-        android:id="@+id/collect_coming_soon"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textSize="12sp" />
+        android:textSize="12sp"
+        android:textStyle="bold" />
 </LinearLayout>

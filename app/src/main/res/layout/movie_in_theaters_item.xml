@@ -17,10 +17,10 @@
         android:id="@+id/title_in_theaters"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingBottom="8dp"
         android:paddingTop="8dp"
         android:textColor="@color/primaryText"
-        android:textSize="12sp" />
+        android:textSize="12sp"
+        android:textStyle="bold" />
 
     <LinearLayout
         android:id="@+id/rating_stars_in_theaters"

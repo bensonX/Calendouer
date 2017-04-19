@@ -16,6 +16,7 @@ import java.util.List;
 import cn.sealiu.calendouer.MainActivity;
 import cn.sealiu.calendouer.R;
 import cn.sealiu.calendouer.bean.MovieBaseBean;
+import cn.sealiu.calendouer.bean.MovieBean;
 
 /**
  * Created by liuyang
@@ -24,10 +25,10 @@ import cn.sealiu.calendouer.bean.MovieBaseBean;
 
 public class MovieComingSoonAdapter extends RecyclerView.Adapter<MovieComingSoonAdapter.ViewHolder> {
 
-    private List<MovieBaseBean> dataset;
+    private List<MovieBean> dataset;
     private Context context;
 
-    public MovieComingSoonAdapter(List<MovieBaseBean> dataset) {
+    public MovieComingSoonAdapter(List<MovieBean> dataset) {
         this.dataset = dataset;
     }
 
@@ -44,15 +45,11 @@ public class MovieComingSoonAdapter extends RecyclerView.Adapter<MovieComingSoon
         final MovieBaseBean movie = dataset.get(position);
         Glide.with(context).load(movie.getImages().getLarge()).into(holder.poster);
         holder.title.setText(movie.getTitle());
-        holder.collect.setText(String.format(
-                context.getString(R.string.collect_num),
-                movie.getCollect_count() + ""
-        ));
 
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                ((MainActivity) context).openMovieFragment(new Gson().toJson(movie));
+                ((MainActivity) context).openMovieFragment(new Gson().toJson(movie), "coming_soon");
             }
         });
     }
@@ -66,13 +63,11 @@ public class MovieComingSoonAdapter extends RecyclerView.Adapter<MovieComingSoon
         // each data item is just a string in this case
         ImageView poster;
         TextView title;
-        TextView collect;
 
         ViewHolder(View v) {
             super(v);
             poster = (ImageView) v.findViewById(R.id.poster_coming_soon);
             title = (TextView) v.findViewById(R.id.title_coming_soon);
-            collect = (TextView) v.findViewById(R.id.collect_coming_soon);
         }
     }
 }

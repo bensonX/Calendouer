@@ -41,10 +41,8 @@ public class CalendouerActivity extends AppCompatActivity {
     final static int STAR = 5;
     final static int MAX_COUNT = 100;
     final static int LOCATION_PERM = 100;
-
+    public SharedPreferences sharedPref, settingPref;
     DateFormat df_ymd, df_hm, df_ymd_hms;
-
-    SharedPreferences sharedPref, settingPref;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -57,7 +55,7 @@ public class CalendouerActivity extends AppCompatActivity {
         df_ymd_hms = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
     }
 
-    void displaySnackBar(View view, String text, String actionName, View.OnClickListener action) {
+    public void displaySnackBar(View view, String text, String actionName, View.OnClickListener action) {
         Snackbar snackbar = Snackbar.make(view, text, Snackbar.LENGTH_LONG)
                 .setAction(actionName, action);
         View v = snackbar.getView();

@@ -388,8 +388,6 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="@dimen/activity_vertical_margin"
-                    android:layout_marginEnd="@dimen/activity_horizontal_margin"
-                    android:layout_marginStart="@dimen/activity_horizontal_margin"
                     android:layout_marginTop="@dimen/activity_vertical_margin"
                     android:orientation="horizontal">
 
@@ -397,14 +395,18 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="正在热映"
+                        android:paddingLeft="@dimen/activity_horizontal_margin"
+                        android:paddingRight="@dimen/activity_horizontal_margin"
+                        android:text="@string/in_theaters"
                         android:textColor="@color/primaryText"
                         android:textSize="16sp" />
 
                     <TextView
+                        android:id="@+id/all_in_theaters"
                         android:layout_width="wrap_content"
                         android:layout_height="match_parent"
-                        android:text="全部"
+                        android:drawableRight="@drawable/ic_right_24dp"
+                        android:text="@string/all_movie"
                         android:textColor="@color/colorAccent"
                         android:textSize="16sp" />
                 </LinearLayout>
@@ -431,8 +433,6 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="@dimen/activity_vertical_margin"
-                    android:layout_marginEnd="@dimen/activity_horizontal_margin"
-                    android:layout_marginStart="@dimen/activity_horizontal_margin"
                     android:layout_marginTop="@dimen/activity_vertical_margin"
                     android:orientation="horizontal">
 
@@ -440,14 +440,18 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="即将上映"
+                        android:paddingLeft="@dimen/activity_horizontal_margin"
+                        android:paddingRight="@dimen/activity_horizontal_margin"
+                        android:text="@string/coming_soon"
                         android:textColor="@color/primaryText"
                         android:textSize="16sp" />
 
                     <TextView
+                        android:id="@+id/all_coming_soon"
                         android:layout_width="wrap_content"
                         android:layout_height="match_parent"
-                        android:text="全部"
+                        android:drawableRight="@drawable/ic_right_24dp"
+                        android:text="@string/all_movie"
                         android:textColor="@color/colorAccent"
                         android:textSize="16sp" />
                 </LinearLayout>
@@ -462,13 +466,15 @@
                     android:scrollbars="none"
                     app:layoutManager="LinearLayoutManager"
                     tools:listitem="@layout/movie_coming_soon_item" />
+
             </LinearLayout>
 
             <LinearLayout
                 android:id="@+id/you_may_like_card"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical">
+                android:orientation="vertical"
+                android:visibility="gone">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -490,7 +496,8 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="match_parent"
-                        android:text="@string/all"
+                        android:drawableRight="@drawable/ic_right_24dp"
+                        android:text="@string/all_movie"
                         android:textColor="@color/colorAccent"
                         android:textSize="16sp" />
                 </LinearLayout>

@@ -17,6 +17,7 @@ import java.util.List;
 import cn.sealiu.calendouer.MainActivity;
 import cn.sealiu.calendouer.R;
 import cn.sealiu.calendouer.bean.MovieBaseBean;
+import cn.sealiu.calendouer.bean.MovieBean;
 
 /**
  * Created by liuyang
@@ -25,10 +26,10 @@ import cn.sealiu.calendouer.bean.MovieBaseBean;
 
 public class MovieInTheatersAdapter extends RecyclerView.Adapter<MovieInTheatersAdapter.ViewHolder> {
 
-    private List<MovieBaseBean> dataset;
+    private List<MovieBean> dataset;
     private Context context;
 
-    public MovieInTheatersAdapter(List<MovieBaseBean> dataset) {
+    public MovieInTheatersAdapter(List<MovieBean> dataset) {
         this.dataset = dataset;
     }
 
@@ -51,7 +52,7 @@ public class MovieInTheatersAdapter extends RecyclerView.Adapter<MovieInTheaters
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mainActivity.openMovieFragment(new Gson().toJson(movie));
+                mainActivity.openMovieFragment(new Gson().toJson(movie), "in_theaters");
             }
         });
     }

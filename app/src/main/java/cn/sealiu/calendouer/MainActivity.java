@@ -633,6 +633,14 @@ public class MainActivity extends CalendouerActivity implements
         else
             genresTV2.setVisibility(View.GONE);
 
+        directorTV.setOnClickListener(this);
+        castsTV1.setOnClickListener(this);
+        castsTV2.setOnClickListener(this);
+        genresTV1.setOnClickListener(this);
+        genresTV2.setOnClickListener(this);
+        genresTV2.setOnClickListener(this);
+        sameNameTV.setOnClickListener(this);
+
         movieCard.setVisibility(View.GONE);
         todayMovieCard.setVisibility(View.VISIBLE);
     }
@@ -660,11 +668,17 @@ public class MainActivity extends CalendouerActivity implements
     private void setMovieInTheaters(DoubanMovies moviesBean) {
         if (moviesBean != null) {
             inTheatersCard.setVisibility(View.VISIBLE);
+            TextView allInTheaters = (TextView) findViewById(R.id.all_in_theaters);
+            allInTheaters.setText(String.format(
+                    getString(R.string.all_movie),
+                    moviesBean.getTotal() + ""
+            ));
+            allInTheaters.setOnClickListener(this);
 
             LinearLayoutManager linearLayoutMgr = new LinearLayoutManager(this);
             linearLayoutMgr.setOrientation(LinearLayoutManager.HORIZONTAL);
             inTheatersRecyclerHolder.setLayoutManager(linearLayoutMgr);
-            final List<MovieBaseBean> dataset = Arrays.asList(moviesBean.getSubjects());
+            final List<MovieBean> dataset = Arrays.asList(moviesBean.getSubjects());
             MovieInTheatersAdapter theatersAdapter = new MovieInTheatersAdapter(dataset);
 
             inTheatersRecyclerHolder.setAdapter(theatersAdapter);
@@ -680,11 +694,17 @@ public class MainActivity extends CalendouerActivity implements
     private void setMovieComingSoon(DoubanMovies moviesBean) {
         if (moviesBean != null) {
             comingSoonCard.setVisibility(View.VISIBLE);
+            TextView allComingSoon = (TextView) findViewById(R.id.all_coming_soon);
+            allComingSoon.setText(String.format(
+                    getString(R.string.all_movie),
+                    moviesBean.getTotal() + ""
+            ));
+            allComingSoon.setOnClickListener(this);
 
             LinearLayoutManager linearLayoutMgr = new LinearLayoutManager(this);
             linearLayoutMgr.setOrientation(LinearLayoutManager.HORIZONTAL);
             comingSoonRecyclerHolder.setLayoutManager(linearLayoutMgr);
-            final List<MovieBaseBean> dataset = Arrays.asList(moviesBean.getSubjects());
+            final List<MovieBean> dataset = Arrays.asList(moviesBean.getSubjects());
             MovieComingSoonAdapter comingAdapter = new MovieComingSoonAdapter(dataset);
 
             comingSoonRecyclerHolder.setAdapter(comingAdapter);
@@ -744,12 +764,28 @@ public class MainActivity extends CalendouerActivity implements
                     mLocationClient.startLocation();
                 }
                 break;
+            case R.id.all_in_theaters:
+                Log.d("MainActivity", "all_in_theaters");
+                // TODO: 2017/4/18
+                break;
+            case R.id.all_coming_soon:
+                Log.d("MainActivity", "all_coming_soon");
+                // TODO: 2017/4/19
+                break;
+            case R.id.director:
+            case R.id.casts_1:
+            case R.id.casts_2:
+            case R.id.genres_1:
+            case R.id.genres_2:
+            case R.id.same_name:
+                startActivity(new Intent(MainActivity.this, CelebrityActivity.class));
+                break;
             case R.id.city_name:
                 mLocationClient.startLocation();
                 break;
             case R.id.movie_image:
             case R.id.movie_summary:
-                openMovieFragment(sharedPref.getString("movie_json", ""));
+                openMovieFragment(sharedPref.getString("movie_json", ""), "");
                 break;
             case R.id.after_ad_closed_rate:
                 Uri uri = Uri.parse("market://details?id=" + getApplication().getPackageName());
@@ -819,7 +855,7 @@ public class MainActivity extends CalendouerActivity implements
         }
     }
 
-    public void openMovieFragment(String movieJson) {
+    public void openMovieFragment(String movieJson, String from) {
 
         if (movieJson.equals("")) {
             Toast.makeText(this, "error", Toast.LENGTH_LONG).show();
@@ -827,6 +863,7 @@ public class MainActivity extends CalendouerActivity implements
             MovieFragment movieFragment = new MovieFragment();
             Bundle bundle = new Bundle();
             bundle.putString("movie", movieJson);
+            bundle.putString("from", from);
 
             movieFragment.setArguments(bundle);
             movieFragment.show(getSupportFragmentManager(), movieFragment.getTag());
