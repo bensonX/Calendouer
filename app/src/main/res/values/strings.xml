@@ -21,8 +21,6 @@
     <string name="api_error">豆瓣数据请求失败</string>
 
     <string name="pref_about_calendouer">关于豆瓣日历</string>
-    <string name="pref_version">版本</string>
-    <string name="version" translatable="false">2.0.1</string>
     <string name="about_content" translatable="false">Calendouer一词取自Calendar和Doubaner。Calendouer是一款日历应用，提供阴历和阳历日期，天气预报信息。Calendouer也是一款电影／图书推荐应用，提供精彩的观影剧目和阅读书目。</string>
     <string name="location_error">无法定位</string>
     <string name="initMovieRecommended">初始化电影推荐</string>
@@ -31,8 +29,10 @@
     <string name="weather_info">%1$s转%2$s</string>
     <string name="close">关闭</string>
     <string name="weather_preview">3日天气预报</string>
+    <string name="pref_version">版本</string>
+    <string name="version" translatable="false">2.0.2</string>
     <string name="what_new">更新内容</string>
-    <string name="update_content">✱ 更新样式，应用主题跟随天气情况而变化\n✱ 定时刷新与缓存天气预报\n✱ 优化电影推荐模式\n✱ 添加事情备忘并及时收到提醒，可将推荐电影写入备忘</string>
+    <string name="update_content">✱ </string>
 
     <string name="pref_card_settings">卡片设置</string>
     <string name="pref_title_things">事情备忘</string>
@@ -64,8 +64,6 @@
     <string name="google_play" translatable="false">Google Play</string>
     <string name="things">事情备忘</string>
     <string name="all_things_have_done">所有事情都已处理</string>
-
-    <string name="download_movie_data">下载电影数据</string>
     <string name="download_tips">这需要耗费些许流量,继续下载吗</string>
     <string name="cancel">取消</string>
 
