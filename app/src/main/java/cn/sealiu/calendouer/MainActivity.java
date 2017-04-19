@@ -231,6 +231,14 @@ public class MainActivity extends CalendouerActivity implements
             restoreTheme();
         }
 
+        // reload data if it's new day
+        String datePref = sharedPref.getString("DATE", "null");
+        if (!datePref.equals(df_ymd.format(new Date()))) {
+            //new day
+            sharedPref.edit().putString("in_theaters", "").apply();
+            sharedPref.edit().putString("coming_soon", "").apply();
+        }
+
         // Movie DB
         if (checkEmpty(dbHelper, MovieEntry.TABLE_NAME)) {
             movieCard.setVisibility(View.VISIBLE);
