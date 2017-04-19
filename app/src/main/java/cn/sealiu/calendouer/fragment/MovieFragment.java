@@ -40,6 +40,7 @@ public class MovieFragment extends BottomSheetDialogFragment implements View.OnC
     MainActivity mainActivity;
     MovieBean movie;
     String from;
+    LikeMovieListener listener;
     private ImageView imageIV;
     private TextView ratingTV;
     private TextView titleTV;
@@ -52,6 +53,12 @@ public class MovieFragment extends BottomSheetDialogFragment implements View.OnC
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
+        try {
+            listener = (LikeMovieListener) context;
+        } catch (ClassCastException e) {
+            throw new ClassCastException(context.toString()
+                    + "must implement WeatherFragment");
+        }
     }
 
     @Override
@@ -83,6 +90,8 @@ public class MovieFragment extends BottomSheetDialogFragment implements View.OnC
             } else {
                 setMovieInfo(movie);
             }
+        } else {
+            dismiss();
         }
     }
 
@@ -102,8 +111,9 @@ public class MovieFragment extends BottomSheetDialogFragment implements View.OnC
                 }
                 break;
             case R.id.bs_like_movie:
-                // TODO: 2017/4/18 add this movie to movie db and record this movie's features
-                Log.d("MovieFragment", "like this movie");
+                LikeMovieListener likeMovieListener = (LikeMovieListener) getActivity();
+                likeMovieListener.onLikeMovie(movie);
+                dismiss();
                 break;
         }
     }
@@ -158,6 +168,10 @@ public class MovieFragment extends BottomSheetDialogFragment implements View.OnC
         mainActivity.sharedPref.edit()
                 .putString(pref, new Gson().toJson(doubanMovies))
                 .apply();
+    }
+
+    public interface LikeMovieListener {
+        void onLikeMovie(MovieBean movie);
     }
 
     private class GetMovieInfo extends AsyncTask<String, String, String> {

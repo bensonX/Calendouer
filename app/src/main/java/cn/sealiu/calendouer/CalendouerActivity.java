@@ -1,6 +1,7 @@
 package cn.sealiu.calendouer;
 
 import android.Manifest;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
@@ -29,7 +30,9 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
 
+import cn.sealiu.calendouer.bean.MovieBaseBean;
 import cn.sealiu.calendouer.until.DBHelper;
+import cn.sealiu.calendouer.until.MovieContract;
 
 /**
  * Created by liuyang
@@ -207,6 +210,26 @@ public class CalendouerActivity extends AppCompatActivity {
             star.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.ic_star_blank_16dp));
             holder.addView(star);
         }
+    }
+
+    public long insertMovieDB(DBHelper dbHelper, Object obj) {
+        MovieBaseBean mbb = (MovieBaseBean) obj;
+
+        SQLiteDatabase db = dbHelper.getWritableDatabase();
+
+        ContentValues values = new ContentValues();
+
+        values.put(MovieContract.MovieEntry.COLUMN_NAME_ID, mbb.getId());
+        values.put(MovieContract.MovieEntry.COLUMN_NAME_TITLE, mbb.getTitle());
+        values.put(MovieContract.MovieEntry.COLUMN_NAME_ORIGINAL_TITLE, mbb.getOriginal_title());
+        values.put(MovieContract.MovieEntry.COLUMN_NAME_IMAGES, mbb.getImages().getLarge());
+        values.put(MovieContract.MovieEntry.COLUMN_NAME_ALT, mbb.getAlt());
+        values.put(MovieContract.MovieEntry.COLUMN_NAME_YEAR, mbb.getYear());
+        values.put(MovieContract.MovieEntry.COLUMN_NAME_STARS, mbb.getRating().getStarts());
+        values.put(MovieContract.MovieEntry.COLUMN_NAME_AVERAGE, mbb.getRating().getAverage());
+        values.put(MovieContract.MovieEntry.COLUMN_NAME_SUMMARY, "");
+
+        return db.insert(MovieContract.MovieEntry.TABLE_NAME, null, values);
     }
 }
 

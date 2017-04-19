@@ -43,7 +43,7 @@ public class WeatherFragment extends DialogFragment {
             listener = (UpdateWeatherListener) context;
         } catch (ClassCastException e) {
             throw new ClassCastException(context.toString()
-                    + "must implement ChooseCityFragment");
+                    + "must implement WeatherFragment");
         }
     }
 

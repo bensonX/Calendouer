@@ -82,7 +82,8 @@ public class MainActivity extends CalendouerActivity implements
         AMapLocationListener,
         View.OnClickListener,
         SharedPreferences.OnSharedPreferenceChangeListener,
-        WeatherFragment.UpdateWeatherListener {
+        WeatherFragment.UpdateWeatherListener,
+        MovieFragment.LikeMovieListener {
 
     Toolbar toolbar;
 
@@ -1007,6 +1008,20 @@ public class MainActivity extends CalendouerActivity implements
         }
     }
 
+    @Override
+    public void onLikeMovie(MovieBean movie) {
+
+        String info = getString(R.string.error);
+        if (movie != null && !movie.getId().equals("")) {
+            if (insertMovieDB(dbHelper, movie) == -1) {
+                info = getString(R.string.like_movie_already_exist);
+            } else {
+                info = getString(R.string.like_movie_success);
+            }
+        }
+        Snackbar.make(nestedScrollView, info, Snackbar.LENGTH_SHORT).show();
+    }
+
     private class GetTop250 extends AsyncTask<String, String, String> {
 
         @Override
@@ -1028,19 +1043,7 @@ public class MainActivity extends CalendouerActivity implements
                 mProgressDialog.setMessage(getResources().getString(R.string.createDB));
 
                 for (MovieBaseBean mbb : movieBaseBeans) {
-                    ContentValues values = new ContentValues();
-
-                    values.put(MovieEntry.COLUMN_NAME_ID, mbb.getId());
-                    values.put(MovieEntry.COLUMN_NAME_TITLE, mbb.getTitle());
-                    values.put(MovieEntry.COLUMN_NAME_ORIGINAL_TITLE, mbb.getOriginal_title());
-                    values.put(MovieEntry.COLUMN_NAME_IMAGES, mbb.getImages().getLarge());
-                    values.put(MovieEntry.COLUMN_NAME_ALT, mbb.getAlt());
-                    values.put(MovieEntry.COLUMN_NAME_YEAR, mbb.getYear());
-                    values.put(MovieEntry.COLUMN_NAME_STARS, mbb.getRating().getStarts());
-                    values.put(MovieEntry.COLUMN_NAME_AVERAGE, mbb.getRating().getAverage());
-                    values.put(MovieEntry.COLUMN_NAME_SUMMARY, "");
-
-                    db.insert(MovieEntry.TABLE_NAME, null, values);
+                    insertMovieDB(dbHelper, mbb);
                 }
 
                 int start = sharedPref.getInt("START", 0) + top250Bean.getCount();

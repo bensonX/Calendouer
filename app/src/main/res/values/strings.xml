@@ -129,5 +129,7 @@
     <string name="pin_inactive_info">取消固定，"今日推荐"恢复更新</string>
     <string name="tomorrow">明天</string>
     <string name="day_after_tomorrow">后天</string>
+    <string name="like_movie_already_exist">推荐列表中已存在</string>
+    <string name="like_movie_success">成功添加到推荐列表</string>
 </resources>
 
