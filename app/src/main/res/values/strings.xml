@@ -19,7 +19,6 @@
     <string name="createDB">正在创建本地数据库....</string>
     <string name="arrangeData">正在整理数据....</string>
     <string name="api_error">豆瓣数据请求失败</string>
-    <string name="today_recommended">今日推荐</string>
 
     <string name="pref_about_calendouer">关于豆瓣日历</string>
     <string name="pref_version">版本</string>
@@ -37,7 +36,7 @@
 
     <string name="pref_card_settings">卡片设置</string>
     <string name="pref_title_things">事情备忘</string>
-    <string name="pref_title_movie">每日电影</string>
+    <string name="today_movie">今日推荐</string>
     <string name="pref_title_weather">天气预报</string>
     <string name="open_location">开启定位服务</string>
     <string name="open_location_setting">定位设置</string>
@@ -126,5 +125,7 @@
     <string name="all_movie">共 %1$s 部</string>
     <string name="coming_soon">即将上映</string>
     <string name="in_theaters">正在热映</string>
+    <string name="pin_active_info">已固定，"今日推荐"不再更新</string>
+    <string name="pin_inactive_info">取消固定，"今日推荐"恢复更新</string>
 </resources>
 

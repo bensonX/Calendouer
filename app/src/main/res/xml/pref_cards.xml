@@ -28,8 +28,8 @@
     <PreferenceCategory android:title="@string/movie_title">
         <SwitchPreference
             android:defaultValue="true"
-            android:key="movie_recommended_show"
-            android:title="@string/pref_title_movie" />
+            android:key="today_movie_show"
+            android:title="@string/today_movie" />
 
         <SwitchPreference
             android:defaultValue="true"

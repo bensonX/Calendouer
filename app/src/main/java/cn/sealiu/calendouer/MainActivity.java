@@ -85,17 +85,29 @@ public class MainActivity extends CalendouerActivity implements
         WeatherFragment.UpdateWeatherListener {
 
     Toolbar toolbar;
+
+    // calendar
     TextView monthTV;
     TextView weekTV;
     TextView lunarTV;
     TextView dateTV;
     TextView solarTermTV;
     TextView festivalTV;
+    CollapsingToolbarLayout collapsingToolbarLayout;
+
+    // weather
     RelativeLayout weatherHolder;
     AppCompatButton getWeatherBtn;
     TextView cityNameTV;
     TextView weatherTV;
     ImageView weatherIconIV;
+    WeatherIcon icons;
+    AMapLocationClient mLocationClient;
+    AMapLocationClientOption mLocationOption;
+    LocationManager locationMgr;
+
+    // movie today
+    ImageView pinIV;
     ImageView movieCardCover;
     ImageView movieImageIV;
     TextView movieAverageTV;
@@ -104,21 +116,19 @@ public class MainActivity extends CalendouerActivity implements
     LinearLayout starsHolderLL;
     AppCompatButton getTop250Btn;
     ProgressDialog mProgressDialog;
-    DBHelper dbHelper;
-    SQLiteDatabase db;
-    WeatherIcon icons;
-    AMapLocationClient mLocationClient;
-    AMapLocationClientOption mLocationOption;
-    LocationManager locationMgr;
-    CollapsingToolbarLayout collapsingToolbarLayout;
-    NestedScrollView nestedScrollView;
-    View progressOfDay;
     TextView directorTV, castsTV1, castsTV2, genresTV1, genresTV2, sameNameTV;
 
+    // database
+    DBHelper dbHelper;
+    SQLiteDatabase db;
+
+    // scroll view elements
+    NestedScrollView nestedScrollView;
     LinearLayout weatherCard, movieCard, todayMovieCard,
             inTheatersCard, comingSoonCard, youMayLikeCard;
     LinearLayout ratingUs;
     NativeExpressAdView adView;
+    View progressOfDay;
 
     RecyclerView inTheatersRecyclerHolder;
     RecyclerView comingSoonRecyclerHolder;
@@ -132,6 +142,9 @@ public class MainActivity extends CalendouerActivity implements
         setContentView(R.layout.activity_main);
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        pinIV = (ImageView) findViewById(R.id.today_pin);
+        pinIV.setOnClickListener(this);
 
         weatherCard = (LinearLayout) findViewById(R.id.weather_card);
         movieCard = (LinearLayout) findViewById(R.id.movie_card);
@@ -218,35 +231,16 @@ public class MainActivity extends CalendouerActivity implements
             restoreTheme();
         }
 
-        //Movie Recommendation
+        // Movie DB
         if (checkEmpty(dbHelper, MovieEntry.TABLE_NAME)) {
             movieCard.setVisibility(View.VISIBLE);
             todayMovieCard.setVisibility(View.GONE);
             getTop250Btn.setOnClickListener(this);
         } else {
-            if (settingPref.getBoolean("movie_recommended_show", true)) {
+            //Movie today_movie
+            if (settingPref.getBoolean("today_movie_show", true)) {
                 todayMovieCard.setVisibility(View.VISIBLE);
-
-                String datePref = sharedPref.getString("DATE", "null");
-                String idPref = sharedPref.getString("ID", "null");
-
-                if (datePref.equals("") || idPref.equals("")) {
-                    setMovieInfoRandom();
-                } else {
-                    if (!datePref.equals(df_ymd.format(new Date()))) {
-                        //new day
-                        db = dbHelper.getWritableDatabase();
-                        db.delete(
-                                MovieEntry.TABLE_NAME,
-                                MovieEntry.COLUMN_NAME_ID + "=?",
-                                new String[]{idPref}
-                        );
-                        setMovieInfoRandom();
-                    } else {
-                        //same day
-                        setMovieInfoRepeat(idPref);
-                    }
-                }
+                initTodayMovie();
             } else {
                 todayMovieCard.setVisibility(View.GONE);
             }
@@ -409,6 +403,36 @@ public class MainActivity extends CalendouerActivity implements
         showProgressDialog(getResources().getString(R.string.downloading));
         int start = sharedPref.getInt("START", 0);
         new GetTop250().execute("https://api.douban.com/v2/movie/top250?start=" + start + "&count=" + MAX_COUNT);
+    }
+
+    private void initTodayMovie() {
+        boolean isPined = sharedPref.getBoolean("today_pin", false);
+        if (isPined) {
+            pinIV.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.ic_pin_active));
+        } else {
+            pinIV.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.ic_pin));
+        }
+
+        String datePref = sharedPref.getString("DATE", "null");
+        String idPref = sharedPref.getString("ID", "null");
+
+        if (datePref.equals("") || idPref.equals("")) {
+            setMovieInfoRandom();
+        } else {
+            if (!datePref.equals(df_ymd.format(new Date())) && !isPined) {
+                //new day
+                db = dbHelper.getWritableDatabase();
+                db.delete(
+                        MovieEntry.TABLE_NAME,
+                        MovieEntry.COLUMN_NAME_ID + "=?",
+                        new String[]{idPref}
+                );
+                setMovieInfoRandom();
+            } else {
+                //same day or today_pin is active
+                setMovieInfoRepeat(idPref);
+            }
+        }
     }
 
     private void initMovieInTheaters() {
@@ -740,6 +764,27 @@ public class MainActivity extends CalendouerActivity implements
                 MovieBean.class
         );
         switch (v.getId()) {
+            case R.id.today_pin:
+                if (sharedPref.getBoolean("today_pin", false)) {
+                    sharedPref.edit().putBoolean("today_pin", false).apply();
+                    pinIV.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.ic_pin));
+                    Snackbar.make(
+                            nestedScrollView,
+                            getString(R.string.pin_inactive_info),
+                            Snackbar.LENGTH_SHORT
+                    ).show();
+                    initTodayMovie();
+                } else {
+
+                    sharedPref.edit().putBoolean("today_pin", true).apply();
+                    pinIV.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.ic_pin_active));
+                    Snackbar.make(
+                            nestedScrollView,
+                            getString(R.string.pin_active_info),
+                            Snackbar.LENGTH_SHORT
+                    ).show();
+                }
+                break;
             case R.id.getTop250_btn:
                 new AlertDialog.Builder(MainActivity.this)
                         .setTitle(getString(R.string.download_movie_data))

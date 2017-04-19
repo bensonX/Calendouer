@@ -226,19 +226,34 @@
                 android:id="@+id/today_movie_card"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/activity_vertical_margin"
                 android:orientation="vertical"
-                android:visibility="gone">
+                android:visibility="visible">
 
-                <TextView
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="@dimen/activity_vertical_margin"
-                    android:layout_marginEnd="@dimen/activity_horizontal_margin"
-                    android:layout_marginStart="@dimen/activity_horizontal_margin"
-                    android:text="@string/today_recommended"
-                    android:textColor="@color/primaryText"
-                    android:textSize="16sp" />
+                    android:layout_marginTop="@dimen/activity_vertical_margin"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:paddingLeft="@dimen/activity_horizontal_margin"
+                        android:paddingRight="@dimen/activity_horizontal_margin"
+                        android:text="@string/today_movie"
+                        android:textColor="@color/primaryText"
+                        android:textSize="16sp" />
+
+                    <ImageView
+                        android:id="@+id/today_pin"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:paddingLeft="8dp"
+                        android:paddingRight="8dp"
+                        ads:srcCompat="@drawable/ic_pin" />
+                </LinearLayout>
 
                 <LinearLayout
                     android:layout_width="match_parent"
