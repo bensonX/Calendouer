@@ -45,6 +45,7 @@
             android:defaultValue="false"
             android:enabled="false"
             android:key="movie_you_may_like"
+            android:summary="即将上线"
             android:title="@string/pref_you_may_like_movie" />
     </PreferenceCategory>
 

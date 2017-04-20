@@ -14,6 +14,7 @@ import com.google.gson.Gson;
 
 import java.util.List;
 
+import cn.sealiu.calendouer.CalendouerActivity;
 import cn.sealiu.calendouer.MainActivity;
 import cn.sealiu.calendouer.R;
 import cn.sealiu.calendouer.bean.MovieBaseBean;
@@ -47,7 +48,7 @@ public class MovieInTheatersAdapter extends RecyclerView.Adapter<MovieInTheaters
         Glide.with(context).load(movie.getImages().getLarge()).into(holder.poster);
         holder.title.setText(movie.getTitle());
         final MainActivity mainActivity = (MainActivity) context;
-        mainActivity.setRatingStar(holder.stars, movie.getRating().getStarts());
+        CalendouerActivity.setRatingStar(context, holder.stars, movie.getRating().getStarts());
 
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override

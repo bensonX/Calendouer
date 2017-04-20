@@ -101,8 +101,9 @@
                         android:layout_alignBottom="@+id/date"
                         android:layout_alignParentRight="true"
                         android:layout_marginBottom="30dp"
-                        android:background="@drawable/border"
-                        android:padding="8dp"
+                        android:background="@drawable/solar_term_bg"
+                        android:gravity="center"
+                        android:padding="6dp"
                         android:textColor="@color/textOrIcons"
                         android:visibility="gone" />
                 </RelativeLayout>
@@ -160,7 +161,7 @@
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:descendantFocusability="blocksDescendants"
             android:orientation="vertical"
             android:paddingBottom="@dimen/activity_vertical_margin">
@@ -261,6 +262,7 @@
                     android:background="@color/textOrIcons"
                     android:orientation="horizontal"
                     android:padding="@dimen/activity_vertical_margin">
+
                     <ImageView
                         android:id="@+id/movie_image"
                         android:layout_width="0dp"
@@ -342,8 +344,9 @@
                             android:layout_height="wrap_content"
                             android:layout_marginRight="@dimen/activity_horizontal_margin"
                             android:background="@drawable/chip"
-                            android:text="@string/chip_director"
-                            android:textColor="@color/textOrIcons" />
+                            android:foreground="?android:attr/selectableItemBackground"
+                            android:textColor="@color/textOrIcons"
+                            android:visibility="gone" />
 
                         <TextView
                             android:id="@+id/casts_1"
@@ -351,8 +354,9 @@
                             android:layout_height="wrap_content"
                             android:layout_marginRight="@dimen/activity_horizontal_margin"
                             android:background="@drawable/chip"
-                            android:text="@string/chip_casts"
-                            android:textColor="@color/textOrIcons" />
+                            android:foreground="?android:attr/selectableItemBackground"
+                            android:textColor="@color/textOrIcons"
+                            android:visibility="gone" />
 
                         <TextView
                             android:id="@+id/casts_2"
@@ -360,26 +364,19 @@
                             android:layout_height="wrap_content"
                             android:layout_marginRight="@dimen/activity_horizontal_margin"
                             android:background="@drawable/chip"
-                            android:text="@string/chip_casts"
-                            android:textColor="@color/textOrIcons" />
+                            android:foreground="?android:attr/selectableItemBackground"
+                            android:textColor="@color/textOrIcons"
+                            android:visibility="gone" />
 
                         <TextView
-                            android:id="@+id/genres_1"
+                            android:id="@+id/genres"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginRight="@dimen/activity_horizontal_margin"
                             android:background="@drawable/chip"
-                            android:text="@string/chip_genres"
-                            android:textColor="@color/textOrIcons" />
-
-                        <TextView
-                            android:id="@+id/genres_2"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginRight="@dimen/activity_horizontal_margin"
-                            android:background="@drawable/chip"
-                            android:text="@string/chip_genres"
-                            android:textColor="@color/textOrIcons" />
+                            android:foreground="?android:attr/selectableItemBackground"
+                            android:textColor="@color/textOrIcons"
+                            android:visibility="gone" />
 
                         <TextView
                             android:id="@+id/same_name"
@@ -387,8 +384,10 @@
                             android:layout_height="wrap_content"
                             android:layout_marginRight="@dimen/activity_horizontal_margin"
                             android:background="@drawable/chip"
+                            android:foreground="?android:attr/selectableItemBackground"
                             android:text="@string/chip_same_name"
-                            android:textColor="@color/textOrIcons" />
+                            android:textColor="@color/textOrIcons"
+                            android:visibility="gone" />
                     </LinearLayout>
                 </HorizontalScrollView>
             </LinearLayout>
@@ -399,32 +398,16 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
 
-                <LinearLayout
+                <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="@dimen/activity_vertical_margin"
                     android:layout_marginTop="@dimen/activity_vertical_margin"
-                    android:orientation="horizontal">
-
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:paddingLeft="@dimen/activity_horizontal_margin"
-                        android:paddingRight="@dimen/activity_horizontal_margin"
-                        android:text="@string/in_theaters"
-                        android:textColor="@color/primaryText"
-                        android:textSize="16sp" />
-
-                    <TextView
-                        android:id="@+id/all_in_theaters"
-                        android:layout_width="wrap_content"
-                        android:layout_height="match_parent"
-                        android:drawableRight="@drawable/ic_right_24dp"
-                        android:text="@string/all_movie"
-                        android:textColor="@color/colorAccent"
-                        android:textSize="16sp" />
-                </LinearLayout>
+                    android:paddingLeft="@dimen/activity_horizontal_margin"
+                    android:paddingRight="@dimen/activity_horizontal_margin"
+                    android:text="@string/in_theaters"
+                    android:textColor="@color/primaryText"
+                    android:textSize="16sp" />
 
                 <android.support.v7.widget.RecyclerView
                     android:id="@+id/in_theaters_recycler_holder"
@@ -445,32 +428,16 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
 
-                <LinearLayout
+                <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="@dimen/activity_vertical_margin"
                     android:layout_marginTop="@dimen/activity_vertical_margin"
-                    android:orientation="horizontal">
-
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:paddingLeft="@dimen/activity_horizontal_margin"
-                        android:paddingRight="@dimen/activity_horizontal_margin"
-                        android:text="@string/coming_soon"
-                        android:textColor="@color/primaryText"
-                        android:textSize="16sp" />
-
-                    <TextView
-                        android:id="@+id/all_coming_soon"
-                        android:layout_width="wrap_content"
-                        android:layout_height="match_parent"
-                        android:drawableRight="@drawable/ic_right_24dp"
-                        android:text="@string/all_movie"
-                        android:textColor="@color/colorAccent"
-                        android:textSize="16sp" />
-                </LinearLayout>
+                    android:paddingLeft="@dimen/activity_horizontal_margin"
+                    android:paddingRight="@dimen/activity_horizontal_margin"
+                    android:text="@string/coming_soon"
+                    android:textColor="@color/primaryText"
+                    android:textSize="16sp" />
 
                 <android.support.v7.widget.RecyclerView
                     android:id="@+id/coming_soon_recycler_holder"
@@ -493,31 +460,13 @@
                 android:orientation="vertical"
                 android:visibility="gone">
 
-                <LinearLayout
+                <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="@dimen/activity_vertical_margin"
-                    android:layout_marginEnd="@dimen/activity_horizontal_margin"
-                    android:layout_marginStart="@dimen/activity_horizontal_margin"
-                    android:layout_marginTop="@dimen/activity_vertical_margin"
-                    android:orientation="horizontal">
-
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="@string/pref_you_may_like_movie"
-                        android:textColor="@color/primaryText"
-                        android:textSize="16sp" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="match_parent"
-                        android:drawableRight="@drawable/ic_right_24dp"
-                        android:text="@string/all_movie"
-                        android:textColor="@color/colorAccent"
-                        android:textSize="16sp" />
-                </LinearLayout>
+                    android:layout_margin="@dimen/activity_horizontal_margin"
+                    android:text="@string/pref_you_may_like_movie"
+                    android:textColor="@color/primaryText"
+                    android:textSize="16sp" />
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -529,7 +478,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:scaleType="centerCrop"
-                        android:src="@mipmap/movie_card_pattern" />
+                        android:src="@mipmap/poster" />
 
                     <TextView
                         android:layout_width="match_parent"
@@ -585,6 +534,7 @@
                             android:paddingRight="16dp"
                             android:paddingTop="4dp"
                             android:text="@string/pref_rate"
+                            android:textAllCaps="false"
                             android:textColor="@color/colorAccent" />
 
                         <Button
@@ -597,6 +547,7 @@
                             android:paddingRight="16dp"
                             android:paddingTop="4dp"
                             android:text="@string/restore_ad"
+                            android:textAllCaps="false"
                             android:textColor="@color/colorAccent" />
                     </LinearLayout>
                 </LinearLayout>

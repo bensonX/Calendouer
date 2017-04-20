@@ -9,11 +9,11 @@ public class MovieBaseBean {
     private RatingBean rating;
     private String[] genres;
     private String title;
-    private CelebrityBean[] casts;
+    private CelebrityBaseBean[] casts;
     private int collect_count; //看过人数
     private String original_title; //原名
     private String subtype;
-    private CelebrityBean[] directors;
+    private CelebrityBaseBean[] directors;
     private String year;
     private ImagesBean images;
     private String alt; //条目页URL
@@ -43,11 +43,11 @@ public class MovieBaseBean {
         this.title = title;
     }
 
-    public CelebrityBean[] getCasts() {
+    public CelebrityBaseBean[] getCasts() {
         return casts;
     }
 
-    public void setCasts(CelebrityBean[] casts) {
+    public void setCasts(CelebrityBaseBean[] casts) {
         this.casts = casts;
     }
 
@@ -75,11 +75,11 @@ public class MovieBaseBean {
         this.subtype = subtype;
     }
 
-    public CelebrityBean[] getDirectors() {
+    public CelebrityBaseBean[] getDirectors() {
         return directors;
     }
 
-    public void setDirectors(CelebrityBean[] directors) {
+    public void setDirectors(CelebrityBaseBean[] directors) {
         this.directors = directors;
     }
 

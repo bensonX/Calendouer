@@ -12,7 +12,6 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.design.widget.CollapsingToolbarLayout;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -21,16 +20,26 @@ import android.view.Display;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.TextView;
+import android.widget.Toast;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 
 import cn.sealiu.calendouer.bean.MovieBaseBean;
+import cn.sealiu.calendouer.bean.MovieBean;
+import cn.sealiu.calendouer.fragment.MovieFragment;
 import cn.sealiu.calendouer.until.DBHelper;
 import cn.sealiu.calendouer.until.MovieContract;
 
@@ -39,13 +48,106 @@ import cn.sealiu.calendouer.until.MovieContract;
  * on 2017/3/8.
  */
 
-public class CalendouerActivity extends AppCompatActivity {
+public class CalendouerActivity extends AppCompatActivity implements
+        MovieFragment.LikeMovieListener {
 
     final static int STAR = 5;
     final static int MAX_COUNT = 100;
     final static int LOCATION_PERM = 100;
-    public SharedPreferences sharedPref, settingPref;
+    public static SharedPreferences sharedPref, settingPref;
     DateFormat df_ymd, df_hm, df_ymd_hms;
+
+    public static void setRatingStar(Context context, ViewGroup holder, String stars) {
+        double stars_num = Double.parseDouble(stars) / 10;
+        int full_star_num = (int) Math.floor(stars_num);
+        int half_star_num = (int) (Math.floor((stars_num - full_star_num) * 2));
+        int blank_star_num = STAR - full_star_num - half_star_num;
+
+        holder.removeAllViews();
+
+        while (full_star_num-- > 0) {
+            ImageView star = new ImageView(context);
+            star.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_star_16dp));
+            holder.addView(star);
+        }
+        while (half_star_num-- > 0) {
+            ImageView star = new ImageView(context);
+            star.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_star_half_16dp));
+            holder.addView(star);
+        }
+
+        while (blank_star_num-- > 0) {
+            ImageView star = new ImageView(context);
+            star.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_star_blank_16dp));
+            holder.addView(star);
+        }
+    }
+
+    public static String join(String[] array, String separator) {
+        String result = "";
+        if (array.length > 0) {
+            for (String a : array) {
+                result += a + separator;
+            }
+            result = result.substring(0, result.length() - separator.length());
+        }
+
+        return result;
+    }
+
+    public static String join(List<String> list, String separator) {
+        String result = "";
+        if (list.size() > 0) {
+            for (String l : list) {
+                result += l + separator;
+            }
+            result = result.substring(0, result.length() - separator.length());
+        }
+
+        return result;
+    }
+
+    public static String doInBackground(String params) {
+        HttpURLConnection connection = null;
+        BufferedReader reader = null;
+
+        try {
+            URL url = new URL(params);
+            connection = (HttpURLConnection) url.openConnection();
+            connection.connect();
+
+            InputStream stream = connection.getInputStream();
+
+            reader = new BufferedReader(new InputStreamReader(stream));
+
+            StringBuffer buffer = new StringBuffer();
+            String line;
+
+            while ((line = reader.readLine()) != null) {
+                buffer.append(line).append("\n");
+            }
+
+            return buffer.toString();
+
+
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            if (connection != null) {
+                connection.disconnect();
+            }
+            try {
+                if (reader != null) {
+                    reader.close();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return null;
+    }
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -56,16 +158,6 @@ public class CalendouerActivity extends AppCompatActivity {
         df_ymd = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
         df_hm = new SimpleDateFormat("HH:mm", Locale.getDefault());
         df_ymd_hms = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
-    }
-
-    public void displaySnackBar(View view, String text, String actionName, View.OnClickListener action) {
-        Snackbar snackbar = Snackbar.make(view, text, Snackbar.LENGTH_LONG)
-                .setAction(actionName, action);
-        View v = snackbar.getView();
-        ((TextView) v.findViewById(android.support.design.R.id.snackbar_text)).setTextColor(ContextCompat.getColor(this, R.color.textOrIcons));
-        ((TextView) v.findViewById(android.support.design.R.id.snackbar_action)).setTextColor(ContextCompat.getColor(this, R.color.colorAccent));
-
-        snackbar.show();
     }
 
     void setCustomTheme(
@@ -186,32 +278,6 @@ public class CalendouerActivity extends AppCompatActivity {
         return isEmpty;
     }
 
-    public void setRatingStar(ViewGroup holder, String stars) {
-        double stars_num = Double.parseDouble(stars) / 10;
-        int full_star_num = (int) Math.floor(stars_num);
-        int half_star_num = (int) (Math.floor((stars_num - full_star_num) * 2));
-        int blank_star_num = STAR - full_star_num - half_star_num;
-
-        holder.removeAllViews();
-
-        while (full_star_num-- > 0) {
-            ImageView star = new ImageView(this);
-            star.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.ic_star_16dp));
-            holder.addView(star);
-        }
-        while (half_star_num-- > 0) {
-            ImageView star = new ImageView(this);
-            star.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.ic_star_half_16dp));
-            holder.addView(star);
-        }
-
-        while (blank_star_num-- > 0) {
-            ImageView star = new ImageView(this);
-            star.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.ic_star_blank_16dp));
-            holder.addView(star);
-        }
-    }
-
     public long insertMovieDB(DBHelper dbHelper, Object obj) {
         MovieBaseBean mbb = (MovieBaseBean) obj;
 
@@ -230,6 +296,55 @@ public class CalendouerActivity extends AppCompatActivity {
         values.put(MovieContract.MovieEntry.COLUMN_NAME_SUMMARY, "");
 
         return db.insert(MovieContract.MovieEntry.TABLE_NAME, null, values);
+    }
+
+    public void openMovieFragment(String movieJson, String from) {
+
+        if (movieJson.equals("")) {
+            Toast.makeText(this, "error", Toast.LENGTH_LONG).show();
+        } else {
+            MovieFragment movieFragment = new MovieFragment();
+            Bundle bundle = new Bundle();
+            bundle.putString("movie", movieJson);
+            bundle.putString("from", from);
+
+            movieFragment.setArguments(bundle);
+            movieFragment.show(getSupportFragmentManager(), movieFragment.getTag());
+        }
+    }
+
+    @Override
+    public void onLikeMovie(MovieBean movie) {
+        DBHelper dbHelper = new DBHelper(this);
+
+        if (checkEmpty(dbHelper, MovieContract.MovieEntry.TABLE_NAME)) {
+            onConfirmDownloadMovie();
+            return;
+        }
+
+        String info;
+        if (movie != null && !movie.getId().equals("")) {
+            if (insertMovieDB(dbHelper, movie) == -1) {
+                info = getString(R.string.like_movie_already_exist);
+            } else {
+                info = getString(R.string.like_movie_success);
+            }
+        } else {
+            info = getString(R.string.error);
+        }
+
+        Toast.makeText(this, info, Toast.LENGTH_LONG).show();
+    }
+
+    public void onConfirmDownloadMovie() {
+    }
+
+    public void doubanErrorAPI() {
+        Toast.makeText(
+                this,
+                getString(R.string.douban_error),
+                Toast.LENGTH_LONG
+        ).show();
     }
 }
 

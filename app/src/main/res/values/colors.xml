@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="colorPrimary">#4CAF50</color>
-    <color name="colorPrimaryLight">#A5D6A7</color>
     <color name="colorPrimaryDark">#388E3C</color>
     <color name="colorAccent">#4CAF50</color>
 
@@ -23,7 +22,4 @@
     <color name="orange">#FF9800</color>
     <color name="orangeDark">#F57C00</color>
 
-    <color name="cucumber">#4CAF50</color>
-    <color name="blueBerry">#5C6BC0</color>
-    <color name="grape">#9C27B0</color>
 </resources>

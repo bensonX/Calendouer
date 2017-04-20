@@ -101,6 +101,8 @@
                         android:layout_marginLeft="16dp"
                         android:background="@drawable/round_border"
                         android:drawableLeft="@drawable/ic_launch_24dp"
+                        android:drawablePadding="4dp"
+                        android:foreground="?android:attr/selectableItemBackground"
                         android:paddingLeft="8dp"
                         android:paddingRight="8dp"
                         android:text="@string/goto_douban"
@@ -115,9 +117,11 @@
                         android:layout_marginLeft="16dp"
                         android:background="@drawable/round_border"
                         android:drawableLeft="@drawable/ic_favorite_24dp"
+                        android:drawablePadding="4dp"
+                        android:foreground="?android:attr/selectableItemBackground"
                         android:paddingLeft="8dp"
                         android:paddingRight="8dp"
-                        android:text="@string/movie_like"
+                        android:text="@string/movie_collect"
                         android:textAllCaps="false"
                         android:textColor="@color/colorAccent" />
                 </LinearLayout>

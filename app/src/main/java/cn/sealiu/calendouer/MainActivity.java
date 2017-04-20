@@ -16,7 +16,6 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.CollapsingToolbarLayout;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.NestedScrollView;
@@ -44,13 +43,6 @@ import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.NativeExpressAdView;
 import com.google.gson.Gson;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.text.ParseException;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -59,7 +51,7 @@ import java.util.List;
 
 import cn.sealiu.calendouer.adapter.MovieComingSoonAdapter;
 import cn.sealiu.calendouer.adapter.MovieInTheatersAdapter;
-import cn.sealiu.calendouer.bean.CelebrityBean;
+import cn.sealiu.calendouer.bean.CelebrityBaseBean;
 import cn.sealiu.calendouer.bean.DoubanMovies;
 import cn.sealiu.calendouer.bean.MovieBaseBean;
 import cn.sealiu.calendouer.bean.MovieBean;
@@ -117,7 +109,7 @@ public class MainActivity extends CalendouerActivity implements
     LinearLayout starsHolderLL;
     AppCompatButton getTop250Btn;
     ProgressDialog mProgressDialog;
-    TextView directorTV, castsTV1, castsTV2, genresTV1, genresTV2, sameNameTV;
+    TextView directorTV, castsTV1, castsTV2, genresTV, sameNameTV;
 
     // database
     DBHelper dbHelper;
@@ -133,6 +125,8 @@ public class MainActivity extends CalendouerActivity implements
 
     RecyclerView inTheatersRecyclerHolder;
     RecyclerView comingSoonRecyclerHolder;
+
+    AsyncTask getTop250Task, getMovieInfoTask, getWeatherTask, getInTheatersTask, getComingSoonTask;
 
     int color, colorDark;
     private int festival = 0;
@@ -164,8 +158,7 @@ public class MainActivity extends CalendouerActivity implements
         directorTV = (TextView) findViewById(R.id.director);
         castsTV1 = (TextView) findViewById(R.id.casts_1);
         castsTV2 = (TextView) findViewById(R.id.casts_2);
-        genresTV1 = (TextView) findViewById(R.id.genres_1);
-        genresTV2 = (TextView) findViewById(R.id.genres_2);
+        genresTV = (TextView) findViewById(R.id.genres);
         sameNameTV = (TextView) findViewById(R.id.same_name);
 
         progressOfDay = findViewById(R.id.progress_day);
@@ -298,6 +291,7 @@ public class MainActivity extends CalendouerActivity implements
                 .addTestDevice("43FE98603DD8DD9E449808D85C7DBD45")
                 .build();
         adView.loadAd(request);
+        adView.setVisibility(View.VISIBLE);
     }
 
     private void initCalendar() {
@@ -414,7 +408,7 @@ public class MainActivity extends CalendouerActivity implements
     private void initMovieDB() {
         showProgressDialog(getResources().getString(R.string.downloading));
         int start = sharedPref.getInt("START", 0);
-        new GetTop250().execute("https://api.douban.com/v2/movie/top250?start=" + start + "&count=" + MAX_COUNT);
+        getTop250Task = new GetTop250().execute("https://api.douban.com/v2/movie/top250?start=" + start + "&count=" + MAX_COUNT);
     }
 
     private void initTodayMovie() {
@@ -450,7 +444,7 @@ public class MainActivity extends CalendouerActivity implements
     private void initMovieInTheaters() {
         String inTheatersStr = sharedPref.getString("in_theaters", "");
         if (inTheatersStr.equals("")) {
-            new GetInTheaters().execute("https://api.douban.com/v2/movie/in_theaters?count=10");
+            getInTheatersTask = new GetInTheaters().execute("https://api.douban.com/v2/movie/in_theaters?count=10");
         } else {
             DoubanMovies movies = new Gson().fromJson(inTheatersStr, DoubanMovies.class);
             setMovieInTheaters(movies);
@@ -460,7 +454,7 @@ public class MainActivity extends CalendouerActivity implements
     private void initMovieComingSoon() {
         String comingSoonStr = sharedPref.getString("coming_soon", "");
         if (comingSoonStr.equals("")) {
-            new GetComingSoon().execute("https://api.douban.com/v2/movie/coming_soon?count=10");
+            getComingSoonTask = new GetComingSoon().execute("https://api.douban.com/v2/movie/coming_soon?count=10");
         } else {
             DoubanMovies movies = new Gson().fromJson(comingSoonStr, DoubanMovies.class);
             setMovieComingSoon(movies);
@@ -504,16 +498,11 @@ public class MainActivity extends CalendouerActivity implements
                 sharedPref.edit().putString("Longitude", lng).apply();
 
             } else {
-                displaySnackBar(
-                        nestedScrollView,
+                Toast.makeText(
+                        MainActivity.this,
                         aMapLocation.getErrorInfo(),
-                        getString(R.string.retry),
-                        new View.OnClickListener() {
-                            @Override
-                            public void onClick(View v) {
-                                mLocationClient.startLocation();
-                            }
-                        });
+                        Toast.LENGTH_LONG
+                ).show();
             }
         }
     }
@@ -545,54 +534,12 @@ public class MainActivity extends CalendouerActivity implements
         if (!lat.equals("") && !lng.equals("")) {
             String apiStr = "https://api.thinkpage.cn/v3/weather/daily.json?key=txyws41isbyqnma5&" +
                     "location=" + lat + ":" + lng + "&language=zh-Hans&unit=c";
-            new GetWeather().execute(apiStr);
+            getWeatherTask = new GetWeather().execute(apiStr);
             Log.d("weather", "Location already know");
         } else {
             Log.d("weather", "startLocation");
             mLocationClient.startLocation();
         }
-    }
-
-    private String doInBackground(String params) {
-        HttpURLConnection connection = null;
-        BufferedReader reader = null;
-
-        try {
-            URL url = new URL(params);
-            connection = (HttpURLConnection) url.openConnection();
-            connection.connect();
-
-            InputStream stream = connection.getInputStream();
-
-            reader = new BufferedReader(new InputStreamReader(stream));
-
-            StringBuffer buffer = new StringBuffer();
-            String line;
-
-            while ((line = reader.readLine()) != null) {
-                buffer.append(line).append("\n");
-            }
-
-            return buffer.toString();
-
-
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            if (connection != null) {
-                connection.disconnect();
-            }
-            try {
-                if (reader != null) {
-                    reader.close();
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-        return null;
     }
 
     /**
@@ -627,7 +574,7 @@ public class MainActivity extends CalendouerActivity implements
     private void setMovieInfoRepeat(String id) {
         String movieJson = sharedPref.getString("movie_json", "");
         if (movieJson.equals("")) {
-            new GetMovieInfo().execute("http://api.douban.com/v2/movie/subject/" + id);
+            getMovieInfoTask = new GetMovieInfo().execute("http://api.douban.com/v2/movie/subject/" + id);
         } else {
             MovieBean todayMovie = new Gson().fromJson(movieJson, MovieBean.class);
             setMovieInfo(todayMovie);
@@ -638,7 +585,7 @@ public class MainActivity extends CalendouerActivity implements
         movieTitleTV.setText(todayMovie.getTitle());
         movieAverageTV.setText(Float.toString(todayMovie.getRating().getAverage()));
 
-        setRatingStar(starsHolderLL, todayMovie.getRating().getStarts());
+        setRatingStar(this, starsHolderLL, todayMovie.getRating().getStarts());
 
         movieSummaryTV.setText(todayMovie.getSummary());
         movieSummaryTV.setOnClickListener(this);
@@ -647,36 +594,41 @@ public class MainActivity extends CalendouerActivity implements
 
         movieImageIV.setOnClickListener(this);
 
-        CelebrityBean[] directors = todayMovie.getDirectors();
-        CelebrityBean[] casts = todayMovie.getCasts();
+        CelebrityBaseBean[] directors = todayMovie.getDirectors();
+        CelebrityBaseBean[] casts = todayMovie.getCasts();
         String[] genres = todayMovie.getGenres();
-        if (directors.length > 0)
+
+        if (directors.length > 0) {
+            directorTV.setVisibility(View.VISIBLE);
             directorTV.setText(String.format(getString(R.string.chip_director), directors[0].getName()));
-        else
-            directorTV.setVisibility(View.GONE);
-        if (casts.length > 0)
+        }
+        if (casts.length > 0) {
+            castsTV1.setVisibility(View.VISIBLE);
             castsTV1.setText(String.format(getString(R.string.chip_casts), casts[0].getName()));
-        else
-            castsTV1.setVisibility(View.GONE);
-        if (casts.length > 1)
+        }
+
+        if (casts.length > 1) {
+            castsTV2.setVisibility(View.VISIBLE);
             castsTV2.setText(String.format(getString(R.string.chip_casts), casts[1].getName()));
-        else
-            castsTV2.setVisibility(View.GONE);
-        if (genres.length > 0)
-            genresTV1.setText(String.format(getString(R.string.chip_genres), genres[0]));
-        else
-            genresTV1.setVisibility(View.GONE);
-        if (genres.length > 1)
-            genresTV2.setText(String.format(getString(R.string.chip_genres), genres[1]));
-        else
-            genresTV2.setVisibility(View.GONE);
+        }
+
+        if (genres.length > 1) {
+            genresTV.setVisibility(View.VISIBLE);
+            genresTV.setText(String.format(
+                    getString(R.string.chip_genres),
+                    genres[0] + "，" + genres[1]
+            ));
+        } else if (genres.length > 0) {
+            genresTV.setVisibility(View.VISIBLE);
+            genresTV.setText(String.format(getString(R.string.chip_genres), genres[0]));
+        }
+
+        sameNameTV.setVisibility(View.VISIBLE);
 
         directorTV.setOnClickListener(this);
         castsTV1.setOnClickListener(this);
         castsTV2.setOnClickListener(this);
-        genresTV1.setOnClickListener(this);
-        genresTV2.setOnClickListener(this);
-        genresTV2.setOnClickListener(this);
+        genresTV.setOnClickListener(this);
         sameNameTV.setOnClickListener(this);
 
         movieCard.setVisibility(View.GONE);
@@ -706,12 +658,6 @@ public class MainActivity extends CalendouerActivity implements
     private void setMovieInTheaters(DoubanMovies moviesBean) {
         if (moviesBean != null) {
             inTheatersCard.setVisibility(View.VISIBLE);
-            TextView allInTheaters = (TextView) findViewById(R.id.all_in_theaters);
-            allInTheaters.setText(String.format(
-                    getString(R.string.all_movie),
-                    moviesBean.getTotal() + ""
-            ));
-            allInTheaters.setOnClickListener(this);
 
             LinearLayoutManager linearLayoutMgr = new LinearLayoutManager(this);
             linearLayoutMgr.setOrientation(LinearLayoutManager.HORIZONTAL);
@@ -732,12 +678,6 @@ public class MainActivity extends CalendouerActivity implements
     private void setMovieComingSoon(DoubanMovies moviesBean) {
         if (moviesBean != null) {
             comingSoonCard.setVisibility(View.VISIBLE);
-            TextView allComingSoon = (TextView) findViewById(R.id.all_coming_soon);
-            allComingSoon.setText(String.format(
-                    getString(R.string.all_movie),
-                    moviesBean.getTotal() + ""
-            ));
-            allComingSoon.setOnClickListener(this);
 
             LinearLayoutManager linearLayoutMgr = new LinearLayoutManager(this);
             linearLayoutMgr.setOrientation(LinearLayoutManager.HORIZONTAL);
@@ -771,29 +711,28 @@ public class MainActivity extends CalendouerActivity implements
 
     @Override
     public void onClick(View v) {
-        MovieBean todayMovie = new Gson().fromJson(
-                sharedPref.getString("movie_json", ""),
-                MovieBean.class
-        );
+
         switch (v.getId()) {
             case R.id.today_pin:
                 if (sharedPref.getBoolean("today_pin", false)) {
                     sharedPref.edit().putBoolean("today_pin", false).apply();
                     pinIV.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.ic_pin));
-                    Snackbar.make(
-                            nestedScrollView,
+
+                    Toast.makeText(
+                            MainActivity.this,
                             getString(R.string.pin_inactive_info),
-                            Snackbar.LENGTH_SHORT
+                            Toast.LENGTH_SHORT
                     ).show();
                     initTodayMovie();
                 } else {
 
                     sharedPref.edit().putBoolean("today_pin", true).apply();
                     pinIV.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.ic_pin_active));
-                    Snackbar.make(
-                            nestedScrollView,
+
+                    Toast.makeText(
+                            MainActivity.this,
                             getString(R.string.pin_active_info),
-                            Snackbar.LENGTH_SHORT
+                            Toast.LENGTH_SHORT
                     ).show();
                 }
                 break;
@@ -813,31 +752,20 @@ public class MainActivity extends CalendouerActivity implements
                     mLocationClient.startLocation();
                 }
                 break;
-            case R.id.all_in_theaters:
-                Log.d("MainActivity", "all_in_theaters");
-                // TODO: 2017/4/18
-                break;
-            case R.id.all_coming_soon:
-                Log.d("MainActivity", "all_coming_soon");
-                // TODO: 2017/4/19
-                break;
             case R.id.director:
-                startCelebrityActivity("director", todayMovie.getDirectors()[0].getId());
+                startCelebrityActivity("director");
                 break;
             case R.id.casts_1:
-                startCelebrityActivity("casts", todayMovie.getCasts()[0].getId());
+                startCelebrityActivity("casts1");
                 break;
             case R.id.casts_2:
-                startCelebrityActivity("casts", todayMovie.getCasts()[1].getId());
+                startCelebrityActivity("casts2");
                 break;
-            case R.id.genres_1:
-                startCelebrityActivity("genres", todayMovie.getGenres()[0]);
-                break;
-            case R.id.genres_2:
-                startCelebrityActivity("genres", todayMovie.getGenres()[1]);
+            case R.id.genres:
+                startCelebrityActivity("genres");
                 break;
             case R.id.same_name:
-                startCelebrityActivity("same_name", todayMovie.getTitle());
+                startCelebrityActivity("same_name");
                 break;
             case R.id.city_name:
                 mLocationClient.startLocation();
@@ -869,8 +797,10 @@ public class MainActivity extends CalendouerActivity implements
         }
     }
 
-    private void onConfirmDownloadMovie() {
-        new AlertDialog.Builder(MainActivity.this)
+    @Override
+    public void onConfirmDownloadMovie() {
+        super.onConfirmDownloadMovie();
+        new AlertDialog.Builder(this)
                 .setTitle(getString(R.string.initMovieRecommended))
                 .setMessage(getString(R.string.download_tips))
                 .setPositiveButton(getString(R.string.ok), new DialogInterface.OnClickListener() {
@@ -929,28 +859,14 @@ public class MainActivity extends CalendouerActivity implements
                 changeTheme(weather_code);
             }
         }
+
+        Toast.makeText(MainActivity.this, getString(R.string.weather_updated), Toast.LENGTH_SHORT).show();
     }
 
-    public void openMovieFragment(String movieJson, String from) {
-
-        if (movieJson.equals("")) {
-            Toast.makeText(this, "error", Toast.LENGTH_LONG).show();
-        } else {
-            MovieFragment movieFragment = new MovieFragment();
-            Bundle bundle = new Bundle();
-            bundle.putString("movie", movieJson);
-            bundle.putString("from", from);
-
-            movieFragment.setArguments(bundle);
-            movieFragment.show(getSupportFragmentManager(), movieFragment.getTag());
-        }
-    }
-
-    private void startCelebrityActivity(String type, String celebrityName) {
-//        Intent intent = new Intent(MainActivity.this, CelebrityActivity.class);
-//        intent.putExtra("type", type);
-//        intent.putExtra("name", celebrityName);
-//        startActivity(intent);
+    private void startCelebrityActivity(String type) {
+        Intent intent = new Intent(MainActivity.this, CelebrityActivity.class);
+        intent.putExtra("type", type);
+        startActivity(intent);
     }
 
     private void changeTheme(String weather_code) {
@@ -999,17 +915,17 @@ public class MainActivity extends CalendouerActivity implements
             Date lastUpdateDate = df_ymd_hms.parse(lastWeatherUpdate);
             // 刷新频率最高：5min
             if (new Date().getTime() - lastUpdateDate.getTime() > 5 * 60 * 1000) {
-                Snackbar.make(
-                        nestedScrollView,
+                Toast.makeText(
+                        MainActivity.this,
                         getString(R.string.weather_updating),
-                        Snackbar.LENGTH_SHORT
+                        Toast.LENGTH_SHORT
                 ).show();
                 getWeather();
             } else {
-                Snackbar.make(
-                        nestedScrollView,
+                Toast.makeText(
+                        MainActivity.this,
                         getString(R.string.weather_update_too_often),
-                        Snackbar.LENGTH_SHORT
+                        Toast.LENGTH_SHORT
                 ).show();
             }
         } catch (ParseException e) {
@@ -1019,31 +935,25 @@ public class MainActivity extends CalendouerActivity implements
     }
 
     @Override
-    public void onLikeMovie(MovieBean movie) {
-        if (checkEmpty(dbHelper, MovieEntry.TABLE_NAME)) {
-            onConfirmDownloadMovie();
-            return;
-        }
-
-        String info;
-        if (movie != null && !movie.getId().equals("")) {
-            if (insertMovieDB(dbHelper, movie) == -1) {
-                info = getString(R.string.like_movie_already_exist);
-            } else {
-                info = getString(R.string.like_movie_success);
-            }
-        } else {
-            info = getString(R.string.error);
-        }
-
-        Snackbar.make(nestedScrollView, info, Snackbar.LENGTH_LONG).show();
+    protected void onPause() {
+        super.onPause();
+        if (getTop250Task != null)
+            getTop250Task.cancel(true);
+        if (getMovieInfoTask != null)
+            getMovieInfoTask.cancel(true);
+        if (getWeatherTask != null)
+            getWeatherTask.cancel(true);
+        if (getInTheatersTask != null)
+            getInTheatersTask.cancel(true);
+        if (getComingSoonTask != null)
+            getComingSoonTask.cancel(true);
     }
 
     private class GetTop250 extends AsyncTask<String, String, String> {
 
         @Override
         protected String doInBackground(String... params) {
-            return MainActivity.this.doInBackground(params[0]);
+            return CalendouerActivity.doInBackground(params[0]);
         }
 
         @Override
@@ -1071,18 +981,15 @@ public class MainActivity extends CalendouerActivity implements
                 setMovieInfoRandom();
             } else {
                 hideProgressDialog();
-                displaySnackBar(
-                        nestedScrollView,
-                        getString(R.string.douban_error),
-                        getString(R.string.retry),
-                        new View.OnClickListener() {
-                            @Override
-                            public void onClick(View v) {
-                                initMovieDB();
-                            }
-                        });
+                doubanErrorAPI();
             }
+        }
 
+        @Override
+        protected void onCancelled(String s) {
+            super.onCancelled(s);
+            db = dbHelper.getWritableDatabase();
+            db.delete(MovieEntry.TABLE_NAME, null, null);
         }
     }
 
@@ -1090,7 +997,7 @@ public class MainActivity extends CalendouerActivity implements
 
         @Override
         protected String doInBackground(String... params) {
-            return MainActivity.this.doInBackground(params[0]);
+            return CalendouerActivity.doInBackground(params[0]);
         }
 
         @Override
@@ -1117,19 +1024,7 @@ public class MainActivity extends CalendouerActivity implements
                 }
             } else {
                 Log.d("douban", "getMovieInfo: null");
-                displaySnackBar(
-                        nestedScrollView,
-                        getString(R.string.douban_error),
-                        getString(R.string.retry),
-                        new View.OnClickListener() {
-                            @Override
-                            public void onClick(View v) {
-                                String id = sharedPref.getString("ID", "");
-                                if (!id.equals("")) {
-                                    setMovieInfoRepeat(id);
-                                }
-                            }
-                        });
+                doubanErrorAPI();
             }
         }
     }
@@ -1138,7 +1033,7 @@ public class MainActivity extends CalendouerActivity implements
 
         @Override
         protected String doInBackground(String... params) {
-            return MainActivity.this.doInBackground(params[0]);
+            return CalendouerActivity.doInBackground(params[0]);
         }
 
         @Override
@@ -1160,16 +1055,11 @@ public class MainActivity extends CalendouerActivity implements
                         icons.map.get("99")
                 ));
 
-                displaySnackBar(
-                        nestedScrollView,
+                Toast.makeText(
+                        MainActivity.this,
                         getString(R.string.weather_error),
-                        getString(R.string.retry),
-                        new View.OnClickListener() {
-                            @Override
-                            public void onClick(View v) {
-                                getWeather();
-                            }
-                        });
+                        Toast.LENGTH_LONG
+                ).show();
             }
         }
     }
@@ -1178,7 +1068,7 @@ public class MainActivity extends CalendouerActivity implements
 
         @Override
         protected String doInBackground(String... params) {
-            return MainActivity.this.doInBackground(params[0]);
+            return CalendouerActivity.doInBackground(params[0]);
         }
 
         @Override
@@ -1191,16 +1081,7 @@ public class MainActivity extends CalendouerActivity implements
                 setMovieInTheaters(moviesBean);
             } else {
                 hideProgressDialog();
-                displaySnackBar(
-                        nestedScrollView,
-                        getString(R.string.douban_error),
-                        getString(R.string.retry),
-                        new View.OnClickListener() {
-                            @Override
-                            public void onClick(View v) {
-                                initMovieInTheaters();
-                            }
-                        });
+                doubanErrorAPI();
             }
         }
     }
@@ -1209,7 +1090,7 @@ public class MainActivity extends CalendouerActivity implements
 
         @Override
         protected String doInBackground(String... params) {
-            return MainActivity.this.doInBackground(params[0]);
+            return CalendouerActivity.doInBackground(params[0]);
         }
 
         @Override
@@ -1222,16 +1103,7 @@ public class MainActivity extends CalendouerActivity implements
                 setMovieComingSoon(moviesBean);
             } else {
                 hideProgressDialog();
-                displaySnackBar(
-                        nestedScrollView,
-                        getString(R.string.douban_error),
-                        getString(R.string.retry),
-                        new View.OnClickListener() {
-                            @Override
-                            public void onClick(View v) {
-                                initMovieComingSoon();
-                            }
-                        });
+                doubanErrorAPI();
             }
         }
     }

@@ -13,6 +13,7 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.google.gson.Gson;
@@ -24,8 +25,10 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 
-import cn.sealiu.calendouer.MainActivity;
+import cn.sealiu.calendouer.CalendouerActivity;
 import cn.sealiu.calendouer.R;
 import cn.sealiu.calendouer.bean.DoubanMovies;
 import cn.sealiu.calendouer.bean.MovieBean;
@@ -37,10 +40,10 @@ import cn.sealiu.calendouer.bean.MovieBean;
 
 public class MovieFragment extends BottomSheetDialogFragment implements View.OnClickListener {
 
-    MainActivity mainActivity;
     MovieBean movie;
     String from;
     LikeMovieListener listener;
+    AsyncTask task;
     private ImageView imageIV;
     private TextView ratingTV;
     private TextView titleTV;
@@ -57,7 +60,7 @@ public class MovieFragment extends BottomSheetDialogFragment implements View.OnC
             listener = (LikeMovieListener) context;
         } catch (ClassCastException e) {
             throw new ClassCastException(context.toString()
-                    + "must implement WeatherFragment");
+                    + "must implement MovieFragment");
         }
     }
 
@@ -78,7 +81,6 @@ public class MovieFragment extends BottomSheetDialogFragment implements View.OnC
         summaryTV = (TextView) view.findViewById(R.id.bs_summary);
         starsLayout = (LinearLayout) view.findViewById(R.id.bs_rating__stars_holder);
         ratingsCountTV = (TextView) view.findViewById(R.id.bs_ratings_count);
-        mainActivity = (MainActivity) getActivity();
 
         String movieJson = getArguments().getString("movie");
         from = getArguments().getString("from");
@@ -119,12 +121,12 @@ public class MovieFragment extends BottomSheetDialogFragment implements View.OnC
     }
 
     private void completeMovieInfo(String id) {
-        new GetMovieInfo().execute("http://api.douban.com/v2/movie/subject/" + id);
+        task = new GetMovieInfo().execute("http://api.douban.com/v2/movie/subject/" + id);
     }
 
     private void setMovieInfo(MovieBean movieBean) {
-        String directors = "";
-        String casts = "";
+        List<String> directors = new ArrayList<>();
+        List<String> casts = new ArrayList<>();
 
         titleTV.setText(movieBean.getTitle());
         ratingTV.setText(Float.toString(movieBean.getRating().getAverage()));
@@ -136,27 +138,34 @@ public class MovieFragment extends BottomSheetDialogFragment implements View.OnC
 
         alt = movieBean.getAlt();
 
-        mainActivity.setRatingStar(starsLayout, movieBean.getRating().getStarts());
+        CalendouerActivity.setRatingStar(
+                getActivity(),
+                starsLayout,
+                movieBean.getRating().getStarts()
+        );
 
         Glide.with(this).load(movieBean.getImages().getLarge()).into(imageIV);
 
         for (int i = 0; i < movieBean.getDirectors().length; i++) {
-            directors += movieBean.getDirectors()[i].getName() + "/";
+            directors.add(movieBean.getDirectors()[i].getName());
         }
 
         for (int i = 0; i < movieBean.getCasts().length; i++) {
-            casts += movieBean.getCasts()[i].getName() + "/";
+            casts.add(movieBean.getCasts()[i].getName());
         }
 
         String celebrityStr = String.format(
                 getString(R.string.directors),
-                directors.substring(0, directors.length() - 1)
-        ) + "\n" + String.format(getString(R.string.casts), casts.substring(0, casts.length() - 1));
+                CalendouerActivity.join(directors, "/")
+        ) + "\n" + String.format(
+                getString(R.string.casts),
+                CalendouerActivity.join(casts, "/")
+        );
         celebrityTV.setText(celebrityStr);
     }
 
     private void updateSharedPref(MovieBean movieBean, String pref) {
-        String prefStr = mainActivity.sharedPref.getString(pref, "");
+        String prefStr = CalendouerActivity.sharedPref.getString(pref, "");
         DoubanMovies doubanMovies = new Gson().fromJson(prefStr, DoubanMovies.class);
 
         for (int i = 0; i < doubanMovies.getSubjects().length; i++) {
@@ -165,9 +174,16 @@ public class MovieFragment extends BottomSheetDialogFragment implements View.OnC
             }
         }
 
-        mainActivity.sharedPref.edit()
+        CalendouerActivity.sharedPref.edit()
                 .putString(pref, new Gson().toJson(doubanMovies))
                 .apply();
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        if (task != null)
+            task.cancel(true);
     }
 
     public interface LikeMovieListener {
@@ -230,16 +246,18 @@ public class MovieFragment extends BottomSheetDialogFragment implements View.OnC
                 if (!from.equals(""))
                     updateSharedPref(movieBean, from);
             } else {
-                mainActivity.displaySnackBar(
-                        summaryTV,
+                Toast.makeText(
+                        getActivity(),
                         getString(R.string.douban_error),
-                        getString(R.string.retry), new View.OnClickListener() {
-                            @Override
-                            public void onClick(View v) {
-                                completeMovieInfo(movie.getId());
-                            }
-                        });
+                        Toast.LENGTH_LONG
+                ).show();
             }
+        }
+
+        @Override
+        protected void onCancelled(String s) {
+            super.onCancelled(s);
+
         }
     }
 }

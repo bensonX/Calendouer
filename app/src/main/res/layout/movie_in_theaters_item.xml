@@ -6,6 +6,7 @@
     android:layout_marginLeft="8dp"
     android:layout_marginRight="8dp"
     android:layout_marginTop="@dimen/activity_vertical_margin"
+    android:foreground="?android:attr/selectableItemBackground"
     android:gravity="bottom"
     android:orientation="vertical">
 

@@ -35,7 +35,9 @@
 
         <service android:name="com.amap.api.location.APSService" />
 
-        <activity android:name=".CelebrityActivity"></activity>
+        <activity
+            android:name=".CelebrityActivity"
+            android:parentActivityName=".MainActivity" />
     </application>
 
 </manifest>

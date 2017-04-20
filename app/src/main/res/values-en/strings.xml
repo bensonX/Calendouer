@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="createDB">Creating Local Database......</string>
+    <string name="deny">Deny</string>
+    <string name="downloaded">Download Completed</string>
+    <string name="downloading">Downloading Movie Info......</string>
+    <string name="getTop250">Initialize Movie Recommended</string>
+    <string name="getWeatherInfo">Get Weather Info</string>
+    <string name="grant">Grant</string>
+    <string name="permission">Request Permission</string>
+    <string name="rationale_location">Location information is only used for weather services.</string>
+    <string name="setting">Setting</string>
+    <string name="pref_about_calendouer">About Calendour</string>
+    <string name="pref_version">Version</string>
+    <string name="location_error">Unknow Location</string>
+    <string name="initMovieRecommended">Initialize Movie Recommended</string>
+    <string name="unknown_weahter">Unknow Weather</string>
+    <string name="weather_preview">Weather Forecast For 3 Days</string>
+    <string name="close">Close</string>
+    <string name="last_update">Update: %1$s</string>
+    <string name="what_new">WHAT\'S NEW</string>
+
+    <string name="need_location_premission">Need Location Permission</string>
+    <string name="pref_card_settings">Feeds Setting</string>
+    <string name="update_frequency">Update Frequency</string>
+    <string name="pref_title_weather">Weather Forecast</string>
+    <string name="weather_update_frequency">Weather Update Frequency</string>
+    <string name="weather_info">%1$s %2$s</string>
+    <string name="pref_rate">Rating</string>
+    <string name="douban_group">Douban Group</string>
+    <string name="weather_title">Weather</string>
+    <string name="cancel">Cancel</string>
+    <string name="download_tips">This may cost your little data. Are you sure?</string>
+
+    <array name="update_frequency_entries">
+        <item>every 2 hours</item>
+        <item>every 4 hours</item>
+        <item>every 6 hours</item>
+        <item>every 8 hours</item>
+    </array>
+    <string name="casts">Casts: %1$s</string>
+    <string name="directors">Directors: %1$s</string>
+    <string name="ratings_count">Rating Count: %1$s</string>
+    <string name="ok">OK</string>
+    <string name="error">ERROR</string>
+    <string name="movie_title">Movie</string>
+    <string name="goto_douban">More</string>
+    <string name="introduction">Introduction</string>
+    <string name="douban_error">Reached douban API limit and retries later</string>
+    <string name="weather_error">Fail to get weather info</string>
+    <string name="ad_title">advertisement</string>
+    <string name="after_ad_closed_beg">Support us in another way?</string>
+    <string name="aka">More Chinese name:  %1$s</string>
+    <string name="aka_en">More English Name:  %1$s</string>
+    <string name="born_place">Born Place:  %1$s</string>
+    <string name="celebrity_title">%1$s \'s works</string>
+    <string name="celebrity_toolbar_casts_title">Actor/%1$s</string>
+    <string name="celebrity_toolbar_director_title">Director/%1$s</string>
+    <string name="celebrity_toolbar_genres_title">Genres/%1$s</string>
+    <string name="celebrity_toolbar_same_name_title">The Same Name/%1$s</string>
+    <string name="chip_casts">ACTOR/%1$s</string>
+    <string name="chip_director">DIRECTOR/%1$s</string>
+    <string name="chip_genres">GENRES/%1$s</string>
+    <string name="chip_same_name">SAME NAME</string>
+    <string name="coming_soon">Upcoming Movies</string>
+    <string name="day_after_tomorrow">day after tmrw</string>
+    <string name="tomorrow">tmrw</string>
+    <string name="gender">gender: %1$s</string>
+    <string name="genres_title">Same Genres/%1$s</string>
+    <string name="in_theaters">Movies In Theater</string>
+    <string name="like_movie_already_exist">Subject already exist</string>
+    <string name="like_movie_success">Added</string>
+    <string name="movie_collect">Like</string>
+    <string name="pin_active_info">Pined</string>
+    <string name="pin_inactive_info">Unpinned</string>
+    <string name="pref_open_source_license">Open Source License</string>
+    <string name="pref_you_may_like_movie">You May Like</string>
+    <string name="restore_ad">Restore Ad</string>
+    <string name="same_name_title">Same Name/%1$s</string>
+    <string name="subject_more">More Subject… go to Douban</string>
+    <string name="subject_no_more">No More</string>
+    <string name="support_developer">Support Developer</string>
+    <string name="today_movie">Today Movie</string>
+    <string name="update_weather">Update Weather</string>
+    <string name="weather_update_too_often">Too frequent, retry after 5 minutes</string>
+    <string name="weather_updating">Updating…</string>
+    <string name="weather_updated">Updated</string>
+    <string name="update_content">✱ support to view the movies in theater and coming soon.\n✱ now you can manually refresh the weather infos.\n✱ support to collect movies to recommended database.\n✱ support to view the same director\'s and actor\'s works, and works with the same genres or similar name.\n✱ removed the todo list function.\n✱ fixed some known problems.</string>
+</resources>

@@ -11,10 +11,10 @@
         android:icon="@drawable/ic_info_24dp"
         android:title="@string/pref_about_calendouer" />
 
-    <header
-        android:id="@+id/open"
-        android:icon="@drawable/ic_open_source"
-        android:title="@string/pref_open_source_license" />
+    <!--<header-->
+    <!--android:id="@+id/open"-->
+    <!--android:icon="@drawable/ic_open_source"-->
+    <!--android:title="@string/pref_open_source_license" />-->
 
     <header
         android:id="@+id/rating"
