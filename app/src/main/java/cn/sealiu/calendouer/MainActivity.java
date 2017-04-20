@@ -859,8 +859,6 @@ public class MainActivity extends CalendouerActivity implements
                 changeTheme(weather_code);
             }
         }
-
-        Toast.makeText(MainActivity.this, getString(R.string.weather_updated), Toast.LENGTH_SHORT).show();
     }
 
     private void startCelebrityActivity(String type) {
@@ -1046,6 +1044,7 @@ public class MainActivity extends CalendouerActivity implements
 
                 //set weather
                 setWeather();
+                Toast.makeText(MainActivity.this, getString(R.string.weather_updated), Toast.LENGTH_SHORT).show();
             } else {
 
                 cityNameTV.setText(getResources().getString(R.string.location_error));
