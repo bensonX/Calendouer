@@ -3,6 +3,7 @@
     <string name="setting">设置</string>
     <string name="lunar_date" translatable="false">农历%1$s%2$s</string>
     <string name="weather" translatable="false">%1$s\n%2$s\u2103 | %3$s\u2103</string>
+    <string name="weather_widget" translatable="false">%1$s\u2103|%2$s\u2103 %3$s</string>
     <string name="weather_high_low" translatable="false">%1$s\u2103 | %2$s\u2103</string>
     <string name="rationale_location">位置信息仅用于天气预报</string>
     <string name="getWeatherInfo">获取天气信息</string>
@@ -107,5 +108,10 @@
     <string name="subject_more">更多作品，去豆瓣查看</string>
     <string name="subject_no_more">没有更多了，全都在这儿了</string>
     <string name="weather_updated">天气已更新</string>
+
+    <string name="solar_date_widget">阳历%1$s</string>
+
+    <string name="appwidget_text">EXAMPLE</string>
+    <string name="add_widget">Add widget</string>
 </resources>
 

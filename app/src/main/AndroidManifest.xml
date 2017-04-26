@@ -38,6 +38,35 @@
         <activity
             android:name=".CelebrityActivity"
             android:parentActivityName=".MainActivity" />
+
+        <receiver android:name=".widget.ClockWidgetProvider">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="cn.sealiu.calendouer.CLOCK_TICK" />
+                <action android:name="cn.sealiu.calendouer.WEATHER_UPDATED" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/clock_widget_info" />
+        </receiver>
+        <receiver android:name=".widget.WeatherWidgetProvider">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="cn.sealiu.calendouer.WEATHER_UPDATED" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/weather_widget_info" />
+        </receiver>
+        <receiver android:name=".widget.WeatherReceiver">
+            <intent-filter>
+                <action android:name="cn.sealiu.calendouer.UPDATE_WEATHER" />
+            </intent-filter>
+        </receiver>
+
+        <service android:name=".widget.WeatherService" />
     </application>
 
 </manifest>

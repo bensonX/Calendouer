@@ -80,7 +80,7 @@ public class MainActivity extends CalendouerActivity implements
     Toolbar toolbar;
 
     // calendar
-    TextView monthTV;
+    TextView monthDayTV;
     TextView weekTV;
     TextView lunarTV;
     TextView dateTV;
@@ -165,7 +165,7 @@ public class MainActivity extends CalendouerActivity implements
         collapsingToolbarLayout = (CollapsingToolbarLayout) findViewById(R.id.collapsing_toolbar);
         nestedScrollView = (NestedScrollView) findViewById(R.id.nest_scroll_view);
 
-        monthTV = (TextView) findViewById(R.id.month);
+        monthDayTV = (TextView) findViewById(R.id.month_day);
         weekTV = (TextView) findViewById(R.id.week_day);
         lunarTV = (TextView) findViewById(R.id.lunar_date);
         dateTV = (TextView) findViewById(R.id.date);
@@ -300,7 +300,7 @@ public class MainActivity extends CalendouerActivity implements
 
         List<String> solarCalendarStrs = LunarCalendar.getLunarCalendarStr(now);
 
-        monthTV.setText(solarCalendarStrs.get(6));
+        monthDayTV.setText(solarCalendarStrs.get(6) + solarCalendarStrs.get(8));
 
         weekTV.setText(solarCalendarStrs.get(4));
         lunarTV.setText(
@@ -311,7 +311,7 @@ public class MainActivity extends CalendouerActivity implements
                 )
         );
 
-        dateTV.setText(solarCalendarStrs.get(8));
+        dateTV.setText(solarCalendarStrs.get(9));
 
         // set solar term
         String str = SolarTermCalendar.getSolarTermStr(now);

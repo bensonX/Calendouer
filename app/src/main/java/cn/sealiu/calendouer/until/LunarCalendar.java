@@ -63,14 +63,19 @@ public class LunarCalendar {
             0x069349, 0x7729BD, 0x06AA51, 0x0AD546, 0x54DABA, 0x04B64E, 0x0A5743, 0x452738, 0x0D264A, 0x8E933E,/*2081-2090*/
             0x0D5252, 0x0DAA47, 0x66B53B, 0x056D4F, 0x04AE45, 0x4A4EB9, 0x0A4D4C, 0x0D1541, 0x2D92B5          /*2091-2099*/
     };
-    private static String[] weeks = {"星期日", "星期一", "星期二", "星期三", "星期四", "星期五", "星期六"};
+    private static String[] weeks = {"周日", "周一", "周二", "周三", "周四", "周五", "周六"};
     private static String[] lunar_months = {"正月", "二月", "三月", "四月", "五月", "六月", "七月", "八月",
             "九月", "十月", "冬月", "腊月"};
     private static String[] solar_months = {"一月", "二月", "三月", "四月", "五月", "六月", "七月", "八月",
             "九月", "十月", "十一月", "十二月"};
-    private static String[] days = {"初一", "初二", "初三", "初四", "初五", "初六", "初七", "初八", "初九",
+    private static String[] lunar_days = {"初一", "初二", "初三", "初四", "初五", "初六", "初七", "初八", "初九",
             "初十", "十一", "十二", "十三", "十四", "十五", "十六", "十七", "十八", "十九", "二十",
             "廿一", "廿二", "廿三", "廿四", "廿五", "廿六", "廿七", "廿八", "廿九", "三十"
+    };
+    private static String[] solar_days = {"一日", "二日", "三日", "四日", "五日", "六日", "七日", "八日",
+            "九日", "十日", "十一日", "十二日", "十三日", "十四日", "十五日", "十六日", "十七日", "十八日",
+            "十九日", "二十日", "二十一日", "二十二日", "二十三日", "二十四日", "二十五日", "二十六日",
+            "二十七日", "二十八日", "二十九日", "三十日", "三十一日"
     };
 
     /**
@@ -322,8 +327,9 @@ public class LunarCalendar {
      * 5 solar_year,
      * 6 solar_month_str, ex: 二月
      * 7 solar_month_num, ex: 2
-     * 8 solar_day,
-     * 9 is_weekend
+     * 8 solar_day_str, ex: 二十五
+     * 9 solar_day_num, ex: 25
+     * 10 is_weekend
      */
     public static List<String> getLunarCalendarStr(Date date) {
         Calendar calendar = Calendar.getInstance();
@@ -340,12 +346,13 @@ public class LunarCalendar {
         List<String> list = new ArrayList<>();
         list.add(Integer.toString(lunar[0]));
         list.add(lunar_months[lunar[1] - 1]);
-        list.add(days[lunar[2] - 1]);
+        list.add(lunar_days[lunar[2] - 1]);
         list.add(Integer.toString(lunar[3]));
         list.add(weeks[week]);
         list.add(Integer.toString(year));
         list.add(solar_months[month]);
         list.add(Integer.toString(month + 1));
+        list.add(solar_days[day - 1]);
         list.add(Integer.toString(day));
         list.add(isWeekend);
         return list;
