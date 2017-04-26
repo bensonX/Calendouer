@@ -8,7 +8,6 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.os.SystemClock;
 import android.util.Log;
 import android.widget.RemoteViews;
 
@@ -35,8 +34,6 @@ public class ClockWidgetProvider extends AppWidgetProvider {
     public static final String CLOCK_TICK_ACTION = "cn.sealiu.calendouer.CLOCK_TICK";
     public static final String UPDATE_WEATHER_ACTION = "cn.sealiu.calendouer.UPDATE_WEATHER";
     public static final String WEATHER_UPDATED = "cn.sealiu.calendouer.WEATHER_UPDATED";
-    private static final int requestCodeTime = 60;
-    private static final int requestCodeWeather = 7200;
     private static final DateFormat df_hm = new SimpleDateFormat("HH:mm", Locale.getDefault());
     private static final String[] weeks = {"周日", "周一", "周二", "周三", "周四", "周五", "周六"};
 
@@ -45,16 +42,6 @@ public class ClockWidgetProvider extends AppWidgetProvider {
                            int appWidgetId) {
 
         Log.d("AlarmMgrTime", Calendar.getInstance().getTime().toString());
-
-        // set repeat alarm
-        AlarmManager alarmMgr = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-        Intent updateIntent = new Intent(AppWidgetManager.ACTION_APPWIDGET_UPDATE);
-        updateIntent.putExtra("type", "time");
-
-        PendingIntent updatePendingIntent = PendingIntent.getBroadcast(
-                context, requestCodeTime, updateIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-        long triggerAtTime = SystemClock.elapsedRealtime() + 10000;
-        alarmMgr.setRepeating(AlarmManager.RTC, triggerAtTime, 60000, updatePendingIntent);
 
         RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.clock_widget);
         Calendar now = Calendar.getInstance();
@@ -79,16 +66,6 @@ public class ClockWidgetProvider extends AppWidgetProvider {
     private void updateWeather(Context context, AppWidgetManager appWidgetManager,
                                int appWidgetId) {
         Log.d("AlarmMgrWeather", Calendar.getInstance().getTime().toString());
-
-        // set repeat alarm
-        AlarmManager alarmMgr = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-        Intent updateIntent = new Intent(AppWidgetManager.ACTION_APPWIDGET_UPDATE);
-        updateIntent.putExtra("type", "weather");
-
-        PendingIntent updatePendingIntent = PendingIntent.getBroadcast(
-                context, requestCodeWeather, updateIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-        long triggerAtTime = SystemClock.elapsedRealtime() + 10000;
-        alarmMgr.setRepeating(AlarmManager.RTC, triggerAtTime, 120000, updatePendingIntent);
 
         RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.clock_widget);
 

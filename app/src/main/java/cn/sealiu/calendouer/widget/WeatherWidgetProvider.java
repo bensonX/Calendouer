@@ -1,11 +1,14 @@
 package cn.sealiu.calendouer.widget;
 
+import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProvider;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.util.Log;
 import android.widget.RemoteViews;
 
 import com.google.gson.Gson;
@@ -30,11 +33,16 @@ import cn.sealiu.calendouer.until.WeatherIcon;
  * Implementation of App Widget functionality.
  */
 public class WeatherWidgetProvider extends AppWidgetProvider {
+
+    public static final String UPDATE_WEATHER_ACTION = "cn.sealiu.calendouer.UPDATE_WEATHER";
+    public static final String WEATHER_UPDATED = "cn.sealiu.calendouer.WEATHER_UPDATED";
+
     private static final DateFormat df_md = new SimpleDateFormat("MM/dd", Locale.getDefault());
 
     static void updateAppWidget(Context context, AppWidgetManager appWidgetManager,
                                 int appWidgetId) {
 
+        Log.d("AlarmWeather", "hhh");
         Intent intent = new Intent(context, MainActivity.class);
         PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent, 0);
 
@@ -129,17 +137,44 @@ public class WeatherWidgetProvider extends AppWidgetProvider {
 
     @Override
     public void onEnabled(Context context) {
-        // Enter relevant functionality for when the first widget is created
+        super.onEnabled(context);
+        AlarmManager alarmMgr = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+        long intervalWeather = 7200000;
+
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(System.currentTimeMillis());
+
+        alarmMgr.setRepeating(AlarmManager.RTC, calendar.getTimeInMillis(),
+                intervalWeather, createWeatherUpdateIntent(context));
     }
 
     @Override
     public void onDisabled(Context context) {
-        // Enter relevant functionality for when the last widget is disabled
+        super.onDisabled(context);
+        AlarmManager alarmMgr = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+        alarmMgr.cancel(createWeatherUpdateIntent(context));
     }
 
     @Override
     public void onReceive(Context context, Intent intent) {
         super.onReceive(context, intent);
+        AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
+        ComponentName widgetComponent = new ComponentName(
+                context.getPackageName(),
+                this.getClass().getName()
+        );
+        int[] appWidgetIds = appWidgetManager.getAppWidgetIds(widgetComponent);
+
+        if (WEATHER_UPDATED.equals(intent.getAction())) {
+            for (int appWidgetId : appWidgetIds) {
+                updateAppWidget(context, appWidgetManager, appWidgetId);
+            }
+        }
+    }
+
+    private PendingIntent createWeatherUpdateIntent(Context context) {
+        Intent intent = new Intent(UPDATE_WEATHER_ACTION);
+        return PendingIntent.getBroadcast(context, 0, intent, 0);
     }
 }
 
