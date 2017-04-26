@@ -21,7 +21,7 @@
             android:layout_marginRight="@dimen/activity_horizontal_margin"
             android:gravity="center_vertical"
             android:textColor="@color/primaryText"
-            android:textSize="28sp"
+            android:textSize="30sp"
             android:textStyle="bold" />
 
         <TextView
@@ -42,19 +42,17 @@
 
             <TextView
                 android:id="@+id/today"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
                 android:layout_gravity="center_vertical"
-                android:background="@drawable/circle_bg"
                 android:gravity="center"
-                android:padding="2dp"
-                android:textColor="@color/textOrIcons"
+                android:textColor="@color/secondaryText"
                 android:textSize="12sp" />
 
             <TextView
                 android:id="@+id/tomorrow"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
                 android:layout_gravity="center_vertical"
                 android:gravity="center"
                 android:textColor="@color/secondaryText"
@@ -62,8 +60,8 @@
 
             <TextView
                 android:id="@+id/day_after_tomorrow"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
                 android:layout_gravity="center_vertical"
                 android:gravity="center"
                 android:textColor="@color/secondaryText"

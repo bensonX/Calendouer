@@ -8,6 +8,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.widget.RemoteViews;
 
@@ -34,12 +35,18 @@ public class ClockWidgetProvider extends AppWidgetProvider {
     public static final String CLOCK_TICK_ACTION = "cn.sealiu.calendouer.CLOCK_TICK";
     public static final String UPDATE_WEATHER_ACTION = "cn.sealiu.calendouer.UPDATE_WEATHER";
     public static final String WEATHER_UPDATED = "cn.sealiu.calendouer.WEATHER_UPDATED";
+    private static final String SWITCH_TODAY_ACTION = "cn.sealiu.calendouer.SWITCH_TODAY";
+    private static final String SWITCH_TOMORROW_ACTION = "cn.sealiu.calendouer.SWITCH_TOMORROW";
+    private static final String SWITCH_DAY_AFTER_TOMORROW_ACTION =
+            "cn.sealiu.calendouer.SWITCH_DAY_AFTER_TOMORROW";
     private static final DateFormat df_hm = new SimpleDateFormat("HH:mm", Locale.getDefault());
     private static final String[] weeks = {"周日", "周一", "周二", "周三", "周四", "周五", "周六"};
+    private static final int[] dateIds = {R.id.today, R.id.tomorrow, R.id.day_after_tomorrow};
 
+    private static int activePos = 0;
 
-    static void updateTime(Context context, AppWidgetManager appWidgetManager,
-                           int appWidgetId) {
+    private void updateTime(Context context, AppWidgetManager appWidgetManager,
+                            int appWidgetId) {
 
         Log.d("AlarmMgrTime", Calendar.getInstance().getTime().toString());
 
@@ -50,15 +57,39 @@ public class ClockWidgetProvider extends AppWidgetProvider {
         views.setTextViewText(R.id.time, df_hm.format(now.getTime()));
         views.setTextViewText(R.id.week_day, weeks[now.get(Calendar.DAY_OF_WEEK) - 1]);
 
-        views.setTextViewText(R.id.today, now.get(Calendar.DAY_OF_MONTH) + "");
+        String today = now.get(Calendar.DAY_OF_MONTH) + "";
 
         // tomorrow
         now.add(Calendar.DAY_OF_MONTH, 1);
-        views.setTextViewText(R.id.tomorrow, now.get(Calendar.DAY_OF_MONTH) + "");
+        String tomorrow = now.get(Calendar.DAY_OF_MONTH) + "";
 
         // day after tomorrow
         now.add(Calendar.DAY_OF_MONTH, 1);
-        views.setTextViewText(R.id.day_after_tomorrow, now.get(Calendar.DAY_OF_MONTH) + "");
+        String day_after_tomorrow = now.get(Calendar.DAY_OF_MONTH) + "";
+
+        String[] dateStr = {today, tomorrow, day_after_tomorrow};
+
+        // active day
+        for (int i = 0; i < 3; i++) {
+            if (i == activePos) {
+                views.setTextColor(dateIds[i],
+                        ContextCompat.getColor(context, R.color.textOrIcons));
+                views.setInt(dateIds[i], "setBackgroundResource", R.drawable.circle_bg);
+            } else {
+                views.setTextColor(dateIds[i],
+                        ContextCompat.getColor(context, R.color.secondaryText));
+                views.setInt(dateIds[i], "setBackgroundResource", R.color.textOrIcons);
+            }
+
+            views.setTextViewText(dateIds[i], dateStr[i]);
+        }
+
+        views.setOnClickPendingIntent(R.id.today,
+                switchDateIntent(context, SWITCH_TODAY_ACTION));
+        views.setOnClickPendingIntent(R.id.tomorrow,
+                switchDateIntent(context, SWITCH_TOMORROW_ACTION));
+        views.setOnClickPendingIntent(R.id.day_after_tomorrow,
+                switchDateIntent(context, SWITCH_DAY_AFTER_TOMORROW_ACTION));
 
         appWidgetManager.updateAppWidget(appWidgetId, views);
     }
@@ -89,7 +120,7 @@ public class ClockWidgetProvider extends AppWidgetProvider {
             XzLocationBean locationBean = resultsBean.getLocation();
             XzWeatherBean[] weatherBeans = resultsBean.getDaily();
 
-            XzWeatherBean nowWeather = weatherBeans[0];
+            XzWeatherBean nowWeather = weatherBeans[activePos];
 
             String weathersText;
             if (nowWeather.getText_day().equals(nowWeather.getText_night())) {
@@ -147,6 +178,26 @@ public class ClockWidgetProvider extends AppWidgetProvider {
                 }
             }
         }
+
+        if (SWITCH_TODAY_ACTION.equals(intent.getAction()) ||
+                SWITCH_TOMORROW_ACTION.equals(intent.getAction()) ||
+                SWITCH_DAY_AFTER_TOMORROW_ACTION.equals(intent.getAction())) {
+            switch (intent.getAction()) {
+                case SWITCH_TODAY_ACTION:
+                    activePos = 0;
+                    break;
+                case SWITCH_TOMORROW_ACTION:
+                    activePos = 1;
+                    break;
+                case SWITCH_DAY_AFTER_TOMORROW_ACTION:
+                    activePos = 2;
+                    break;
+            }
+            for (int appWidgetId : appWidgetIds) {
+                updateTime(context, appWidgetManager, appWidgetId);
+                updateWeather(context, appWidgetManager, appWidgetId);
+            }
+        }
     }
 
     @Override
@@ -181,6 +232,7 @@ public class ClockWidgetProvider extends AppWidgetProvider {
         AlarmManager alarmMgr = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
         alarmMgr.cancel(createClockTickIntent(context));
         alarmMgr.cancel(createWeatherUpdateIntent(context));
+        activePos = 0;
         Log.d("AlarmMgr", "canceled");
     }
 
@@ -191,6 +243,13 @@ public class ClockWidgetProvider extends AppWidgetProvider {
 
     private PendingIntent createWeatherUpdateIntent(Context context) {
         Intent intent = new Intent(UPDATE_WEATHER_ACTION);
+        return PendingIntent.getBroadcast(context, 0, intent, 0);
+    }
+
+    private PendingIntent switchDateIntent(Context context, String action) {
+        // An explicit intent directed at the current class (the "self").
+        Intent intent = new Intent(context, getClass());
+        intent.setAction(action);
         return PendingIntent.getBroadcast(context, 0, intent, 0);
     }
 }
