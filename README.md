@@ -63,7 +63,15 @@ dependencies {
 
 ## 下载：
 - [Google Play](https://play.google.com/store/apps/details?id=cn.sealiu.calendouer)
-- [国内分发渠道：酷安](http://www.coolapk.com/apk/cn.sealiu.calendouer)
+
+**国内分发渠道：**  
+- [百度手机助手](http://shouji.baidu.com/software/11361552.html)
+- [腾讯应用宝](http://sj.qq.com/myapp/detail.htm?apkName=cn.sealiu.calendouer)
+- [魅族应用商店](http://app.flyme.cn/apps/public/detail?package_name=cn.sealiu.calendouer)
+- [豌豆荚](http://www.wandoujia.com/apps/cn.sealiu.calendouer)
+- [安卓市场](http://apk.hiapk.com/appinfo/cn.sealiu.calendouer)
+- [酷安](http://www.coolapk.com/apk/cn.sealiu.calendouer)
+
 
 ## 反馈
 - email
