@@ -212,7 +212,8 @@ public class ClockWidgetProvider extends AppWidgetProvider {
     @Override
     public void onEnabled(Context context) {
         super.onEnabled(context);
-        AlarmManager alarmMgr = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+        AlarmManager alarmMgr = (AlarmManager) context.getSystemService(
+                Context.ALARM_SERVICE);
         long intervalClock = 60000;
         long intervalWeather = 7200000;
 
