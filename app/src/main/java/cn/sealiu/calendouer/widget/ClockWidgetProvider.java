@@ -17,6 +17,8 @@ import com.google.gson.Gson;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 
 import cn.sealiu.calendouer.MainActivity;
@@ -25,6 +27,7 @@ import cn.sealiu.calendouer.bean.XzBean;
 import cn.sealiu.calendouer.bean.XzLocationBean;
 import cn.sealiu.calendouer.bean.XzResultsBean;
 import cn.sealiu.calendouer.bean.XzWeatherBean;
+import cn.sealiu.calendouer.until.LunarCalendar;
 import cn.sealiu.calendouer.until.WeatherIcon;
 
 /**
@@ -55,6 +58,20 @@ public class ClockWidgetProvider extends AppWidgetProvider {
 
         // time
         views.setTextViewText(R.id.time, df_hm.format(now.getTime()));
+
+        List<String> calendarList = LunarCalendar.getLunarCalendarStr(new Date());
+        views.setTextViewText(R.id.solar_date, String.format(
+                context.getString(R.string.solar_date_widget),
+                calendarList.get(7),
+                calendarList.get(9),
+                calendarList.get(4)
+        ));
+        views.setTextViewText(R.id.lunar_date, String.format(
+                context.getString(R.string.lunar_date),
+                calendarList.get(1),
+                calendarList.get(2)
+        ));
+
         views.setTextViewText(R.id.week_day, weeks[now.get(Calendar.DAY_OF_WEEK) - 1]);
 
         String today = now.get(Calendar.DAY_OF_MONTH) + "";
@@ -121,6 +138,8 @@ public class ClockWidgetProvider extends AppWidgetProvider {
             XzWeatherBean[] weatherBeans = resultsBean.getDaily();
 
             XzWeatherBean nowWeather = weatherBeans[activePos];
+
+            views.setTextViewText(R.id.city, locationBean.getName());
 
             String weathersText;
             if (nowWeather.getText_day().equals(nowWeather.getText_night())) {

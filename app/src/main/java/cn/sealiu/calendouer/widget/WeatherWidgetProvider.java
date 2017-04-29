@@ -56,7 +56,9 @@ public class WeatherWidgetProvider extends AppWidgetProvider {
         List<String> calendarList = LunarCalendar.getLunarCalendarStr(new Date());
         views.setTextViewText(R.id.solar_date, String.format(
                 context.getString(R.string.solar_date_widget),
-                calendarList.get(6) + calendarList.get(8)
+                calendarList.get(7),
+                calendarList.get(9),
+                calendarList.get(4)
         ));
         views.setTextViewText(R.id.lunar_date, String.format(
                 context.getString(R.string.lunar_date),
