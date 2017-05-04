@@ -73,7 +73,6 @@
     <string name="movie_collect">Like</string>
     <string name="pin_active_info">Pined</string>
     <string name="pin_inactive_info">Unpinned</string>
-    <string name="pref_open_source_license">Open Source License</string>
     <string name="pref_you_may_like_movie">You May Like</string>
     <string name="restore_ad">Restore Ad</string>
     <string name="same_name_title">Same Name/%1$s</string>
@@ -85,5 +84,5 @@
     <string name="weather_update_too_often">Too frequent, retry after 5 minutes</string>
     <string name="weather_updating">Updating…</string>
     <string name="weather_updated">Updated</string>
-    <string name="update_content">✱ support to view the movies in theater and coming soon.\n✱ now you can manually refresh the weather infos.\n✱ support to collect movies to recommended database.\n✱ support to view the same director\'s and actor\'s works, and works with the same genres or similar name.\n✱ removed the todo list function.\n✱ fixed some known problems.</string>
+    <string name="update_content">✱ support to add widgets to home screen.\n✱ fixed some known problems.</string>
 </resources>

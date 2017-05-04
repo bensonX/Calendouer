@@ -29,15 +29,6 @@ public class DBHelper extends SQLiteOpenHelper {
     private static final String MOVIE_DELETE_ENTRIES =
             "DROP TABLE IF EXISTS " + MovieEntry.TABLE_NAME;
 
-    private static final String PERSONAL_DELETE_ENTRIES =
-            "DROP TABLE IF EXISTS personal";
-
-    private static final String SIMILAR_DELETE_ENTRIES =
-            "DROP TABLE IF EXISTS similar";
-
-    private static final String THINGS_DELETE_ENTRIES =
-            "DROP TABLE IF EXISTS things";
-
     public DBHelper(Context context) {
         super(context, DB_NAME, null, DB_VERSION);
     }
@@ -53,10 +44,6 @@ public class DBHelper extends SQLiteOpenHelper {
             db.execSQL(MOVIE_DELETE_ENTRIES);
             db.execSQL(MOVIE_CREATE_ENTRIES);
         }
-
-        db.execSQL(PERSONAL_DELETE_ENTRIES);
-        db.execSQL(SIMILAR_DELETE_ENTRIES);
-        db.execSQL(THINGS_DELETE_ENTRIES);
 
         onCreate(db);
     }

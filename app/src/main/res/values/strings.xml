@@ -28,9 +28,9 @@
     <string name="close">关闭</string>
     <string name="weather_preview">3日天气预报</string>
     <string name="pref_version">版本</string>
-    <string name="version" translatable="false">2.1.0</string>
+    <string name="version" translatable="false">2.1.1</string>
     <string name="what_new">更新内容</string>
-    <string name="update_content">✱ 可查看正在热映和即将上映影片\n✱ 现在可以手动刷新天气了\n✱ 支持添加喜欢的电影到今日推荐，以后观看\n✱ 支持查看今日推荐的导演，演员，相同类型以及同名作品\n✱ 移除了备忘事项功能\n✱ 修复了一些已知问题</string>
+    <string name="update_content">✱ 添加桌面小部件\n✱ 修复了一些已知问题</string>
 
     <string name="pref_card_settings">卡片设置</string>
     <string name="today_movie">今日推荐</string>
@@ -76,7 +76,6 @@
     <string name="native_ad_unit_id" translatable="false">ca-app-pub-6993844563211839/9791767307</string>
     <string name="support_developer">支持开发者</string>
     <string name="ad_title">广告</string>
-    <string name="pref_open_source_license">开源许可</string>
     <string name="update_weather">更新天气</string>
     <string name="weather_updating">更新天气中…</string>
     <string name="weather_update_too_often">天气信息不会变化这么快，5分钟后再试</string>
@@ -109,6 +108,6 @@
     <string name="subject_no_more">没有更多了，全都在这儿了</string>
     <string name="weather_updated">天气已更新</string>
 
-    <string name="solar_date_widget">%1$s 月 %2$s 日 %3$s</string>
+    <string name="solar_date_widget" translatable="false">%1$s 月 %2$s 日 %3$s</string>
 </resources>
 
