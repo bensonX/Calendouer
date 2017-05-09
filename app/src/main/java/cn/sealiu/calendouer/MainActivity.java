@@ -477,8 +477,7 @@ public class MainActivity extends CalendouerActivity implements
 
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPref, String key) {
-        if (key.equals("Latitude") || key.equals("Longitude") &&
-                sharedPref.getString("weather_json", "").equals("")) {
+        if (sharedPref.getString("weather_json", "").equals("")) {
             getWeather();
         }
 
@@ -928,7 +927,6 @@ public class MainActivity extends CalendouerActivity implements
             }
         } catch (ParseException e) {
             e.printStackTrace();
-            getWeather();
         }
     }
 
@@ -1044,6 +1042,7 @@ public class MainActivity extends CalendouerActivity implements
 
                 //set weather
                 setWeather();
+                Log.d("Weather", "weather updated: " + new Date().toString());
                 Toast.makeText(MainActivity.this, getString(R.string.weather_updated), Toast.LENGTH_SHORT).show();
             } else {
 

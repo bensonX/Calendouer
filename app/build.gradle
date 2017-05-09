@@ -15,8 +15,8 @@ android {
         applicationId "cn.sealiu.calendouer"
         minSdkVersion 17
         targetSdkVersion 25
-        versionCode 10
-        versionName "2.1.1"
+        versionCode 11
+        versionName "2.1.2"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
     }
@@ -48,6 +48,6 @@ dependencies {
     compile 'com.google.code.gson:gson:2.7'
     compile 'com.github.bumptech.glide:glide:3.7.0'
     compile 'com.android.support:support-v13:25.3.1'
-    compile 'com.google.android.gms:play-services-ads:10.2.1'
+    compile 'com.google.android.gms:play-services-ads:10.2.4'
     testCompile 'junit:junit:4.12'
 }

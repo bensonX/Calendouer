@@ -28,9 +28,9 @@
     <string name="close">关闭</string>
     <string name="weather_preview">3日天气预报</string>
     <string name="pref_version">版本</string>
-    <string name="version" translatable="false">2.1.1</string>
+    <string name="version" translatable="false">2.1.2</string>
     <string name="what_new">更新内容</string>
-    <string name="update_content">✱ 添加桌面小部件\n✱ 修复了一些已知问题</string>
+    <string name="update_content">✱ 修复了一些已知问题</string>
 
     <string name="pref_card_settings">卡片设置</string>
     <string name="today_movie">今日推荐</string>
